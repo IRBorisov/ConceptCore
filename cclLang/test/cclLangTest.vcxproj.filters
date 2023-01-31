@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{ed04b33d-515f-46b0-aad1-54dcbc55a5fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{e557a0c7-3116-47e0-9713-487c7e6cc101}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\testManagedText.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testReference.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRefsManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testLexicalTerm.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testTextProcessor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testMorphology.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils\FakeTextProcessor.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FakeTermContext.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\RefHelper.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\MockTextProcessor.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

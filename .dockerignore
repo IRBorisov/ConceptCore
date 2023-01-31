@@ -1,0 +1,8 @@
+.git
+.vscode
+.vs
+*.vcxproj.user
+
+output
+packages
+**/build

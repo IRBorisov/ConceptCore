@@ -1,0 +1,6 @@
+LIBRARY
+
+EXPORTS
+	ConvertToASCII
+	ConvertToMath
+	ASTasText

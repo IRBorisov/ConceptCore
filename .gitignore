@@ -1,0 +1,13 @@
+~*
+.vscode
+.vs
+*.vcxproj.user
+*.pch.tmp
+*.clang.pch
+
+packages
+build
+output
+
+rslang/src/RSParserImpl.output
+rslang/src/RSParserImpl.gv
