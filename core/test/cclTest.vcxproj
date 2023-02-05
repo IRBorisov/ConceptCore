@@ -199,6 +199,7 @@
     <ClCompile Include="src\testRSConcept.cpp" />
     <ClCompile Include="src\testRSCore.cpp" />
     <ClCompile Include="src\testRSForm.cpp" />
+    <ClCompile Include="src\testRSFormJA.cpp" />
     <ClCompile Include="src\testRSModsFacet.cpp" />
     <ClCompile Include="src\testRSOperationsFacet.cpp" />
     <ClCompile Include="src\testEquationOpts.cpp" />

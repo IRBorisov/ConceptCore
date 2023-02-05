@@ -29,3 +29,4 @@
 #include "../src/oss/RSSynthesProcessor.cpp"
 #include "../src/tools/CstNameGenerator.cpp"
 #include "../src/tools/EntityGenerator.cpp"
+#include "../src/api/RSFormJA.cpp"

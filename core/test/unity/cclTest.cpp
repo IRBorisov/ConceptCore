@@ -42,3 +42,4 @@
 #include "../src/testSourceManager.cpp"
 #include "../src/testSynthes.cpp"
 #include "../src/testJSON.cpp"
+#include "../src/testRSFormJA.cpp"

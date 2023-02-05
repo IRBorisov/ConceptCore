@@ -32,6 +32,16 @@ void from_json(const nlohmann::ordered_json& object, TrackingFlags& mods);
 
 } // namespace ccl::semantic
 
+namespace rslang {
+
+void to_json(nlohmann::ordered_json& object, const ExpressionType& type);
+void to_json(nlohmann::ordered_json& object, const Typification& typif);
+void to_json(nlohmann::ordered_json& object, const TokenData& data);
+void to_json(nlohmann::ordered_json& object, const SyntaxTree& ast);
+void to_json(nlohmann::ordered_json& object, const Error& error);
+
+} // namespace ccl::rslang
+
 namespace lang {
 
 void to_json(nlohmann::ordered_json& object, const LexicalTerm& term);

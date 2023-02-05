@@ -172,37 +172,39 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\env\cclEnvironment.cpp"/>
-    <ClCompile Include="src\JSON.cpp"/>
-    <ClCompile Include="src\ops\EquationOptions.cpp"/>
-    <ClCompile Include="src\ops\RSAggregator.cpp"/>
-    <ClCompile Include="src\ops\RSEquationProcessor.cpp"/>
-    <ClCompile Include="src\ops\RSOperations.cpp"/>
-    <ClCompile Include="src\oss\OSSchema.cpp"/>
-    <ClCompile Include="src\oss\ossGraphFacet.cpp"/>
-    <ClCompile Include="src\oss\ossGridFacet.cpp"/>
-    <ClCompile Include="src\oss\ossOperationsFacet.cpp"/>
-    <ClCompile Include="src\oss\ossSourceFacet.cpp"/>
-    <ClCompile Include="src\oss\RSSynthesProcessor.cpp"/>
-    <ClCompile Include="src\semantic\rscore\ConceptRecord.cpp"/>
-    <ClCompile Include="src\semantic\rscore\CstList.cpp"/>
-    <ClCompile Include="src\semantic\rscore\IdentityManager.cpp"/>
-    <ClCompile Include="src\semantic\rscore\RSCore.cpp"/>
-    <ClCompile Include="src\semantic\rsform\RSForm.cpp"/>
-    <ClCompile Include="src\semantic\rsform\rsModificationFacet.cpp"/>
-    <ClCompile Include="src\semantic\rsform\rsOperationFacet.cpp"/>
-    <ClCompile Include="src\semantic\rsmodel\InterpretationStorage.cpp"/>
-    <ClCompile Include="src\semantic\rsmodel\rsCalculationFacet.cpp"/>
-    <ClCompile Include="src\semantic\rsmodel\RSModel.cpp"/>
-    <ClCompile Include="src\semantic\rsmodel\rsValuesFacet.cpp"/>
-    <ClCompile Include="src\semantic\schema\RSConcept.cpp"/>
-    <ClCompile Include="src\semantic\schema\Schema.cpp"/>
-    <ClCompile Include="src\semantic\thesaurus\TextConcept.cpp"/>
-    <ClCompile Include="src\semantic\thesaurus\Thesaurus.cpp"/>
-    <ClCompile Include="src\tools\CstNameGenerator.cpp"/>
-    <ClCompile Include="src\tools\EntityGenerator.cpp"/>
+    <ClCompile Include="src\api\RSFormJA.cpp" />
+    <ClCompile Include="src\env\cclEnvironment.cpp" />
+    <ClCompile Include="src\JSON.cpp" />
+    <ClCompile Include="src\ops\EquationOptions.cpp" />
+    <ClCompile Include="src\ops\RSAggregator.cpp" />
+    <ClCompile Include="src\ops\RSEquationProcessor.cpp" />
+    <ClCompile Include="src\ops\RSOperations.cpp" />
+    <ClCompile Include="src\oss\OSSchema.cpp" />
+    <ClCompile Include="src\oss\ossGraphFacet.cpp" />
+    <ClCompile Include="src\oss\ossGridFacet.cpp" />
+    <ClCompile Include="src\oss\ossOperationsFacet.cpp" />
+    <ClCompile Include="src\oss\ossSourceFacet.cpp" />
+    <ClCompile Include="src\oss\RSSynthesProcessor.cpp" />
+    <ClCompile Include="src\semantic\rscore\ConceptRecord.cpp" />
+    <ClCompile Include="src\semantic\rscore\CstList.cpp" />
+    <ClCompile Include="src\semantic\rscore\IdentityManager.cpp" />
+    <ClCompile Include="src\semantic\rscore\RSCore.cpp" />
+    <ClCompile Include="src\semantic\rsform\RSForm.cpp" />
+    <ClCompile Include="src\semantic\rsform\rsModificationFacet.cpp" />
+    <ClCompile Include="src\semantic\rsform\rsOperationFacet.cpp" />
+    <ClCompile Include="src\semantic\rsmodel\InterpretationStorage.cpp" />
+    <ClCompile Include="src\semantic\rsmodel\rsCalculationFacet.cpp" />
+    <ClCompile Include="src\semantic\rsmodel\RSModel.cpp" />
+    <ClCompile Include="src\semantic\rsmodel\rsValuesFacet.cpp" />
+    <ClCompile Include="src\semantic\schema\RSConcept.cpp" />
+    <ClCompile Include="src\semantic\schema\Schema.cpp" />
+    <ClCompile Include="src\semantic\thesaurus\TextConcept.cpp" />
+    <ClCompile Include="src\semantic\thesaurus\Thesaurus.cpp" />
+    <ClCompile Include="src\tools\CstNameGenerator.cpp" />
+    <ClCompile Include="src\tools\EntityGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ccl\api\RSFormJA.h" />
     <ClInclude Include="include\ccl\env\cclEnvironment.h" />
     <ClInclude Include="include\ccl\env\SourceManager.hpp" />
     <ClInclude Include="include\ccl\Operation.hpp" />
@@ -239,7 +241,7 @@
     <ClInclude Include="include\ccl\Source.hpp" />
     <ClInclude Include="include\ccl\tools\CstNameGenerator.h" />
     <ClInclude Include="include\ccl\tools\EntityGenerator.h" />
-    <ClInclude Include="include\ccl\tools\EnumJSON.hpp"/>
+    <ClInclude Include="include\ccl\tools\EnumJSON.hpp" />
     <ClInclude Include="include\ccl\tools\JSON.h" />
   </ItemGroup>
   <ItemGroup>

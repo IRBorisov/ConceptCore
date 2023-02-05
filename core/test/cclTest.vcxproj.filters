@@ -112,6 +112,9 @@
     <ClCompile Include="src\testIdentityManager.cpp">
       <Filter>s_Concept\03 RSCore</Filter>
     </ClCompile>
+    <ClCompile Include="src\testRSFormJA.cpp">
+      <Filter>s_API</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="s_OSS">
@@ -143,6 +146,9 @@
     </Filter>
     <Filter Include="s_Concept\02 Thesaurus">
       <UniqueIdentifier>{b2885581-28a0-4bef-9a27-15bf0d342061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_API">
+      <UniqueIdentifier>{434c8a3a-5655-47ea-af49-f366af973d73}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -2,14 +2,14 @@
 
 #include "ccl/rslang/RSExpr.h"
 
-namespace nlo = nlohmann;
+using JSON = nlohmann::ordered_json;
 
 namespace {
 
-nlo::ordered_json ExtractPicts(const ccl::oss::OSSchema& oss) {
-	auto pictsArray = nlo::ordered_json::array();
+JSON ExtractPicts(const ccl::oss::OSSchema& oss) {
+	auto pictsArray = JSON::array();
 	for (const auto& pict : oss) {
-		auto object = nlo::ordered_json(pict);
+		auto object = JSON(pict);
 		if (const auto* srcHandle = oss.Src()(pict.uid); srcHandle != nullptr) {
 			object["attachedSource"] = *srcHandle;
 		}
@@ -22,7 +22,7 @@ nlo::ordered_json ExtractPicts(const ccl::oss::OSSchema& oss) {
 	return pictsArray;
 }
 
-void LoadPicts(const nlo::ordered_json& data, ccl::oss::OSSchema& oss) {
+void LoadPicts(const JSON& data, ccl::oss::OSSchema& oss) {
 	using ccl::oss::Pict;
 	using ccl::oss::PictID;
 	using ccl::oss::GridPosition;
@@ -45,12 +45,12 @@ void LoadPicts(const nlo::ordered_json& data, ccl::oss::OSSchema& oss) {
 	}
 }
 
-nlo::ordered_json ExtractData(const ccl::semantic::RSModel& model) {
+JSON ExtractData(const ccl::semantic::RSModel& model) {
 	using ccl::object::SDCompact;
 
-	auto data = nlo::ordered_json::array();
+	auto data = JSON::array();
 	for (const auto uid : model.Core()) {
-		auto object = nlo::ordered_json{
+		auto object = JSON{
 			{"entityUID", uid},
 			{"wasCalculated", model.Calculations().WasCalculated(uid)}
 		};
@@ -74,7 +74,7 @@ nlo::ordered_json ExtractData(const ccl::semantic::RSModel& model) {
 	return data;
 }
 
-void LoadData(const nlo::ordered_json& data, ccl::semantic::RSModel& model) {
+void LoadData(const JSON& data, ccl::semantic::RSModel& model) {
 	using ccl::object::SDCompact;
 	using ccl::EntityUID;
 	using ccl::SetOfEntities;
@@ -108,13 +108,53 @@ void LoadData(const nlo::ordered_json& data, ccl::semantic::RSModel& model) {
 	model.Calculations().LoadCalulated(calculated);
 }
 
+//! Traverse AST to produce JSON
+class AST2json final : public ccl::rslang::ASTVisitor<AST2json> {
+	friend class ccl::rslang::SyntaxTree::Cursor;
+	friend class ASTVisitor<AST2json>;
+
+	using NodeIndex = size_t;
+
+	NodeIndex baseID = 0;
+	std::unordered_map<const ccl::rslang::Token*, NodeIndex> ids{};
+
+public:
+	JSON jsonNodes = JSON::array();
+
+protected:
+	bool VisitDefault(Cursor iter) {
+		JSON node{};
+		const auto myID = baseID;
+		++baseID;
+		ids.emplace(&*iter, myID);
+		node["uid"] = myID;
+		
+		if (iter.IsRoot()) {
+			node["parent"] = myID;
+		} else {
+			node["parent"] = ids.at(&iter.Parent());
+		}
+		node["typeID"] = iter->id;
+		node["start"] = iter->pos.start;
+		node["finish"] = iter->pos.finish;
+		node["data"] = iter->data;
+
+		jsonNodes += std::move(node);
+		for (ccl::rslang::Index child = 0; child < iter.ChildrenCount(); ++child) {
+			VisitChild(iter, child);
+		}
+		return true;
+	}
+};
+
+
 } // namespace
 
 namespace ccl {
 
 namespace semantic {
 
-void to_json(nlo::ordered_json& object, const RSModel& model) {
+void to_json(JSON& object, const RSModel& model) {
 	object = {
 		{"type", "rsmodel"},
 		{"title", model.title},
@@ -125,7 +165,7 @@ void to_json(nlo::ordered_json& object, const RSModel& model) {
 	object["data"] = ExtractData(model);
 }
 
-void from_json(const nlo::ordered_json& object, RSModel& model) {
+void from_json(const JSON& object, RSModel& model) {
 	object.at("title").get_to<std::string>(model.title);
 	object.at("alias").get_to<std::string>(model.alias);
 	object.at("comment").get_to<std::string>(model.comment);
@@ -134,7 +174,7 @@ void from_json(const nlo::ordered_json& object, RSModel& model) {
 	LoadData(object.at("data"), model);
 }
 
-void to_json(nlo::ordered_json& object, const RSForm& schema) {
+void to_json(JSON& object, const RSForm& schema) {
 	object = {
 		{"type", "rsform"},
 		{"title", schema.title},
@@ -142,7 +182,7 @@ void to_json(nlo::ordered_json& object, const RSForm& schema) {
 		{"comment", schema.comment},
 		{"items", schema.Core()}
 	};
-	object["tracking"] = nlo::ordered_json::array();
+	object["tracking"] = JSON::array();
 	for (const auto uid : schema.List()) {
 		const auto* trackPtr = schema.Mods()(uid);
 		if (trackPtr != nullptr) {
@@ -154,57 +194,67 @@ void to_json(nlo::ordered_json& object, const RSForm& schema) {
 	}
 }
 
-void from_json(const nlo::ordered_json& object, RSForm& schema) {
+void from_json(const JSON& object, RSForm& schema) {
 	object.at("title").get_to(schema.title);
 	object.at("alias").get_to(schema.alias);
 	object.at("comment").get_to(schema.comment);
 	object.at("items").get_to(schema.LoadCore());
-	const auto& tracking = object.at("tracking");
-	for (auto it = begin(tracking); it != end(tracking); ++it) {
-		const auto uid = it->at("entityUID").get<EntityUID>();
-		schema.Mods().Track(uid, it->at("flags").get<TrackingFlags>());
+	if (object.contains("tracking")) {
+		const auto& tracking = object.at("tracking");
+		for (auto it = begin(tracking); it != end(tracking); ++it) {
+			const auto uid = it->at("entityUID").get<EntityUID>();
+			schema.Mods().Track(uid, it->at("flags").get<TrackingFlags>());
+		}
 	}
 }
 
-void to_json(nlo::ordered_json& object, const RSCore& core) {
-	object = nlo::ordered_json::array();
+void to_json(JSON& object, const RSCore& core) {
+	object = JSON::array();
 	for (const auto uid : core.List()) {
 		const auto& parse = core.GetParse(uid);
-		const auto* typification = core.GetParse(uid).Typification();
+		const auto* typification = parse.Typification();
 		const auto typeStr = typification != nullptr ? typification->ToString() : std::string{};
 		const auto* exprTree = core.RSLang().ASTContext()(core.GetRS(uid).alias);
-		nlo::ordered_json cstJSON(core.AsRecord(uid));
+		JSON cstJSON(core.AsRecord(uid));
 		cstJSON["parse"] = {
 			{"status", parse.status},
-			{"valueClass", parse.valueClass},
-			{"typification", typeStr},
-			{"syntaxTree", exprTree ? ccl::rslang::AST2String::Apply(*exprTree) : ""}
+			{"valueClass", parse.valueClass}
 		};
+		if (typification != nullptr) {
+			cstJSON["parse"]["typification"] = *typification;
+		} else {
+			cstJSON["parse"]["typification"] = "";
+		}
+		if (exprTree != nullptr) {
+			cstJSON["parse"]["syntaxTree"] = ccl::rslang::AST2String::Apply(*exprTree);
+		} else {
+			cstJSON["parse"]["syntaxTree"] = "";
+		}
 		object += std::move(cstJSON);
 	}
 }
 
-void from_json(const nlo::ordered_json& object, RSCore& core) {
+void from_json(const JSON& object, RSCore& core) {
 	for (auto it = begin(object); it != end(object); ++it) {
 		core.Load(it->get<ConceptRecord>());
 	}
 	core.UpdateState();
 }
 
-void to_json(nlo::ordered_json& object, const TextInterpretation& text) {
-	object = nlo::ordered_json::array();
+void to_json(JSON& object, const TextInterpretation& text) {
+	object = JSON::array();
 	for (const auto& textElement : text) {
 		object += textElement.second;
 	}
 }
 
-void from_json(const nlo::ordered_json& object, TextInterpretation& text) {
+void from_json(const JSON& object, TextInterpretation& text) {
 	for (auto it = begin(object); it != end(object); ++it) {
 		text.PushBack(it->get<std::string>());
 	}
 }
 
-void to_json(nlo::ordered_json& object, const ConceptRecord& record) {
+void to_json(JSON& object, const ConceptRecord& record) {
 	object = {
 		{"entityUID", record.uid},
 		{"type", "constituenta"},
@@ -219,7 +269,7 @@ void to_json(nlo::ordered_json& object, const ConceptRecord& record) {
 	};
 }
 
-void from_json(const nlo::ordered_json& object, ConceptRecord& record) {
+void from_json(const JSON& object, ConceptRecord& record) {
 	object.at("entityUID").get_to(record.uid);
 	object.at("cstType").get_to(record.type);
 	object.at("alias").get_to(record.alias);
@@ -229,7 +279,7 @@ void from_json(const nlo::ordered_json& object, ConceptRecord& record) {
 	object.at("definition").at("text").get_to(record.definition);
 }
 
-void to_json(nlo::ordered_json& object, const TrackingFlags& mods) {
+void to_json(JSON& object, const TrackingFlags& mods) {
 	object = {
 		{"mutable", mods.allowEdit},
 		{"editTerm", mods.term},
@@ -238,7 +288,7 @@ void to_json(nlo::ordered_json& object, const TrackingFlags& mods) {
 	};
 }
 
-void from_json(const nlo::ordered_json& object, TrackingFlags& mods) {
+void from_json(const JSON& object, TrackingFlags& mods) {
 	object.at("mutable").get_to(mods.allowEdit);
 	object.at("editTerm").get_to(mods.term);
 	object.at("editDefinition").get_to(mods.definition);
@@ -248,20 +298,80 @@ void from_json(const nlo::ordered_json& object, TrackingFlags& mods) {
 } // namespace ccl::semantic
 
 
+namespace rslang {
+
+void to_json(JSON& object, const ExpressionType& type) {
+	object = std::visit(meta::Overloads{
+		[](const Typification& t) { return t.ToString();	},
+		[](const LogicT& /*t*/) { return std::string{"LOGIC"}; },
+											}, type);
+}
+
+void to_json(JSON& object, const Typification& typif) {
+	object = typif.ToString();
+}
+
+void to_json(JSON& object, const SyntaxTree& ast) {
+	AST2json visitor{};
+	ast.Root().DispatchVisit(visitor);
+	object = std::move(visitor.jsonNodes);
+}
+
+void to_json(JSON& object, const TokenData& data) {
+	if (!data.HasValue()) {
+		object = {
+			{"dataType", "none"},
+			{"value", ""}
+		};
+	} else if (data.IsInt()) {
+		object = {
+			{"dataType", "integer"},
+			{"value", data.ToInt()}
+		};
+	} else if (data.IsText()) {
+		object = {
+			{"dataType", "string"},
+			{"value", data.ToText()}
+		};
+	} else if (data.IsTuple()) {
+		object = {
+			{"dataType", "tuple"},
+			{"value", data.ToTuple()}
+		};
+	} else {
+		object = {
+			{"dataType", "unknown"},
+			{"value", ""}
+		};
+	}
+}
+
+void to_json(JSON& object, const Error& error) {
+	object = {
+		{"errorType", error.eid},
+		{"position", error.position},
+		{"isCritical", error.IsCritical()},
+		{"params", error.params}
+	};
+}
+
+} // namespace ccl::rslang
+
+
 namespace lang {
 
-void to_json(nlo::ordered_json& object, const LexicalTerm& term) {
+void to_json(JSON& object, const LexicalTerm& term) {
 	object = term.Text();
-	object["forms"] = nlo::ordered_json::array();
+	object["forms"] = JSON::array();
 	for (const auto& [form, text] : term.GetAllManual()) {
-		object["forms"] += nlo::ordered_json{
+		object["forms"] += JSON{
 			{"text", text},
 			{"tags", form.ToString()}
 		};
 	}
 }
 
-void from_json(const nlo::ordered_json& object, LexicalTerm& term) {
+void from_json(const JSON& object, LexicalTerm& term) {
 	term = LexicalTerm{ object.get<ManagedText>() };
 	const auto& forms = object.at("forms");
 	for (auto it = begin(forms); it != end(forms); ++it) {
@@ -270,14 +380,14 @@ void from_json(const nlo::ordered_json& object, LexicalTerm& term) {
 	}
 }
 
-void to_json(nlo::ordered_json& object, const ManagedText& text) {
+void to_json(JSON& object, const ManagedText& text) {
 	object = {
 		{"raw", text.Raw()},
 		{"resolved", text.Str()},
 	};
 }
 
-void from_json(const nlo::ordered_json& object, ManagedText& text) {
+void from_json(const JSON& object, ManagedText& text) {
 	text = ManagedText{
 		object.at("raw").get<std::string>(),
 		object.at("resolved").get<std::string>()
@@ -289,7 +399,7 @@ void from_json(const nlo::ordered_json& object, ManagedText& text) {
 
 namespace src {
 
-void to_json(nlo::ordered_json& object, const Handle& srcHandle) {
+void to_json(JSON& object, const Handle& srcHandle) {
 	object = {
 		{"resourceID", u8to_string(srcHandle.desc.name)},
 		{"resourceType", srcHandle.desc.type},
@@ -298,7 +408,7 @@ void to_json(nlo::ordered_json& object, const Handle& srcHandle) {
 	};
 }
 
-void from_json(const nlo::ordered_json& object, Handle& srcHandle) {
+void from_json(const JSON& object, Handle& srcHandle) {
 	srcHandle.desc.name = to_u8string(object.at("resourceID").get<std::string>());
 	object.at("resourceType").get_to(srcHandle.desc.type);
 	object.at("coreHash").get_to(srcHandle.coreHash);
@@ -310,7 +420,7 @@ void from_json(const nlo::ordered_json& object, Handle& srcHandle) {
 
 namespace oss {
 
-void to_json(nlo::ordered_json& object, const OSSchema& oss) {
+void to_json(JSON& object, const OSSchema& oss) {
 	object = {
 		{"type", "oss"},
 		{"title", oss.title},
@@ -322,7 +432,7 @@ void to_json(nlo::ordered_json& object, const OSSchema& oss) {
 	};
 }
 
-void from_json(const nlo::ordered_json& object, OSSchema& oss) {
+void from_json(const JSON& object, OSSchema& oss) {
 	object.at("title").get_to(oss.title);
 	object.at("comment").get_to(oss.comment);
 	oss.Src().ossDomain = to_u8string(object.at("sourceDomain").get<std::string>());
@@ -333,7 +443,7 @@ void from_json(const nlo::ordered_json& object, OSSchema& oss) {
 	}
 }
 
-void to_json(nlohmann::ordered_json& object, const Pict& pict) {
+void to_json(JSON& object, const Pict& pict) {
 	object = {
 		{"pictUID", pict.uid},
 		{"dataType", pict.dataType},
@@ -347,7 +457,7 @@ void to_json(nlohmann::ordered_json& object, const Pict& pict) {
 	}
 }
 
-void from_json(const nlohmann::ordered_json& object, Pict& pict) {
+void from_json(const JSON& object, Pict& pict) {
 	object.at("pictUID").get_to(pict.uid);
 	object.at("dataType").get_to(pict.dataType);
 	object.at("title").get_to(pict.title);
@@ -358,19 +468,19 @@ void from_json(const nlohmann::ordered_json& object, Pict& pict) {
 	}
 }
 
-void to_json(nlo::ordered_json& object, const MediaLink& link) {
+void to_json(JSON& object, const MediaLink& link) {
 	object = {
 		{"address", link.address},
 		{"subAddr", link.subAddr}
 	};
 }
 
-void from_json(const nlo::ordered_json& object, MediaLink& link) {
+void from_json(const JSON& object, MediaLink& link) {
 	object.at("address").get_to(link.address);
 	object.at("subAddr").get_to(link.subAddr);
 }
 
-void to_json(nlo::ordered_json& object, const OperationHandle& operation) {
+void to_json(JSON& object, const OperationHandle& operation) {
 	object = {
 		{"operationType", operation.type},
 		{"isBroken", operation.broken },
@@ -378,7 +488,7 @@ void to_json(nlo::ordered_json& object, const OperationHandle& operation) {
 	};
 	const auto* options = dynamic_cast<const ops::EquationOptions*>(operation.options.get());
 	if (options != nullptr) {
-		object["options"] = nlo::ordered_json{
+		object["options"] = JSON{
 			{"type", "equations"},
 			{"data", *options}
 		};
@@ -388,7 +498,7 @@ void to_json(nlo::ordered_json& object, const OperationHandle& operation) {
 	}
 }
 
-void from_json(const nlo::ordered_json& object, OperationHandle& operation) {
+void from_json(const JSON& object, OperationHandle& operation) {
 	object.at("operationType").get_to(operation.type);
 	object.at("isBroken").get_to(operation.broken);
 	object.at("isOutdated").get_to(operation.outdated);
@@ -403,29 +513,29 @@ void from_json(const nlo::ordered_json& object, OperationHandle& operation) {
 	}
 }
 
-void to_json(nlo::ordered_json& object, const Grid& grid) {
-	object = nlo::ordered_json::array();
+void to_json(JSON& object, const Grid& grid) {
+	object = JSON::array();
 	for (const auto& [position, pid] : grid) {
-		auto newItem = nlo::ordered_json(position);
+		auto newItem = JSON(position);
 		newItem["pictUID"] = pid;
 		object += std::move(newItem);
 	}
 }
 
-void from_json(const nlo::ordered_json& object, Grid& grid) {
+void from_json(const JSON& object, Grid& grid) {
 	for (auto it = begin(object); it != end(object); ++it) {
 		grid.emplace(it->get<GridPosition>(), it->at("pictUID").get<PictID>());
 	}
 }
 
-void to_json(nlo::ordered_json& object, const GridPosition& position) {
+void to_json(JSON& object, const GridPosition& position) {
 	object = {
 		{"row", position.row},
 		{"column", position.column}
 	};
 }
 
-void from_json(const nlo::ordered_json& object, GridPosition& position) {
+void from_json(const JSON& object, GridPosition& position) {
 	object.at("row").get_to(position.row);
 	object.at("column").get_to(position.column);
 }
@@ -435,18 +545,18 @@ void from_json(const nlo::ordered_json& object, GridPosition& position) {
 
 namespace ops {
 
-void to_json(nlo::ordered_json& object, const TranslationData& translations) {
-	object = nlo::ordered_json(translations);
+void to_json(JSON& object, const TranslationData& translations) {
+	object = JSON(translations);
 }
 
-void from_json(const nlo::ordered_json& object, TranslationData& translations) {
+void from_json(const JSON& object, TranslationData& translations) {
 	object.get_to(translations);
 }
 
-void to_json(nlo::ordered_json& object, const EquationOptions& equations) {
-	object = nlo::ordered_json::array();
+void to_json(JSON& object, const EquationOptions& equations) {
+	object = JSON::array();
 	for (const auto& [key, value] : equations) {
-		object += nlo::ordered_json{
+		object += JSON{
 			{"operand1", key},
 			{"operand2", value},
 			{"parameters", equations.PropsFor(key)},
@@ -454,7 +564,7 @@ void to_json(nlo::ordered_json& object, const EquationOptions& equations) {
 	}
 }
 
-void from_json(const nlo::ordered_json& object, EquationOptions& equations) {
+void from_json(const JSON& object, EquationOptions& equations) {
 	for (auto it = begin(object); it != end(object); ++it) {
 		equations.Insert(
 			it->at("operand1").get<EntityUID>(),
@@ -464,28 +574,28 @@ void from_json(const nlo::ordered_json& object, EquationOptions& equations) {
 	}
 }
 
-void to_json(nlo::ordered_json& object, const Equation& equation) {
+void to_json(JSON& object, const Equation& equation) {
 	object = {
 		{"equationType", equation.mode},
 		{"newTerm", equation.arg}
 	};
 }
 
-void from_json(const nlo::ordered_json& object, Equation& equation) {
+void from_json(const JSON& object, Equation& equation) {
 	object.at("equationType").get_to(equation.mode);
 	object.at("newTerm").get_to(equation.arg);
 }
 
 } // namespace ccl::ops
 
-void to_json(nlo::ordered_json& object, const EntityTranslation& translation) {
-	object = nlo::ordered_json::array();
+void to_json(JSON& object, const EntityTranslation& translation) {
+	object = JSON::array();
 	for (const auto& [uid1, uid2] : translation) {
 		object += {uid1, uid2};
 	}
 }
 
-void from_json(const nlo::ordered_json& object, EntityTranslation& translation) {
+void from_json(const JSON& object, EntityTranslation& translation) {
 	for (auto it = begin(object); it != end(object); ++it) {
 		auto key = begin(*it)->get<EntityUID>();
 		auto value = next(begin(*it))->get<EntityUID>();

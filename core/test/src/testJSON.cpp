@@ -6,13 +6,15 @@
 #include "ccl/lang/Literals.h"
 #include "ccl/rslang/Literals.h"
 
-namespace nlo = nlohmann;
+using JSON = nlohmann::ordered_json;
 
 using ccl::lang::operator""_form;
 using ccl::rslang::operator""_rs;
+using ccl::rslang::operator""_t;
 
 class UTjson: public ::testing::Test {
 protected:
+	using StrRange = ccl::StrRange;
 	using ValueClass = ccl::rslang::ValueClass;
 	using ParsingStatus = ccl::semantic::ParsingStatus;
 	using CstType = ccl::semantic::CstType;
@@ -27,6 +29,13 @@ protected:
 	using TextInterpretation = ccl::semantic::TextInterpretation;
 	using ConceptRecord = ccl::semantic::ConceptRecord;
 	using TrackingFlags = ccl::semantic::TrackingFlags;
+	using ExpressionType = ccl::rslang::ExpressionType;
+	using Typification = ccl::rslang::Typification;
+	using SyntaxTree = ccl::rslang::SyntaxTree;
+	using TokenData = ccl::rslang::TokenData;
+	using Token = ccl::rslang::Token;
+	using TokenID = ccl::rslang::TokenID;
+	using Error = ccl::rslang::Error;
 	using LexicalTerm = ccl::lang::LexicalTerm;
 	using ManagedText = ccl::lang::ManagedText;
 	using SrcHandle = ccl::src::Handle;
@@ -60,7 +69,7 @@ TEST_F(UTjson, OSSchema) {
 	equations->Insert(42, 1337);
 	initial.Ops().InitFor(result, OpsType::rsSynt, std::move(equations));
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	OSSchema restored{};
 	json.get_to(restored);
 
@@ -129,7 +138,7 @@ TEST_F(UTjson, RSModel) {
 	initial.Values().SetBasicText(x1.uid, TextInterpretation{ {"one", "two"} });
 	initial.Calculations().RecalculateAll();
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	RSModel restored{};
 	json.get_to(restored);
 
@@ -171,7 +180,7 @@ TEST_F(UTjson, RSForm) {
 	initial.Load(ConceptRecord{ cst });
 	initial.Mods().Track(cst.uid, flags);
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<RSForm>();
 
 	ASSERT_EQ(std::size(restored.List()), std::size(initial.List()));
@@ -201,7 +210,7 @@ TEST_F(UTjson, RSCore) {
 	initial.Load(ConceptRecord{ cst1 });
 	initial.Load(ConceptRecord{ cst2 });
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<RSCore>();
 
 	ASSERT_EQ(std::size(restored), std::size(initial));
@@ -216,7 +225,7 @@ TEST_F(UTjson, RSCore) {
 
 TEST_F(UTjson, TextInterpretation) {
 	TextInterpretation initial{ {"item1", "item2"} };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<TextInterpretation>();
 	EXPECT_EQ(restored , initial);
 }
@@ -233,7 +242,7 @@ TEST_F(UTjson, ConceptRecord) {
 	initial.term.SetForm(form, "Form");
 	initial.definition = ManagedText{ "Test_raw", "Test_resolved" };
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<ConceptRecord>();
 
 	EXPECT_EQ(restored.uid, initial.uid);
@@ -252,7 +261,7 @@ TEST_F(UTjson, TrackingFlags) {
 	initial.convention = false;
 	initial.term = true;
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<TrackingFlags>();
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.allowEdit, initial.allowEdit);
@@ -266,7 +275,7 @@ TEST_F(UTjson, LexicalTerm) {
 	const auto form = "nomn,sing"_form;
 	initial.SetForm(form, "Form");
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<LexicalTerm>();
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.Text().Raw(), initial.Text().Raw());
@@ -276,7 +285,7 @@ TEST_F(UTjson, LexicalTerm) {
 
 TEST_F(UTjson, ManagedText) {
 	ManagedText initial{ "Test_raw", "Test_resolved" };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<ManagedText>();
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.Raw(), initial.Raw());
@@ -289,7 +298,7 @@ TEST_F(UTjson, SrcHandle) {
 	initial.desc.type = SrcType::rsDoc;
 	initial.coreHash = 42;
 	initial.fullHash = 1337;
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<SrcHandle>();
 	EXPECT_EQ(restored.desc, initial.desc);
 	EXPECT_EQ(restored.coreHash, initial.coreHash);
@@ -305,7 +314,7 @@ TEST_F(UTjson, Pict) {
 	initial.dataType = DataType::rsSchema;
 	initial.lnk = MediaLink{"1", "2"};
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<Pict>();
 	EXPECT_EQ(restored.uid, initial.uid);
 	EXPECT_EQ(restored.alias, initial.alias);
@@ -317,7 +326,7 @@ TEST_F(UTjson, Pict) {
 
 TEST_F(UTjson, MediaLink) {
 	MediaLink initial{ "address", "subaddress" };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<MediaLink>();
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.address, initial.address);
@@ -334,7 +343,7 @@ TEST_F(UTjson, OperationHandle) {
 	initial.translations->begin()->Insert(42, 1337);
 	initial.translations->push_back({});
 
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<OperationHandle>();
 	EXPECT_EQ(restored.broken, initial.broken);
 	EXPECT_EQ(restored.outdated, initial.outdated);
@@ -346,14 +355,14 @@ TEST_F(UTjson, Grid) {
 	Grid initial{};
 	initial.emplace(GridPosition{ 1, 1 }, 42);
 	initial.emplace(GridPosition{ 1, 2 }, 1337);
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<Grid>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, GridPosition) {
 	GridPosition initial{ 10, 11 };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<GridPosition>();
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.row, initial.row);
@@ -364,7 +373,7 @@ TEST_F(UTjson, EquationOptions) {
 	EquationOptions initial{};
 	initial.Insert(42, 1337, Equation{ EquationMode::createNew, "Test_term1" });
 	initial.Insert(43, 1338, Equation{ EquationMode::keepDel, "Test_term2"});
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<EquationOptions>();
 	EXPECT_EQ(restored.PropsFor(42).mode, initial.PropsFor(42).mode);
 	EXPECT_EQ(restored.PropsFor(42).arg, initial.PropsFor(42).arg);
@@ -374,7 +383,7 @@ TEST_F(UTjson, EquationOptions) {
 
 TEST_F(UTjson, Equation) {
 	Equation initial{ EquationMode::createNew, "Test_term" };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<Equation>();
 	EXPECT_EQ(restored.arg, initial.arg);
 	EXPECT_EQ(restored.mode, initial.mode);
@@ -385,56 +394,114 @@ TEST_F(UTjson, EntityTranslation) {
 	initial.Insert(42, 1337);
 	initial.Insert(1, 40);
 	initial.Insert(2, 37);
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<EntityTranslation>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, ValueClass) {
 	ValueClass initial{ ValueClass::value };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<ValueClass>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, ParsingStatus) {
 	ParsingStatus initial{ ParsingStatus::VERIFIED };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<ParsingStatus>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, CstType) {
 	CstType initial{ CstType::function };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<CstType>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, DataType) {
 	DataType initial{ DataType::rsSchema };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<DataType>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, SrcType) {
 	SrcType initial{ SrcType::rsDoc };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<SrcType>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, EquationMode) {
 	EquationMode initial{ EquationMode::keepDel };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<EquationMode>();
 	EXPECT_EQ(restored, initial);
 }
 
 TEST_F(UTjson, OpsType) {
 	OpsType initial{ OpsType::rsSynt };
-	const auto json = nlo::ordered_json(initial);
+	const auto json = JSON(initial);
 	const auto restored = json.get<OpsType>();
 	EXPECT_EQ(restored, initial);
+}
+
+TEST_F(UTjson, ExpressionType) {
+	const ExpressionType logic = ccl::rslang::LogicT{};
+	const ExpressionType typif = "B(X1*X1)"_t;
+	EXPECT_EQ(JSON(logic), "LOGIC");
+	EXPECT_EQ(JSON(typif), std::get<Typification>(typif).ToString());
+}
+
+TEST_F(UTjson, Typification) {
+	const auto typif = "B(X1*X1)"_t;
+	EXPECT_EQ(JSON(typif), typif.ToString());
+}
+
+TEST_F(UTjson, TokenData) {
+	TokenData empty{};
+	TokenData integer{ 1 };
+	TokenData str{ "alpha"};
+	const auto indecies = std::vector<ccl::rslang::Index>{ 1, 2, 3 };
+	TokenData tupleInt{ indecies };
+	EXPECT_EQ(JSON(empty).at("dataType"), "none");
+	EXPECT_EQ(JSON(empty).at("value"), "");
+	EXPECT_EQ(JSON(integer).at("dataType"), "integer");
+	EXPECT_EQ(JSON(integer).at("value").get<int32_t>(), 1);
+	EXPECT_EQ(JSON(str).at("dataType"), "string");
+	EXPECT_EQ(JSON(str).at("value"), "alpha");
+	EXPECT_EQ(JSON(tupleInt).at("dataType"), "tuple");
+	EXPECT_EQ(JSON(tupleInt).at("value").get<decltype(indecies)>(), indecies);
+}
+
+TEST_F(UTjson, Error) {
+	Error err{ 0x2001, 42 };
+	err.params = {"42", "test"};
+	JSON jsonErr(err);
+	EXPECT_EQ(jsonErr.at("errorType").get<decltype(err.eid)>(), err.eid);
+	EXPECT_EQ(jsonErr.at("position").get<decltype(err.position)>(), err.position);
+	EXPECT_EQ(jsonErr.at("isCritical").get<bool>(), err.IsCritical());
+	EXPECT_EQ(jsonErr.at("params").get<decltype(err.params)>(), err.params);
+}
+
+TEST_F(UTjson, SyntaxTree) {
+	using Node = SyntaxTree::Node;
+	Node root{ Token{ TokenID::AND, StrRange{2, 4}, TokenData{42} } };
+	root.AddChildCopy(Node{ Token{ TokenID::OR, StrRange{0, 5} } });
+	root.AddChildCopy(Node{ Token{ TokenID::BOOL, StrRange{6, 10} } });
+	root(0).AddChildCopy(Node{ Token{ TokenID::ID_LOCAL, StrRange{0, 3}}});
+	root(0).AddChildCopy(Node{ Token{ TokenID::ID_GLOBAL, StrRange{4, 5} } });
+	root(1).AddChildCopy(Node{ Token{ TokenID::LIT_INTEGER, StrRange{1, 2} } });
+	SyntaxTree ast{ std::make_unique<Node>(root) };
+
+	JSON jsonAST(ast);
+	ASSERT_EQ(jsonAST.size(), 6);
+	EXPECT_EQ(jsonAST[0].at("uid").get<int32_t>(), 0);
+	EXPECT_EQ(jsonAST[0].at("parent").get<int32_t>(), 0);
+	EXPECT_EQ(jsonAST[0].at("typeID").get<TokenID>(), TokenID::AND);
+	EXPECT_EQ(jsonAST[2].at("uid").get<int32_t>(), 2);
+	EXPECT_EQ(jsonAST[2].at("parent").get<int32_t>(), 1);
+	EXPECT_EQ(jsonAST[2].at("typeID").get<TokenID>(), TokenID::ID_LOCAL);
 }

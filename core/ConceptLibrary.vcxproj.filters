@@ -34,6 +34,9 @@
     <Filter Include="04 ops\01 RSOps">
       <UniqueIdentifier>{3b955deb-294b-4000-bb01-4a043fdfbf38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="06 API">
+      <UniqueIdentifier>{b2207c2a-30f0-424c-bfe2-f81eeca2949d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\env\cclEnvironment.cpp">
@@ -75,7 +78,6 @@
     <ClCompile Include="src\ops\RSEquationProcessor.cpp">
       <Filter>04 ops\01 RSOps</Filter>
     </ClCompile>
-    <ClCompile Include="unity\CCL.cpp" />
     <ClCompile Include="src\JSON.cpp">
       <Filter>01 tools</Filter>
     </ClCompile>
@@ -123,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="src\semantic\rscore\IdentityManager.cpp">
       <Filter>03 semantic\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\api\RSFormJA.cpp">
+      <Filter>06 API</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,8 +245,8 @@
     <ClInclude Include="include\ccl\ops\RSEquationProcessor.h">
       <Filter>04 ops\01 RSOps</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="include\ccl\api\RSFormJA.h">
+      <Filter>06 API</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
