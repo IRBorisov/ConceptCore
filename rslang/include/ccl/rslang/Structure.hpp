@@ -9,7 +9,7 @@ namespace ccl::rslang {
 enum class StructureType : uint8_t {
 	basic = 0,
 	tuple,
-	collection,
+	collection
 };
 
 //! Structured base class

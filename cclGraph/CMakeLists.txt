@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.14)
+﻿cmake_minimum_required(VERSION 3.15)
 
 project (cclGraph VERSION 1.1.0 LANGUAGES CXX)
 
@@ -22,6 +22,11 @@ include(cmake/conan.cmake)
 ## Project Setup
 ##
 add_library(cclGraph)
+set_target_properties(cclGraph PROPERTIES 
+	OUTPUT_NAME cclGraph
+	DEBUG_POSTFIX d
+	POSITION_INDEPENDENT_CODE ON
+)
 
 target_sources(cclGraph
 	PRIVATE
@@ -39,10 +44,6 @@ target_link_libraries(cclGraph
 	PRIVATE 
 		ccl_CXXwarnings
 		ccl_CXXoptions
-)
-set_target_properties(cclGraph PROPERTIES 
-	OUTPUT_NAME cclGraph
-	DEBUG_POSTFIX d
 )
 if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")

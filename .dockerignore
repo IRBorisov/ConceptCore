@@ -2,7 +2,15 @@
 .vscode
 .vs
 *.vcxproj.user
+*.pyc
+*.pyd
 
 output
 packages
 **/build
+**/venv
+**/pyconcept/import
+**/egg-info
+
+rslang/src/RSParserImpl.output
+rslang/src/RSParserImpl.gv

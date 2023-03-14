@@ -1,8 +1,0 @@
-[requires]
-gtest/1.12.1
-
-[generators]
-cmake
-cmake_find_package
-
-[options]

@@ -1,0 +1,12 @@
+include VERSION LICENSE pybind11/LICENSE
+graft src
+graft include
+graft tests
+graft cmake
+
+
+include CMakeLists.txt
+include pybind11/CMakeLists.txt
+graft pybind11/include
+graft pybind11/tools
+recursive-include import *

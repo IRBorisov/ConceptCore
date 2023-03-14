@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.14)
+﻿cmake_minimum_required(VERSION 3.15)
 
 project (RSlang VERSION 1.1.0 LANGUAGES CXX)
 
@@ -22,6 +22,11 @@ include(cmake/conan.cmake)
 ## Project Setup
 ##
 add_library(RSlang)
+set_target_properties(RSlang PROPERTIES 
+	OUTPUT_NAME RSlang
+	DEBUG_POSTFIX d
+	POSITION_INDEPENDENT_CODE ON
+)
 
 target_sources(RSlang
 	PRIVATE
@@ -44,10 +49,7 @@ target_link_libraries(RSlang
 		ccl_CXXwarnings
 		ccl_CXXoptions
 )
-set_target_properties(RSlang PROPERTIES 
-	OUTPUT_NAME RSlang
-	DEBUG_POSTFIX d
-)
+
 if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")
 		set_target_properties(RSlang PROPERTIES

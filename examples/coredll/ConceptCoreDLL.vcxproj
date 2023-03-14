@@ -49,37 +49,37 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>build\x86\$(Configuration)\dll\</OutDir>
+    <OutDir>$(SolutionDir)\output\dll\x86\</OutDir>
     <IntDir>build\x86\$(Configuration)\</IntDir>
     <TargetName>ConceptCore32</TargetName>
-    <LibraryPath>..\..\output\lib\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>build\x86\$(Configuration)\dll\</OutDir>
+    <OutDir>$(SolutionDir)\output\dll\x86\</OutDir>
     <IntDir>build\x86\$(Configuration)\</IntDir>
     <TargetName>ConceptCore32</TargetName>
-    <LibraryPath>..\..\output\lib\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>build\x64\$(Configuration)\dll\</OutDir>
+    <OutDir>$(SolutionDir)\output\dll\x64\</OutDir>
     <IntDir>build\x64\$(Configuration)\</IntDir>
     <TargetName>ConceptCore64</TargetName>
-    <LibraryPath>..\..\output\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>build\x64\$(Configuration)\dll\</OutDir>
+    <OutDir>$(SolutionDir)\output\dll\x64\</OutDir>
     <IntDir>build\x64\$(Configuration)\</IntDir>
     <TargetName>ConceptCore64</TargetName>
-    <LibraryPath>..\..\output\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\;header;include;..\..\cclCommons\include;..\..\RSlang\include;header</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;header;include;..\..\output\include;header</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;CONCEPTCOREDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -95,6 +95,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>ConceptCore.def</ModuleDefinitionFile>
       <AdditionalDependencies>RSlangd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\output\lib\x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -112,7 +113,7 @@
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalIncludeDirectories>.\;header;include;..\..\cclCommons\include;..\..\RSlang\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;header;include;..\..\output\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,17 +122,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>ConceptCore.def</ModuleDefinitionFile>
       <AdditionalDependencies>RSlang.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\output\lib\x86</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "..\..\output\dll" mkdir "..\..\output\dll"
-copy "$(TargetDir)$(TargetFileName)" "..\..\output\dll\$(TargetFileName)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\;header;include;..\..\cclCommons\include;..\..\RSlang\include;header</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;header;include;..\..\output\include;header</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;CONCEPTCOREDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -147,6 +149,7 @@ copy "$(TargetDir)$(TargetFileName)" "..\..\output\dll\$(TargetFileName)"</Comma
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>ConceptCore.def</ModuleDefinitionFile>
       <AdditionalDependencies>RSlangd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\output\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,7 +167,7 @@ copy "$(TargetDir)$(TargetFileName)" "..\..\output\dll\$(TargetFileName)"</Comma
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalIncludeDirectories>.\;header;include;..\..\cclCommons\include;..\..\RSlang\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;header;include;..\..\output\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,10 +176,11 @@ copy "$(TargetDir)$(TargetFileName)" "..\..\output\dll\$(TargetFileName)"</Comma
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>ConceptCore.def</ModuleDefinitionFile>
       <AdditionalDependencies>RSlang.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\output\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "..\..\output\dll" mkdir "..\..\output\dll"
-copy "$(TargetDir)$(TargetFileName)" "..\..\output\dll\$(TargetFileName)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

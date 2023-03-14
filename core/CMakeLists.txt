@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.14)
+﻿cmake_minimum_required(VERSION 3.15)
 
 project (ConceptCoreLibrary VERSION 1.1.0 LANGUAGES CXX)
 
@@ -26,6 +26,11 @@ include(cmake/ImportConceptTargets.cmake)
 ##
 
 add_library(ccl)
+set_target_properties(ccl PROPERTIES 
+	OUTPUT_NAME ConceptCoreLibrary
+	DEBUG_POSTFIX d
+	POSITION_INDEPENDENT_CODE ON
+)
 
 target_sources(ccl
 	PRIVATE
@@ -40,8 +45,6 @@ target_include_directories(ccl
 		import/include
 )
 target_link_libraries(ccl
-	PUBLIC
-		CONAN_PKG::nlohmann_json
 	INTERFACE
 		RSLang
 		cclLang
@@ -50,10 +53,7 @@ target_link_libraries(ccl
 		ccl_CXXwarnings
 		ccl_CXXoptions
 )
-set_target_properties(ccl PROPERTIES 
-	OUTPUT_NAME ConceptCoreLibrary
-	DEBUG_POSTFIX d
-)
+
 if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")
 		set_target_properties(ccl PROPERTIES

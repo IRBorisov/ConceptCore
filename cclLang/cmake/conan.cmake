@@ -1,21 +1,36 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 
 ##
 ## Conan setup using cmake-conan
 ## https://github.com/conan-io/cmake-conan
 ##
-if(NOT EXISTS "${PROJECT_BINARY_DIR}/conan.cmake")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 	message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
 	file(DOWNLOAD 
-		"https://raw.githubusercontent.com/conan-io/cmake-conan/v0.14/conan.cmake"
-		"${PROJECT_BINARY_DIR}/conan.cmake"
+			"https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
+			"${CMAKE_BINARY_DIR}/conan.cmake"
+			TLS_VERIFY ON
 	)
 endif()
 
-include(${PROJECT_BINARY_DIR}/conan.cmake)
-conan_check(REQUIRED)
-conan_cmake_run(
-	CONANFILE conanfile.txt
-	BASIC_SETUP CMAKE_TARGETS
-	BUILD missing
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+conan_cmake_configure(
+	REQUIRES
+		gtest/1.12.1
+	GENERATORS
+		CMakeDeps
+		CMakeToolchain
+)
+
+conan_cmake_autodetect(settings)
+
+conan_cmake_install(
+	PATH_OR_REFERENCE .
+    BUILD missing
+    REMOTE conancenter
+    SETTINGS ${settings}
 )

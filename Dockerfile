@@ -13,6 +13,8 @@ ARG  DEBIAN_FRONTEND=noninteractive
 # Install standard packages
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
+        nano \
+        vim \
         wget \
         curl \
         tar \
@@ -24,11 +26,13 @@ RUN apt-get update -qq && \
         cmake \
         python3 \
         python3-pip \
+        python3-venv \
+        python3-dev \
         cppcheck
 
 # Install conan
 RUN python3 -m pip install --upgrade pip setuptools && \
-    python3 -m pip install conan && \
+    python3 -m pip install "conan>=1.59,<=1.80" && \
     conan --version
 
 # Add GCC compiler
@@ -79,15 +83,16 @@ RUN apt-get autoclean -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# ====================== END OF CPP BUILDER ==================
+# ====================== END OF CPP-Python environment ==================
 
 
 # This part should be done in CI system instead of docker. This is temporary measure while migrating to Jenkins CI
 
 FROM cpp-builder as CCL
-ARG CMAKE_BUILD_TYPE="Debug"
-ENV CC="clang"
-ENV CXX="clang++"
+ARG CMAKE_BUILD_TYPE="Release"
+# Choose between clang/clang++ or gcc/g++
+ENV CC="gcc"
+ENV CXX="g++"
 
 COPY cclCommons /home/cclCommons
 WORKDIR /home/cclCommons/build
@@ -129,4 +134,8 @@ RUN cmake ../ && \
     cmake --install . --prefix /home/output
 WORKDIR /home
 
-COPY . /home/test/
+# Build python library
+COPY examples/pyconcept /home/examples/pyconcept
+WORKDIR  /home/examples/pyconcept
+RUN script/Build.sh
+WORKDIR /home

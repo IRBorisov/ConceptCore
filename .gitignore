@@ -1,13 +1,17 @@
 ~*
-.vscode
 .vs
 *.vcxproj.user
 *.pch.tmp
 *.clang.pch
+*.pyc
+*.pyd
 
 packages
 build
 output
+venv/
+examples/pyconcept/import/
+*egg-info
 
 rslang/src/RSParserImpl.output
 rslang/src/RSParserImpl.gv
