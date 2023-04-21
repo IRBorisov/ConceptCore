@@ -160,11 +160,11 @@ TEST_F(UTRSCalculationFacet, Status) {
 	calc.Calculate(a1);
 	EXPECT_EQ(calc(a1), EvalStatus::HAS_DATA);
 
-	model.SetExpressionFor(a1, "1=2");
+	model.SetExpressionFor(a1, R"(1=2)");
 	calc.Calculate(a1);
 	EXPECT_EQ(calc(a1), EvalStatus::AXIOM_FAIL);
 
-	model.SetExpressionFor(a1, R"(card(BBB(X1 \setminus S1)) = 0)"_rs);
+	model.SetExpressionFor(a1, R"(card(BBB(X1 \setminus S1)) \eq 0)"_rs);
 	calc.Calculate(a1);
 	EXPECT_EQ(calc(a1), EvalStatus::INCALCULABLE);
 	EXPECT_FALSE(values.StatementFor(a1).has_value());

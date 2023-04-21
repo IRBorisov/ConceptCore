@@ -33,10 +33,9 @@ public:
 	[[nodiscard]] ValueClass VType() const noexcept { return current; }
 
 protected:
-	bool VisitDefault(Cursor /*iter*/) noexcept { return false; }
-
 	bool ViGlobalDefinition(Cursor iter);
 
+	bool ViFunctionDefinition(Cursor iter) { return VisitAllChildren(iter); }
 	bool ViFunctionCall(Cursor iter);
 
 	bool ViGlobal(Cursor iter);

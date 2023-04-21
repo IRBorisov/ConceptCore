@@ -6,7 +6,7 @@
 namespace ccl::rslang {
 
 //! Convert syntax
-[[nodiscard]] std::string ConvertTo(const std::string& input, Syntax syntax);
+[[nodiscard]] std::string ConvertTo(const std::string& input, Syntax targetSyntax);
 
 //! RS expression generator factory
 class Generator {
@@ -18,7 +18,7 @@ public:
 
 public:
 	[[nodiscard]] static std::string GlobalDefinition(std::string globalID, std::string expr, bool isStruct);
-	[[nodiscard]] static std::string FromTree(const SyntaxTree& ast, Syntax syntax = Syntax::RSLANG);
+	[[nodiscard]] static std::string FromTree(const SyntaxTree& ast, Syntax syntax = Syntax::MATH);
 
 	[[nodiscard]] static std::string CreatePrefix(const FunctionArguments& args);
 	[[nodiscard]] static std::string ExtractPrefix(const std::string& declaration);

@@ -2,13 +2,13 @@
 
 #include "ccl/rslang/AsciiLexer.h"
 
-class UTAsciiLexer : public LexerTester<ccl::rslang::AsciiLexer> {
+class UTAsciiLexer : public LexerTester<ccl::rslang::detail::AsciiLexer> {
 protected:
 };
 
 TEST_F(UTAsciiLexer, Construction) {
 	static const std::string input{ "X1" };
-	EXPECT_EQ(TokenID::ID_GLOBAL, ccl::rslang::AsciiLexer{ input }.Stream()().id);
+	EXPECT_EQ(TokenID::ID_GLOBAL, ccl::rslang::detail::AsciiLexer{ input }.Stream()().id);
 }
 
 TEST_F(UTAsciiLexer, Whitespace) {
@@ -21,26 +21,9 @@ TEST_F(UTAsciiLexer, Whitespace) {
 }
 
 TEST_F(UTAsciiLexer, Symbolic) {
-	TestSingle("+", TokenID::PLUS);
-	TestSingle("-", TokenID::MINUS);
-	TestSingle(">", TokenID::GREATER);
-	TestSingle("<", TokenID::LESSER);
-	TestSingle(">=", TokenID::GREATER_OR_EQ);
-	TestSingle("<=", TokenID::LESSER_OR_EQ);
-
-	TestSingle("=", TokenID::EQUAL);
-	TestSingle("!=", TokenID::NOTEQUAL);
-
-	TestSingle("<=>", TokenID::EQUIVALENT);
-	TestSingle("=>", TokenID::IMPLICATION);
-	TestSingle("&&", TokenID::AND);
-	TestSingle("||", TokenID::OR);
-
 	TestSingle("*", TokenID::DECART);
 	TestSingle("B", TokenID::BOOLEAN);
 
-	TestSingle(":==", TokenID::PUNC_DEFINE);
-	TestSingle("::=", TokenID::PUNC_STRUCT);
 	TestSingle("(", TokenID::PUNC_PL);
 	TestSingle(")", TokenID::PUNC_PR);
 	TestSingle("{", TokenID::PUNC_CL);
@@ -49,7 +32,13 @@ TEST_F(UTAsciiLexer, Symbolic) {
 	TestSingle("]", TokenID::PUNC_SR);
 	TestSingle("|", TokenID::PUNC_BAR);
 	TestSingle(",", TokenID::PUNC_COMMA);
-	TestSingle(";", TokenID::PUNC_SEMICOLON);	
+	TestSingle(";", TokenID::PUNC_SEMICOLON);
+
+	TestSingle("D", TokenID::DECLARATIVE);
+	TestSingle("R", TokenID::RECURSIVE);
+	TestSingle("I", TokenID::IMPERATIVE);
+
+	TestSingle("Z", TokenID::LIT_INTSET);
 }
 
 TEST_F(UTAsciiLexer, MultipleBoolean) {
@@ -67,6 +56,21 @@ TEST_F(UTAsciiLexer, Keywords) {
 	TestSingle(R"(\E)", TokenID::EXISTS);
 	TestSingle(R"(\neg)", TokenID::NOT);
 
+	TestSingle(R"(\plus)", TokenID::PLUS);
+	TestSingle(R"(\minus)", TokenID::MINUS);
+	TestSingle(R"(\gr)", TokenID::GREATER);
+	TestSingle(R"(\ls)", TokenID::LESSER);
+	TestSingle(R"(\ge)", TokenID::GREATER_OR_EQ);
+	TestSingle(R"(\le)", TokenID::LESSER_OR_EQ);
+
+	TestSingle(R"(\eq)", TokenID::EQUAL);
+	TestSingle(R"(\noteq)", TokenID::NOTEQUAL);
+
+	TestSingle(R"(\equiv)", TokenID::EQUIVALENT);
+	TestSingle(R"(\impl)", TokenID::IMPLICATION);
+	TestSingle(R"(\and)", TokenID::AND);
+	TestSingle(R"(\or)", TokenID::OR);
+
 	TestSingle(R"(\from)", TokenID::PUNC_ITERATE);
 	TestSingle(R"(\in)", TokenID::IN);
 	TestSingle(R"(\notin)", TokenID::NOTIN);
@@ -79,16 +83,14 @@ TEST_F(UTAsciiLexer, Keywords) {
 	TestSingle(R"(\setminus)", TokenID::SET_MINUS);
 	TestSingle(R"(\symmdiff)", TokenID::SYMMINUS);
 
+	TestSingle(R"(\defexpr)", TokenID::PUNC_DEFINE);
+	TestSingle(R"(\deftype)", TokenID::PUNC_STRUCT);
+
 	TestSingle("card", TokenID::CARD);
 	TestSingle("bool", TokenID::BOOL);
 	TestSingle("red", TokenID::REDUCE);
 	TestSingle("debool", TokenID::DEBOOL);
 
-	TestSingle("D", TokenID::DECLARATIVE);
-	TestSingle("R", TokenID::RECURSIVE);
-	TestSingle("I", TokenID::IMPERATIVE);
-
-	TestSingle("Z", TokenID::LIT_INTSET);
 	TestSingle("{}", TokenID::LIT_EMPTYSET);
 }
 
@@ -138,10 +140,10 @@ TEST_F(UTAsciiLexer, ReadMultipleTokens) {
 	ExpectNextIDPos(TokenID::PUNC_PR, StrRange{ 10, 11 });
 	ExpectNextID(TokenID::END);
 
-	const std::string input2{ "1=1" };
+	const std::string input2{ R"(1 \eq 1)" };
 	lex.SetInput(input2);
 	ExpectNextIDPos(TokenID::LIT_INTEGER, StrRange{ 0, 1 });
-	ExpectNextIDPos(TokenID::EQUAL, StrRange{ 1, 2 });
-	ExpectNextIDPos(TokenID::LIT_INTEGER, StrRange{ 2, 3 });
+	ExpectNextIDPos(TokenID::EQUAL, StrRange{ 2, 5 });
+	ExpectNextIDPos(TokenID::LIT_INTEGER, StrRange{ 6, 7 });
 	ExpectNextID(TokenID::END);
 }

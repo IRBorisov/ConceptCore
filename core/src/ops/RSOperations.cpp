@@ -5,7 +5,7 @@
 #include <format>
 #endif
 
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/MathLexer.h"
 
 namespace ccl::ops {
 
@@ -19,7 +19,7 @@ using rslang::Typification;
 namespace {
 
 bool NeedsBracketsAfterQuantor(const std::string& expr) {
-	const auto firstID = rslang::RSLexer{ expr }.lex();
+	const auto firstID = rslang::detail::MathLexer{ expr }.lex(); // TODO: do not create lexer for each quantor
 	return firstID != TokenID::FORALL
 		&& firstID != TokenID::EXISTS
 		&& firstID != TokenID::NOT;

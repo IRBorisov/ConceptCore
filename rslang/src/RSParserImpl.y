@@ -8,7 +8,7 @@
 %define parse.error verbose
 %define parse.assert
 
-%define api.namespace {ccl::rslang::parse}
+%define api.namespace {ccl::rslang::detail}
 %define api.token.prefix {RST_}
 %define api.parser.class {RSParserImpl}
 %param {ParserState* state}
@@ -37,32 +37,34 @@
 #include "ccl/rslang/SyntaxTree.h"
 #include "ccl/rslang/ParserState.hpp"
 
-namespace ccl::rslang::parse {
+namespace ccl::rslang::detail {
 
-#define YYSTYPE NodePtr
+#define YYSTYPE RawNode
 struct ParserState;
 
-NodePtr AddNode(TokenID token, NodePtr son);
-NodePtr AddNode(TokenID token, NodePtr son1, NodePtr son2);
-NodePtr BinaryOperation(NodePtr op1, NodePtr operation, NodePtr op2);
-NodePtr UnaryOperation(NodePtr operation, NodePtr operand);
-NodePtr RemoveBrackets(NodePtr br1, NodePtr operand, NodePtr br2);
-NodePtr ReplaceBrackets(TokenID token, NodePtr br1, NodePtr argList, NodePtr br2);
-NodePtr Enumeration(TokenID token, NodePtr el1, NodePtr el2);
-NodePtr Decartian(NodePtr op1, NodePtr decart, NodePtr op2);
+RawNode AddNode(TokenID token, RawNode son);
+RawNode AddNode(TokenID token, RawNode son1, RawNode son2);
 
-NodePtr Quantifier(NodePtr quant, NodePtr declaration, NodePtr domain, NodePtr predicate);
-NodePtr FunctionCall(NodePtr function, NodePtr args, NodePtr rs);
-NodePtr FilterCall(NodePtr filter, NodePtr params, NodePtr argument, NodePtr rp);
-NodePtr TextOperator(NodePtr oper, NodePtr args, NodePtr rp);
-NodePtr TermDeclaration(NodePtr lc, NodePtr declaration, NodePtr domain, NodePtr predicate, NodePtr rc);
-NodePtr FullRecursion(NodePtr rec, NodePtr localid, NodePtr domain, NodePtr condition, NodePtr iteration, NodePtr rc);
-NodePtr ShortRecursion(NodePtr rec, NodePtr localid, NodePtr domain, NodePtr iteration, NodePtr rc);
-NodePtr Imperative(NodePtr imp, NodePtr value, NodePtr actions, NodePtr rc);
+RawNode BinaryOperation(RawNode op1, RawNode operation, RawNode op2);
+RawNode UnaryOperation(RawNode operation, RawNode operand);
+RawNode RemoveBrackets(RawNode br1, RawNode operand, RawNode br2);
+RawNode ReplaceBrackets(TokenID token, RawNode br1, RawNode argList, RawNode br2);
+RawNode Enumeration(TokenID token, RawNode el1, RawNode el2);
+RawNode Decartian(RawNode op1, RawNode decart, RawNode op2);
 
-int yylex(NodePtr* yylval, ParserState* state);
+RawNode Quantifier(RawNode quant, RawNode declaration, RawNode domain, RawNode predicate);
+RawNode FunctionDeclaration(RawNode start, RawNode argdecl, RawNode expr);
+RawNode FunctionCall(RawNode function, RawNode args, RawNode rs);
+RawNode FilterCall(RawNode filter, RawNode params, RawNode argument, RawNode rp);
+RawNode TextOperator(RawNode oper, RawNode args, RawNode rp);
+RawNode TermDeclaration(RawNode lc, RawNode declaration, RawNode domain, RawNode predicate, RawNode rc);
+RawNode FullRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode condition, RawNode iteration, RawNode rc);
+RawNode ShortRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode iteration, RawNode rc);
+RawNode Imperative(RawNode imp, RawNode value, RawNode actions, RawNode rc);
 
-} // namespace ccl::rslang::parse
+int yylex(RawNode* yylval, ParserState* state);
+
+} // namespace ccl::rslang::detail
 
 }
 
@@ -146,27 +148,31 @@ int yylex(NodePtr* yylval, ParserState* state);
 
 //--------------- Выражение ------------------------------
 expression		: global_declaration
-				| term_or_logic							{ state->FinalizeASTExpression($1); }
+				| term_or_logic							{ state->FinalizeExpression($1); }
+				| function_decl							{ state->FinalizeExpression($1); }
 				;
 
 term_or_logic	: logic
 				| term
 				;
 
-//--------------- Выражение конституэнты ------------------------------
-global_declaration : GLOBAL DEFINE						{ state->FinalizeASTCstNoExpr($1, $2); }
-				| GLOBAL STRUCT term					{ state->FinalizeASTCstExpr($1, $2, $3); }
-				| GLOBAL DEFINE term_or_logic			{ state->FinalizeASTCstExpr($1, $2, $3); }
-				| function_name DEFINE LS arg_declaration RS term_or_logic
-														{ state->FinalizeASTFunction($1, $2, $4, $6); }
-				| function_name DEFINE LS error			{ state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+function_decl	: LS arg_declaration RS term_or_logic	{ $$ = FunctionDeclaration($1, $2, $4); }
+				| LS error								{ state->OnError(ParseEID::expectedDeclaration); YYABORT; }
 				;
-arg_declaration	: declaration							{ $$ = AddNode(TokenID::NT_ARG_TYPES_ENUM, $1); }
-				| arg_declaration COMMA declaration		{ $$ = Enumeration(TokenID::NT_ARG_TYPES_ENUM, $1, $3); }
+
+arg_declaration	: declaration							{ $$ = AddNode(TokenID::NT_ARGUMENTS, $1); }
+				| arg_declaration COMMA declaration		{ $$ = Enumeration(TokenID::NT_ARGUMENTS, $1, $3); }
 				| arg_declaration COMMA error			{ state->OnError(ParseEID::expectedLocal); YYABORT; }
 				;
 declaration		: LOCAL IN term							{ $$ = AddNode(TokenID::NT_ARG_DECL, $1, $3); }
 				| LOCAL error							{ state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+				;
+
+//--------------- Выражение конституэнты ------------------------------
+global_declaration : GLOBAL DEFINE						{ state->FinalizeCstEmpty($1, $2); }
+				| GLOBAL STRUCT term					{ state->FinalizeCstExpression($1, $2, $3); }
+				| GLOBAL DEFINE term_or_logic			{ state->FinalizeCstExpression($1, $2, $3); }
+				| function_name DEFINE function_decl	{ state->FinalizeCstExpression($1, $2, $3); }
 				;
 
 //--------------- Логическое выражение -----------------------------------------

@@ -38,8 +38,8 @@ private:
 } // unnamed namespace
 
 Typification operator""_t(const char* input, const size_t /*size*/) {
-	static AsciiLexer lexer{};
-	static RSParser parser{};
+	static detail::AsciiLexer lexer{};
+	static detail::RSParser parser{};
 	static EchoTypeEnvironment env{};
 	static TypeAuditor analyse{ env };
 
@@ -63,7 +63,7 @@ Typification operator""_t(const char* input, const size_t /*size*/) {
 }
 
 std::string operator"" _rs(const char* input, const size_t size) {
-	return ConvertTo(std::string(input, size), Syntax::RSLANG);
+	return ConvertTo(std::string(input, size), Syntax::MATH);
 }
 
 } // namespace ccl::rslang

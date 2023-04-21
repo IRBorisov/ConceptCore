@@ -197,6 +197,7 @@
   <ItemGroup>
     <None Include="setup.cfg" />
     <None Include="setup.py" />
+    <None Include="VERSION" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\ConceptLibrary.vcxproj">

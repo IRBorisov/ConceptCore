@@ -4,8 +4,7 @@
 
 #include "FakeRSEnvironment.hpp"
 
-#include "ccl/rslang/Interpreter.hpp"
-#include "ccl/rslang/AsciiLexer.h"
+#include "ccl/rslang/Interpreter.h"
 
 class UTInterpreter : public ::testing::Test {
 protected:
@@ -15,7 +14,7 @@ protected:
 	using Typification = ccl::rslang::Typification;
 	using TypedID = ccl::rslang::TypedID;
 
-	using TestInterpreter = ccl::rslang::Interpreter<ccl::rslang::AsciiLexer>;
+	using TestInterpreter = ccl::rslang::Interpreter;
 
 protected:
 	UTInterpreter();
@@ -31,10 +30,12 @@ UTInterpreter::UTInterpreter() : interpreter{ env, env.GetAST(), env.GetDataCont
 
 TEST_F(UTInterpreter, EvaluateExpression) {
 	EXPECT_FALSE(interpreter.Evaluate(std::string{}).has_value());
-	EXPECT_FALSE(interpreter.Evaluate("X1:==").has_value());
-	EXPECT_FALSE(interpreter.Evaluate("invalid=1").has_value());
+	EXPECT_FALSE(interpreter.Evaluate(R"(X1 \defexpr)").has_value());
+	EXPECT_FALSE(interpreter.Evaluate(R"(X1:==)").has_value());
+	EXPECT_FALSE(interpreter.Evaluate(R"(invalid \eq 1)").has_value());
 	EXPECT_EQ(std::get<StructuredData>(interpreter.Evaluate(R"(X1 \setminus X1)").value()), Factory::EmptySet());
-	EXPECT_EQ(std::get<bool>(interpreter.Evaluate("1=1").value()), true);
+	EXPECT_EQ(std::get<bool>(interpreter.Evaluate(R"(1 \eq 1)").value()), true);
+	EXPECT_EQ(std::get<bool>(interpreter.Evaluate(R"(1=1)").value()), true);
 }
 
 TEST_F(UTInterpreter, Errors) {
@@ -50,7 +51,7 @@ TEST_F(UTInterpreter, Functions) {
 	env.data["F1"] = {};
 	EXPECT_FALSE(interpreter.Evaluate("F1[X1]").has_value());
 
-	ASSERT_TRUE(env.AddAST("F1", R"(F1:==[a \in B(X1)] {a})"));
+	ASSERT_TRUE(env.AddAST("F1", R"(F1 \defexpr [a \in B(X1)] {a})"));
 
 	env.data["F1"].type = "B(X1)"_t;
 	env.data["F1"].arguments = { TypedID{ "a", "B(X1)"_t } };

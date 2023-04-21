@@ -52,6 +52,7 @@ protected:
 
 	bool ViGlobalDefinition(Cursor iter);
 
+	// bool ViFunctionDefinition(Cursor iter)
 	// bool ViFunctionCall(Cursor iter);
 
 	bool ViGlobal(Cursor iter) { return ViLocal(iter); }

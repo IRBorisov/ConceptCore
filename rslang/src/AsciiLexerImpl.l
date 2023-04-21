@@ -3,7 +3,7 @@
 
 %option outfile=AsciiLexerImpl.hpp
 
-%option namespace=ccl::rslang::asciilex
+%option namespace=ccl::rslang::detail::asciilex
 %option lexer=AsciiLexerImpl
 %option token-type=ccl::rslang::TokenID
 
@@ -46,21 +46,21 @@ local_id		(_|{lower}){alnum}*
 "\E"			{ return TokenID::EXISTS; }
 
 "\neg"			{ return TokenID::NOT; }
-"&&"			{ return TokenID::AND; }
-"||"			{ return TokenID::OR; }
-"=>"			{ return TokenID::IMPLICATION; }
-"<=>"			{ return TokenID::EQUIVALENT; }
+"\and"			{ return TokenID::AND; }
+"\or"			{ return TokenID::OR; }
+"\impl"			{ return TokenID::IMPLICATION; }
+"\equiv"		{ return TokenID::EQUIVALENT; }
 
-"+"				{ return TokenID::PLUS; }
-"-"				{ return TokenID::MINUS; }
+"\plus"			{ return TokenID::PLUS; }
+"\minus"		{ return TokenID::MINUS; }
 "\multiply"		{ return TokenID::MULTIPLY; }
-">"				{ return TokenID::GREATER; }
-"<"				{ return TokenID::LESSER; }
-">="			{ return TokenID::GREATER_OR_EQ; }
-"<="			{ return TokenID::LESSER_OR_EQ; }
+"\gr"			{ return TokenID::GREATER; }
+"\ls"			{ return TokenID::LESSER; }
+"\ge"			{ return TokenID::GREATER_OR_EQ; }
+"\le"			{ return TokenID::LESSER_OR_EQ; }
 
-"="				{ return TokenID::EQUAL; }
-"!="			{ return TokenID::NOTEQUAL; }
+"\eq"			{ return TokenID::EQUAL; }
+"\noteq"		{ return TokenID::NOTEQUAL; }
 
 "\in"			{ return TokenID::IN; }
 "\notin"		{ return TokenID::NOTIN; }
@@ -98,10 +98,10 @@ R{number}		{ return TokenID::ID_RADICAL; }
 {global_id}		{ return TokenID::ID_GLOBAL; }
 {local_id}		{ return TokenID::ID_LOCAL; }
 
-":="			{ return TokenID::PUNC_ASSIGN; }
+"\assign"		{ return TokenID::PUNC_ASSIGN; }
 "\from"			{ return TokenID::PUNC_ITERATE; }
-":=="			{ return TokenID::PUNC_DEFINE; }
-"::="			{ return TokenID::PUNC_STRUCT; }
+"\defexpr"		{ return TokenID::PUNC_DEFINE; }
+"\deftype"		{ return TokenID::PUNC_STRUCT; }
 "("				{ return TokenID::PUNC_PL; }
 ")"				{ return TokenID::PUNC_PR; }
 "{"				{ return TokenID::PUNC_CL; }

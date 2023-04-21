@@ -1,4 +1,4 @@
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/MathLexer.h"
 
 #ifdef _MSC_VER
 	#pragma warning( push )
@@ -26,7 +26,7 @@
 	#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-#include "RSLexerImpl.hpp"
+#include "MathLexerImpl.hpp"
 
 #ifdef _MSC_VER
 	#pragma warning( pop )
@@ -41,46 +41,46 @@
 	#pragma GCC diagnostic pop
 #endif
 
-namespace ccl::rslang {
+namespace ccl::rslang::detail {
 
-using rslex::RSLexerImpl;
+using rslex::MathLexerImpl;
 
-RSLexer::RSLexer(const std::string& input)
-	: impl{ std::make_unique<RSLexerImpl>(input) } {}
+MathLexer::MathLexer(const std::string& input)
+	: impl{ std::make_unique<MathLexerImpl>(input) } {}
 
-RSLexer& RSLexer::operator()(const std::string& input) {
+MathLexer& MathLexer::operator()(const std::string& input) {
 	SetInput(input);
 	return *this;
 }
 
-RSLexer::RSLexer(ErrorReporter reporter)
-	: LexerBase<RSLexer>{ std::move(reporter) }, impl{ std::make_unique<RSLexerImpl>() } {}
+MathLexer::MathLexer(ErrorReporter reporter)
+	: LexerBase<MathLexer>{ std::move(reporter) }, impl{ std::make_unique<MathLexerImpl>() } {}
 
-RSLexer::RSLexer() :
-	impl{ std::make_unique<RSLexerImpl>() } {}
+MathLexer::MathLexer() :
+	impl{ std::make_unique<MathLexerImpl>() } {}
 
-RSLexer::~RSLexer() = default;
+MathLexer::~MathLexer() = default;
 
-void RSLexer::SetInput(const std::string& input) {
+void MathLexer::SetInput(const std::string& input) {
 	impl->lineBase = 0;
 	impl->in(input);
 }
 
-TokenID RSLexer::DoLex() {
+TokenID MathLexer::DoLex() {
 	return impl->lex();
 }
 
-std::string RSLexer::GetText() const {
+std::string MathLexer::GetText() const {
 	return impl->str();
 }
 
-StrRange RSLexer::Range() const {
+StrRange MathLexer::Range() const {
 	return impl->Range();
 }
 
-StrRange RSLexer::RangeInBytes() const {
+StrRange MathLexer::RangeInBytes() const {
 	return StrRange{ static_cast<StrPos>(impl->matcher().first()),
 		static_cast<StrPos>(impl->matcher().last()) };
 }
 
-} // namespace ccl::rslang
+} // namespace ccl::rslang::detail

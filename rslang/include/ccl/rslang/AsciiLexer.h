@@ -5,7 +5,7 @@
 #include <string>
 #include <optional>
 
-namespace ccl::rslang {
+namespace ccl::rslang::detail {
 
 namespace asciilex { class AsciiLexerImpl; }
 
@@ -39,4 +39,4 @@ private:
 	[[nodiscard]] TokenID DoLex();
 };
 
-} // namespace ccl::rslang
+} // namespace ccl::rslang::detail

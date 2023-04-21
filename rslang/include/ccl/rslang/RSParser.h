@@ -2,14 +2,14 @@
 
 #include "ParserState.hpp"
 
-namespace ccl::rslang {
+namespace ccl::rslang::detail {
 
-namespace parse { class RSParserImpl; }
+class RSParserImpl;
 
 //! Parser for RS
 class RSParser {
-	parse::ParserState state;
-	std::unique_ptr<parse::RSParserImpl> impl;
+	ParserState state;
+	std::unique_ptr<RSParserImpl> impl;
 
 public:
 	~RSParser();
@@ -33,4 +33,4 @@ public:
 	}
 };
 
-} // namespace ccl::rslang
+} // namespace ccl::rslang::detail

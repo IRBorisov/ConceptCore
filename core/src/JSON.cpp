@@ -6,6 +6,13 @@ using JSON = nlohmann::ordered_json;
 
 namespace {
 
+template<typename ObjectType>
+void LoadOptionalKey(const JSON& data, const std::string_view key, ObjectType& destination) {
+	if (data.contains(key)) {
+		data.at(key).get_to(destination);
+	}
+}
+
 JSON ExtractPicts(const ccl::oss::OSSchema& oss) {
 	auto pictsArray = JSON::array();
 	for (const auto& pict : oss) {
@@ -166,9 +173,9 @@ void to_json(JSON& object, const RSModel& model) {
 }
 
 void from_json(const JSON& object, RSModel& model) {
-	object.at("title").get_to<std::string>(model.title);
-	object.at("alias").get_to<std::string>(model.alias);
-	object.at("comment").get_to<std::string>(model.comment);
+	LoadOptionalKey(object, "title", model.title);
+	LoadOptionalKey(object, "alias", model.alias);
+	LoadOptionalKey(object, "comment", model.comment);
 	object.at("items").get_to<RSCore>(model.LoadCore());
 	model.FinalizeLoadingCore();
 	LoadData(object.at("data"), model);
@@ -195,9 +202,9 @@ void to_json(JSON& object, const RSForm& schema) {
 }
 
 void from_json(const JSON& object, RSForm& schema) {
-	object.at("title").get_to(schema.title);
-	object.at("alias").get_to(schema.alias);
-	object.at("comment").get_to(schema.comment);
+	LoadOptionalKey(object, "title", schema.title);
+	LoadOptionalKey(object, "alias", schema.alias);
+	LoadOptionalKey(object, "comment", schema.comment);
 	object.at("items").get_to(schema.LoadCore());
 	if (object.contains("tracking")) {
 		const auto& tracking = object.at("tracking");
@@ -273,10 +280,12 @@ void from_json(const JSON& object, ConceptRecord& record) {
 	object.at("entityUID").get_to(record.uid);
 	object.at("cstType").get_to(record.type);
 	object.at("alias").get_to(record.alias);
-	object.at("convention").get_to(record.convention);
-	object.at("term").get_to(record.term);
-	object.at("definition").at("formal").get_to(record.rs);
-	object.at("definition").at("text").get_to(record.definition);
+	LoadOptionalKey(object, "convention", record.convention);
+	LoadOptionalKey(object, "term", record.term);
+	if (object.contains("definition")) {
+		LoadOptionalKey(object.at("definition"), "formal", record.rs);
+		LoadOptionalKey(object.at("definition"), "text", record.definition);
+	}
 }
 
 void to_json(JSON& object, const TrackingFlags& mods) {
@@ -373,10 +382,12 @@ void to_json(JSON& object, const LexicalTerm& term) {
 
 void from_json(const JSON& object, LexicalTerm& term) {
 	term = LexicalTerm{ object.get<ManagedText>() };
-	const auto& forms = object.at("forms");
-	for (auto it = begin(forms); it != end(forms); ++it) {
-		const auto morpho = Morphology{ it->at("tags").get<std::string>() };
-		term.SetForm(morpho, it->at("text").get<std::string>());
+	if (object.contains("forms")) {
+		const auto& forms = object.at("forms");
+		for (auto it = begin(forms); it != end(forms); ++it) {
+			const auto morpho = Morphology{ it->at("tags").get<std::string>() };
+			term.SetForm(morpho, it->at("text").get<std::string>());
+		}
 	}
 }
 
@@ -388,9 +399,11 @@ void to_json(JSON& object, const ManagedText& text) {
 }
 
 void from_json(const JSON& object, ManagedText& text) {
+	std::string resolved{};
+	LoadOptionalKey(object, "resolved", resolved);
 	text = ManagedText{
 		object.at("raw").get<std::string>(),
-		object.at("resolved").get<std::string>()
+		std::move(resolved)
 	};
 }
 

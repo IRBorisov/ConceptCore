@@ -6,6 +6,29 @@ using JSON = nlohmann::ordered_json;
 
 namespace ccl::api {
 
+std::string ParseExpression(const std::string& expression, const rslang::Syntax syntaxHint) {
+	using rslang::Syntax;
+	rslang::Parser parser{};
+
+	JSON result{};
+	const auto isCorrect = parser.Parse(expression, syntaxHint);
+	result["parseResult"] = isCorrect;
+	result["syntax"] = parser.syntax;
+	result["errors"] = JSON::array();
+	for (const auto& error : parser.Errors().All()) {
+		result["errors"] += error;
+	}
+
+	if (isCorrect) {
+		result["astText"] = rslang::AST2String::Apply(parser.AST());
+		result["ast"] = parser.AST();
+	} else {
+		result["astText"] = "";
+		result["ast"] = "";
+	}
+	return result.dump(JSON_IDENT);
+}
+
 const semantic::RSForm& RSFormJA::data() const noexcept {
   return *schema.get();
 }
@@ -46,11 +69,11 @@ std::string RSFormJA::ToMinimalJSON() const {
   return object.dump(JSON_IDENT);
 }
 
-std::string RSFormJA::ParseExpression(const std::string& text) const {
+std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syntax syntaxHint) const {
 	JSON result{};
 
 	auto analyser = schema->Core().RSLang().MakeAuditor();
-	const auto typeOK = analyser->CheckType(text);
+	const auto typeOK = analyser->CheckType(text, syntaxHint);
 	const auto valueOK = typeOK && analyser->CheckValue();
 
 	result["parseResult"] = typeOK;
@@ -71,8 +94,8 @@ std::string RSFormJA::ParseExpression(const std::string& text) const {
 	}
 
 	if (analyser->isParsed) {
-		result["astText"] = rslang::AST2String::Apply(analyser->AST());
-		result["ast"] = analyser->AST();
+		result["astText"] = rslang::AST2String::Apply(analyser->parser.AST());
+		result["ast"] = analyser->parser.AST();
 	} else {
 		result["astText"] = "";
 		result["ast"] = "";

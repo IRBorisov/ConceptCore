@@ -5,7 +5,7 @@
 #include "ccl/rslang/RSErrorCodes.hpp"
 #include "ccl/cclMeta.hpp"
 
-namespace ccl::rslang {
+namespace ccl::rslang::detail {
 
 //! Abstract Lexer
 template<typename ConcreteLexer>
@@ -73,4 +73,4 @@ private:
 	}
 };
 
-} // namespace ccl::rslang
+} // namespace ccl::rslang::detail

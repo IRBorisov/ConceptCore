@@ -1,17 +1,18 @@
 # ubunutu is the base image
-ARG UBUNTU_VER="jammy"
-FROM ubuntu:$UBUNTU_VER as cpp-builder
-ARG UBUNTU_VER 
+FROM ubuntu:jammy as cpp-builder
 LABEL version="1.0"
 LABEL maintainer="IRBorisov iborisov@acconcept.ru"
 LABEL description="Linux build environment"
 
+ARG LINUX_FLAVOR=ubuntu
+ARG LINUX_DISTR=jammy
 ARG  DEBIAN_FRONTEND=noninteractive
 # ENV TZ=Europe/Moscow
 # RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install standard packages
 RUN apt-get update -qq && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
         nano \
         vim \
@@ -23,12 +24,10 @@ RUN apt-get update -qq && \
         software-properties-common \
         build-essential \
         gpg-agent \
-        cmake \
         python3 \
         python3-pip \
         python3-venv \
-        python3-dev \
-        cppcheck
+        python3-dev
 
 # Install conan
 RUN python3 -m pip install --upgrade pip setuptools && \
@@ -48,7 +47,7 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
 # Add Clang compiler
 ARG LLVM_VER="15"
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null
-RUN add-apt-repository -y "deb http://apt.llvm.org/${UBUNTU_VER}/ llvm-toolchain-${UBUNTU_VER}-${LLVM_VER} main" && \
+RUN add-apt-repository -y "deb http://apt.llvm.org/${LINUX_DISTR}/ llvm-toolchain-${LINUX_DISTR}-${LLVM_VER} main" && \
     apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         clang-${LLVM_VER} \
@@ -69,10 +68,10 @@ RUN add-apt-repository -y "deb http://apt.llvm.org/${UBUNTU_VER}/ llvm-toolchain
     update-alternatives --install /usr/bin/clang++ clang++ $(which clang++-${LLVM_VER}) 100 && \
     update-alternatives --install /usr/bin/clang-tidy clang-tidy $(which clang-tidy-${LLVM_VER}) 1
 
-# Add current cmake/ccmake, from Kitware
+# Add CMake
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
         | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
-    apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main' && \
+    apt-add-repository "deb https://apt.kitware.com/${LINUX_FLAVOR}/ ${LINUX_DISTR} main" && \
     apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         cmake

@@ -15,6 +15,7 @@ protected:
 	using RSForm = ccl::semantic::RSForm;
 	using ConceptRecord = ccl::semantic::ConceptRecord;
 	using CstType = ccl::semantic::CstType;
+	using Syntax = ccl::rslang::Syntax;
 
 	RSForm schema{};
 
@@ -85,24 +86,38 @@ TEST_F(UTRSFormJA, ReloadMinimal) {
 }
 
 TEST_F(UTRSFormJA, ParseExpression) {
-	auto wrapper = RSFormJA::FromData(SetupSchema());
 	{
-		auto reponse = JSON::parse(wrapper.ParseExpression(""));
+		auto reponse = JSON::parse(ccl::api::ParseExpression(""));
 		EXPECT_EQ(reponse.at("parseResult").get<bool>(), false);
-		EXPECT_EQ(reponse.at("errors").size(), 1);
+		EXPECT_EQ(reponse.at("errors").size(), 1U);
 	}
 	{
-		auto reponse = JSON::parse(wrapper.ParseExpression("X1=X2"));
+		auto reponse = JSON::parse(ccl::api::ParseExpression(R"(X1\X2)", Syntax::MATH));
+		EXPECT_EQ(reponse.at("syntax"), "math");
+		EXPECT_EQ(reponse.at("parseResult").get<bool>(), true);
+		EXPECT_EQ(reponse.at("astText"), R"([\[X1][X2]])");
+	}
+}
+
+TEST_F(UTRSFormJA, CheckExpression) {
+	auto wrapper = RSFormJA::FromData(SetupSchema());
+	{
+		auto reponse = JSON::parse(wrapper.CheckExpression(""));
+		EXPECT_EQ(reponse.at("parseResult").get<bool>(), false);
+		EXPECT_EQ(reponse.at("errors").size(), 1U);
+	}
+	{
+		auto reponse = JSON::parse(wrapper.CheckExpression("X1=X2", Syntax::MATH));
 		EXPECT_EQ(reponse.at("parseResult").get<bool>(), false);
 		EXPECT_EQ(reponse.at("astText"), "[=[X1][X2]]");
-		EXPECT_EQ(reponse.at("errors").size(), 1);
+		EXPECT_EQ(reponse.at("errors").size(), 1U);
 		EXPECT_NE(reponse.at("errors")[0].at("position").get<int32_t>(), 0);
 	}
 	{
-		auto reponse = JSON::parse(wrapper.ParseExpression("X1=X1"));
+		auto reponse = JSON::parse(wrapper.CheckExpression("X1=X1", Syntax::MATH));
 		EXPECT_EQ(reponse.at("parseResult").get<bool>(), true);
 		EXPECT_EQ(reponse.at("typification"), "LOGIC");
 		EXPECT_EQ(reponse.at("astText"), "[=[X1][X1]]");
-		EXPECT_EQ(reponse.at("errors").size(), 0);
+		EXPECT_EQ(reponse.at("errors").size(), 0U);
 	}
 }

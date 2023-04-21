@@ -1,4 +1,9 @@
+# Git
 .git
+.gitignore
+
+
+# Local build/utility folders
 .vscode
 .vs
 *.vcxproj.user
@@ -12,5 +17,8 @@ packages
 **/pyconcept/import
 **/egg-info
 
+
+# Specific items
+docker-compose.yml
 rslang/src/RSParserImpl.output
 rslang/src/RSParserImpl.gv

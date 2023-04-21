@@ -1,10 +1,10 @@
 
 %option fast
 
-%option outfile=RSLexerImpl.hpp
+%option outfile=MathLexerImpl.hpp
 
-%option namespace=ccl::rslang::rslex
-%option lexer=RSLexerImpl
+%option namespace=ccl::rslang::detail::rslex
+%option lexer=MathLexerImpl
 %option token-type=ccl::rslang::TokenID
 
 %option noindent

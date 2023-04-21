@@ -3,8 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "ccl/semantic/Schema.h"
-#include "ccl/rslang/AsciiLexer.h"
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/Auditor.h"
 #include "RSLHelper.hpp"
 #include "RandomGenerator.hpp"
 
@@ -22,6 +21,7 @@ protected:
 	using LogicT = ccl::rslang::LogicT;
 	using FunctionArguments = ccl::rslang::FunctionArguments;
 	using ValueClass = ccl::rslang::ValueClass;
+	using Syntax = ccl::rslang::Syntax;
 
 protected:
 	Schema core{};
@@ -764,15 +764,15 @@ TEST_F(UTSchema, Evaluate) {
 TEST_F(UTSchema, MakeAuditor) {
 	core.Emplace(x1, "X1", CstType::base);
 	{
-		auto auditor = core.MakeAuditor<ccl::rslang::RSLexer>();
+		auto auditor = core.MakeAuditor();
 		ASSERT_NE(auditor, nullptr);
-		EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))"_rs));
-		EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))"));
+		EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))"_rs, Syntax::MATH));
+		EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))", Syntax::MATH));
 	}
 	{
-		auto auditor = core.MakeAuditor<ccl::rslang::AsciiLexer>();
+		auto auditor = core.MakeAuditor();
 		ASSERT_NE(auditor, nullptr);
-		EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))"_rs));
-		EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))"));
+		EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))"_rs, Syntax::ASCII));
+		EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))", Syntax::ASCII));
 	}
 }

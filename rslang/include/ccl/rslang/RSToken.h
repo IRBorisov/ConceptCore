@@ -10,9 +10,11 @@ namespace ccl::rslang {
 
 using Index = int16_t;
 
+//! Available syntax for RSLang
 enum class Syntax : uint8_t {
-	RSLANG,
-	ASCII
+	UNDEF,
+	MATH,			// Math syntax using UTF8 symbols
+	ASCII			// Pure ASCII encoded syntax
 };
 
 //! RS language token types enumeration
@@ -102,9 +104,9 @@ enum class TokenID : uint32_t {
 	NT_TUPLE_DECL,  // Декларация переменных с помощью кортежа
 	NT_ARG_DECL, // Объявление аргумента
 
-
-	NT_GLOBAL_CALL, // Вызов терм-функции
-	NT_ARG_TYPES_ENUM, // Задание типизаций аргументов терм-функции
+	NT_FUNC_DEFINITION, // Определение функции
+	NT_ARGUMENTS, // Задание аргументов функции
+	NT_FUNC_CALL, // Вызов функции
 	
 	NT_DECLARATIVE_EXPR, // Задание множества с помощью выражения D{x из H | A(x) }
 	NT_IMPERATIVE_EXPR, // Императивное определение
@@ -179,9 +181,9 @@ public:
 	[[nodiscard]] bool operator==(const Token& rhs) const;
 	[[nodiscard]] bool operator!=(const Token& rhs) const { return !(*this == rhs); }
 
-	[[nodiscard]] std::string ToString(Syntax syntax = Syntax::RSLANG) const;
+	[[nodiscard]] std::string ToString(Syntax syntax = Syntax::MATH) const;
 
-	[[nodiscard]] static std::string Str(TokenID id, Syntax syntax = Syntax::RSLANG);
+	[[nodiscard]] static std::string Str(TokenID id, Syntax syntax = Syntax::MATH);
 	[[nodiscard]] static Comparison CompareOperations(TokenID left, TokenID right);
 };
 

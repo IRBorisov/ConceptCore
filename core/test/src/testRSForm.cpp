@@ -7,7 +7,6 @@
 #include "FakeObserver.hpp"
 
 #include "ccl/semantic/RSForm.h"
-#include "RSLHelper.hpp"
 
 #include <vector>
 #include <unordered_set>

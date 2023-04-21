@@ -3,9 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "ccl/rslang/ASTInterpreter.h"
-#include "ccl/rslang/RSParser.h"
-#include "ccl/rslang/AsciiLexer.h"
-#include "ccl/rslang/ErrorLogger.h"
+#include "ccl/rslang/Parser.h"
 #include "ccl/rslang/RSGenerator.h"
 
 #include "FakeRSEnvironment.hpp"
@@ -23,15 +21,14 @@ protected:
 	using ValueEID = ccl::rslang::ValueEID;
 	using ExpressionValue = ccl::rslang::ExpressionValue;
 	using DataID = ccl::object::DataID;
+	using Syntax = ccl::rslang::Syntax;
 
 protected:
 	UTASTInterpreter();
 
 	static StructuredData CreateBaseSet(int32_t count);
 
-	ccl::rslang::ErrorLogger log{};
-	ccl::rslang::AsciiLexer lexer{ log.SendReporter() };
-	ccl::rslang::RSParser parser{ log.SendReporter() };
+	ccl::rslang::Parser parser{};
 	RSEnvironment env{};
 	ExpressionValue resultVal{};
 
@@ -51,7 +48,7 @@ protected:
 				return data.at(name);
 			}
 		},
-		log.SendReporter()	
+		parser.log.SendReporter()
 	};
 
 	void ExpectValue(const std::string& input, DataID value);
@@ -63,7 +60,7 @@ protected:
 };
 
 UTASTInterpreter::UTASTInterpreter() {
-	env.AddAST("F1", R"(F1:==[a \in B(X1)] { a })");
+	env.AddAST("F1", R"(F1 \defexpr [a \in B(X1)] { a })");
 }
 
 ccl::object::StructuredData UTASTInterpreter::CreateBaseSet(const int32_t count) {
@@ -75,7 +72,7 @@ ccl::object::StructuredData UTASTInterpreter::CreateBaseSet(const int32_t count)
 }
 
 void UTASTInterpreter::Evaluate(const std::string& input) {
-	ASSERT_TRUE(parser.Parse(lexer(input).Stream())) << input;
+	ASSERT_TRUE(parser.Parse(input, Syntax::ASCII)) << input;
 	SyntaxTree ast = parser.AST();
 	ast.Normalize(env.GetAST());
 	const auto result = eval.Evaluate(ast);
@@ -106,109 +103,111 @@ void UTASTInterpreter::ExpectValue(const std::string& input, const StructuredDat
 }
 
 void UTASTInterpreter::ExpectError(const std::string& input, const ValueEID id, const ccl::StrPos pos) {
-	log.Clear();
-	ASSERT_TRUE(parser.Parse(lexer(input).Stream())) << input;
+	parser.log.Clear();
+	ASSERT_TRUE(parser.Parse(input, Syntax::ASCII)) << input;
 	auto ast = parser.ExtractAST();
 	ast->Normalize(env.GetAST());
 	ASSERT_FALSE(eval.Evaluate(*ast).has_value()) << input;
 
-	EXPECT_EQ(static_cast<uint32_t>(id), begin(log.All())->eid) << input;
-	const auto errorPos = log.FirstErrorPos();
+	EXPECT_EQ(static_cast<uint32_t>(id), begin(parser.log.All())->eid) << input;
+	const auto errorPos = parser.log.FirstErrorPos();
 	EXPECT_EQ(errorPos, pos) << input;
 }
 
 TEST_F(UTASTInterpreter, IterationsCounter) {
-	ExpectValue(R"(\A a \in X1 a=a)", true);
+	ExpectValue(R"(\A a \in X1 a \eq a)", true);
 	EXPECT_EQ(data.at("X1").B().Cardinality(), eval.Iterations());
 
-	ExpectValue(R"(\E a \in X1 a=a)", true);
+	ExpectValue(R"(\E a \in X1 a \eq a)", true);
 	EXPECT_EQ(eval.Iterations(), 1);
 
-	ExpectValue(R"(I{a | a \from X1} = X1)", true);
+	ExpectValue(R"(I{a | a \from X1} \eq X1)", true);
 	EXPECT_EQ(data.at("X1").B().Cardinality(), eval.Iterations());
 }
 
 TEST_F(UTASTInterpreter, NumericExpressions) {
 	ExpectValue(R"(42)", 42);
-	ExpectValue(R"(4+2)", 6);
+	ExpectValue(R"(4 \plus 2)", 6);
 	ExpectValue(R"(4 \multiply 2)", 8);
-	ExpectValue(R"(4-2)", 2);
-	ExpectValue(R"(2-4)", -2);
+	ExpectValue(R"(4 \minus 2)", 2);
+	ExpectValue(R"(2 \minus 4)", -2);
 	ExpectValue(R"(card(X1))", 3);
 }
 
 TEST_F(UTASTInterpreter, NumericPredicates) {
-	ExpectValue(R"(2+2=4)", true);
-	ExpectValue(R"(2 \multiply 2=5)", false);
-	ExpectValue(R"(1!=1)", false);
-	ExpectValue(R"(1!=0)", true);
-	ExpectValue(R"(1=1)", true);
-	ExpectValue(R"(1>1)", false);
-	ExpectValue(R"(1>0)", true);
-	ExpectValue(R"(1<1)", false);
-	ExpectValue(R"(0<1)", true);
-	ExpectValue(R"(1<=1)", true);
-	ExpectValue(R"(1>=1)", true);
+	ExpectValue(R"(2 \plus 2 \eq 4)", true);
+	ExpectValue(R"(2 \multiply 2 \eq 5)", false);
+	ExpectValue(R"(1 \noteq 1)", false);
+	ExpectValue(R"(1 \noteq 0)", true);
+	ExpectValue(R"(1 \eq 1)", true);
+	ExpectValue(R"(1 \gr 1)", false);
+	ExpectValue(R"(1 \gr 0)", true);
+	ExpectValue(R"(1 \ls 1)", false);
+	ExpectValue(R"(0 \ls 1)", true);
+	ExpectValue(R"(1 \le 1)", true);
+	ExpectValue(R"(1 \le 2)", true);
+	ExpectValue(R"(1 \ge 1)", true);
+	ExpectValue(R"(2 \ge 1)", true);
 }
 
 TEST_F(UTASTInterpreter, LogicOperations) {
-	ExpectValue(R"(\neg 1=2)", true);
-	ExpectValue(R"(\neg 1=1)", false);
+	ExpectValue(R"(\neg 1 \eq 2)", true);
+	ExpectValue(R"(\neg 1 \eq 1)", false);
 
-	ExpectValue(R"(1=1 && 1=1)", true);
-	ExpectValue(R"(1=2 && 1=1)", false);
-	ExpectValue(R"(1=1 && 1=2)", false);
-	ExpectValue(R"(1=2 && 1=2)", false);
+	ExpectValue(R"(1 \eq 1 \and 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 2 \and 1 \eq 1)", false);
+	ExpectValue(R"(1 \eq 1 \and 1 \eq 2)", false);
+	ExpectValue(R"(1 \eq 2 \and 1 \eq 2)", false);
 
-	ExpectValue(R"(1=1 || 1=1)", true);
-	ExpectValue(R"(1=2 || 1=1)", true);
-	ExpectValue(R"(1=1 || 1=2)", true);
-	ExpectValue(R"(1=2 || 1=2)", false);
+	ExpectValue(R"(1 \eq 1 \or 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 2 \or 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 1 \or 1 \eq 2)", true);
+	ExpectValue(R"(1 \eq 2 \or 1 \eq 2)", false);
 
-	ExpectValue(R"(1=1 => 1=1)", true);
-	ExpectValue(R"(1=2 => 1=1)", true);
-	ExpectValue(R"(1=1 => 1=2)", false);
-	ExpectValue(R"(1=2 => 1=2)", true);
+	ExpectValue(R"(1 \eq 1 \impl 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 2 \impl 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 1 \impl 1 \eq 2)", false);
+	ExpectValue(R"(1 \eq 2 \impl 1 \eq 2)", true);
 
-	ExpectValue(R"(1=1 <=> 1=1)", true);
-	ExpectValue(R"(1=2 <=> 1=1)", false);
-	ExpectValue(R"(1=1 <=> 1=2)", false);
-	ExpectValue(R"(1=2 <=> 1=2)", true);
+	ExpectValue(R"(1 \eq 1 \equiv 1 \eq 1)", true);
+	ExpectValue(R"(1 \eq 2 \equiv 1 \eq 1)", false);
+	ExpectValue(R"(1 \eq 1 \equiv 1 \eq 2)", false);
+	ExpectValue(R"(1 \eq 2 \equiv 1 \eq 2)", true);
 }
 
 TEST_F(UTASTInterpreter, Quantifier) {
-	ExpectValue(R"(\A a \in X1 a=a)", true);
-	ExpectValue(R"(\A a \in X1 a!=a)", false);
-	ExpectValue(R"(\A a \in (X1 \setminus X1) a=a)", true);
-	ExpectValue(R"(\A a \in (X1 \setminus X1) a!=a)", true);
+	ExpectValue(R"(\A a \in X1 a \eq a)", true);
+	ExpectValue(R"(\A a \in X1 a \noteq a)", false);
+	ExpectValue(R"(\A a \in (X1 \setminus X1) a \eq a)", true);
+	ExpectValue(R"(\A a \in (X1 \setminus X1) a \noteq a)", true);
 	ExpectValue(R"(\A a \in X1 a \in S1)", false);
 
-	ExpectValue(R"(\E a \in X1 a=a)", true);
-	ExpectValue(R"(\E a \in X1 a!=a)", false);
-	ExpectValue(R"(\E a \in (X1 \setminus X1) a=a)", false);
-	ExpectValue(R"(\E a \in (X1 \setminus X1) a!=a)", false);
+	ExpectValue(R"(\E a \in X1 a \eq a)", true);
+	ExpectValue(R"(\E a \in X1 a \noteq a)", false);
+	ExpectValue(R"(\E a \in (X1 \setminus X1) a \eq a)", false);
+	ExpectValue(R"(\E a \in (X1 \setminus X1) a \noteq a)", false);
 	ExpectValue(R"(\E a \in X1 a \in S1)", true);
 
-	ExpectValue(R"(\A a,b \in X1 a=b)", false);
-	ExpectValue(R"(\E a,b \in X1 a=b)", true);
-	ExpectValue(R"(\A a \in X1 \E b \in X1 a=b)", true);
-	ExpectValue(R"(\A (a,b) \in S3 (a \in X1 && b \in X2))", true);
+	ExpectValue(R"(\A a,b \in X1 a \eq b)", false);
+	ExpectValue(R"(\E a,b \in X1 a \eq b)", true);
+	ExpectValue(R"(\A a \in X1 \E b \in X1 a \eq b)", true);
+	ExpectValue(R"(\A (a,b) \in S3 (a \in X1 \and b \in X2))", true);
 
-	ExpectValue(R"(debool({X1})=X1)", true);
-	ExpectValue(R"(\A a \in X1 debool({a})=a)", true);
-	ExpectValue(R"(\A a \in X1*X1 debool({a})=a)", true);
+	ExpectValue(R"(debool({X1}) \eq X1)", true);
+	ExpectValue(R"(\A a \in X1 debool({a}) \eq a)", true);
+	ExpectValue(R"(\A a \in X1*X1 debool({a}) \eq a)", true);
 }
 
 TEST_F(UTASTInterpreter, TypedPredicates) {
-	ExpectValue(R"(X1 = X1)", true);
-	ExpectValue(R"(X1 = S1)", false);
-	ExpectValue(R"(S1 = X1)", false);
+	ExpectValue(R"(X1 \eq X1)", true);
+	ExpectValue(R"(X1 \eq S1)", false);
+	ExpectValue(R"(S1 \eq X1)", false);
 
-	ExpectValue(R"(X1 = {})", false);
+	ExpectValue(R"(X1 \eq {})", false);
 
-	ExpectValue(R"(X1 != X1)", false);
-	ExpectValue(R"(X1 != S1)", true);
-	ExpectValue(R"(S1 != X1)", true);
+	ExpectValue(R"(X1 \noteq X1)", false);
+	ExpectValue(R"(X1 \noteq S1)", true);
+	ExpectValue(R"(S1 \noteq X1)", true);
 
 	ExpectValue(R"(X1 \in S2)", true);
 	ExpectValue(R"(S1 \in S2)", false);
@@ -285,18 +284,18 @@ TEST_F(UTASTInterpreter, TypedExpressions) {
 	ExpectValue(R"(Fi1[X1 \setminus X1](S3))", Factory::EmptySet());
 	ExpectValue(R"(Fi1[X1](S3 \setminus S3))", Factory::EmptySet());
 
-	ExpectValue(CreateFilter(R"(X1)", "t=t"), data.at("X1"));
-	ExpectValue(CreateFilter(R"(X1 \setminus X1)", "t=t"), Factory::EmptySet());
-	ExpectValue(CreateFilter(R"(B(X1) \setminus B(X1))", "t=t"), Factory::EmptySet());
+	ExpectValue(CreateFilter(R"(X1)", R"(t \eq t)"), data.at("X1"));
+	ExpectValue(CreateFilter(R"(X1 \setminus X1)", R"(t \eq t)"), Factory::EmptySet());
+	ExpectValue(CreateFilter(R"(B(X1) \setminus B(X1))", R"(t \eq t)"), Factory::EmptySet());
 
-	ExpectValue(R"(D{a \in X1 | 1=1})", data.at("X1"));
-	ExpectValue(R"(D{a \in X1 | a!=a})", Factory::EmptySet());
+	ExpectValue(R"(D{a \in X1 | 1 \eq 1})", data.at("X1"));
+	ExpectValue(R"(D{a \in X1 | a \noteq a})", Factory::EmptySet());
 
-	ExpectValue(R"(I{(a,b) | a \from X1; b:=a; b!=a})", Factory::EmptySet());
+	ExpectValue(R"(I{(a,b) | a \from X1; b \assign a; b \noteq a})", Factory::EmptySet());
 	ExpectValue(R"(I{a | a \from X1})", data.at("X1"));
 
-	ExpectValue(R"(R{a:=X1 | a \setminus a})", Factory::EmptySet());
-	ExpectValue(R"(R{a:=X1 \setminus X1 | a \union X1})", data.at("X1"));
+	ExpectValue(R"(R{a \assign X1 | a \setminus a})", Factory::EmptySet());
+	ExpectValue(R"(R{a \assign X1 \setminus X1 | a \union X1})", data.at("X1"));
 }
 
 TEST_F(UTASTInterpreter, Function) {
@@ -306,25 +305,25 @@ TEST_F(UTASTInterpreter, Function) {
 }
 
 TEST_F(UTASTInterpreter, GlobalDeclaration) {
-	ExpectValue(R"(D1:==X1 \setminus X1)", Factory::EmptySet());
-	ExpectValue(R"(A1:==1=1)", true);
+	ExpectValue(R"(D1 \defexpr X1 \setminus X1)", Factory::EmptySet());
+	ExpectValue(R"(A1 \defexpr 1 \eq 1)", true);
 }
 
 TEST_F(UTASTInterpreter, ErrorsGlobalID) {
 	ExpectError(R"(X1 \setminus D1)", ValueEID::globalMissingValue, 13);
 	ExpectError(R"(D1 \setminus X1)", ValueEID::globalMissingValue, 0);
-	ExpectError(R"(\neg D1 \setminus X1=X1)", ValueEID::globalMissingValue, 5);
+	ExpectError(R"(\neg D1 \setminus X1 \eq X1)", ValueEID::globalMissingValue, 5);
 
-	ExpectError(R"(card(D1)=1)", ValueEID::globalMissingValue, 5);
-	ExpectError(R"(1=card(D1))", ValueEID::globalMissingValue, 7);
-	ExpectError(R"(card(D1)+1)", ValueEID::globalMissingValue, 5);
-	ExpectError(R"(1+card(D1))", ValueEID::globalMissingValue, 7);
-	ExpectError(R"(card(D1)>1)", ValueEID::globalMissingValue, 5);
-	ExpectError(R"(1>card(D1))", ValueEID::globalMissingValue, 7);
-	ExpectError(R"(card(D1)=1 && 1=1)", ValueEID::globalMissingValue, 5);
-	ExpectError(R"(1=1 && card(D1)=1)", ValueEID::globalMissingValue, 12);
+	ExpectError(R"(card(D1) \eq 1)", ValueEID::globalMissingValue, 5);
+	ExpectError(R"(1 \eq card(D1))", ValueEID::globalMissingValue, 11);
+	ExpectError(R"(card(D1) \plus 1)", ValueEID::globalMissingValue, 5);
+	ExpectError(R"(1 \plus card(D1))", ValueEID::globalMissingValue, 13);
+	ExpectError(R"(card(D1) \gr 1)", ValueEID::globalMissingValue, 5);
+	ExpectError(R"(1 \gr card(D1))", ValueEID::globalMissingValue, 11);
+	ExpectError(R"(card(D1) \eq 1 \and 1 \eq 1)", ValueEID::globalMissingValue, 5);
+	ExpectError(R"(1 \eq 1 \and card(D1) \eq 1)", ValueEID::globalMissingValue, 18);
 
-	ExpectError(R"(\A a \in D1 a = a)", ValueEID::globalMissingValue, 9);
+	ExpectError(R"(\A a \in D1 a  \eq  a)", ValueEID::globalMissingValue, 9);
 	ExpectError(R"(\A a \in X1 a \in D1)", ValueEID::globalMissingValue, 18);
 
 	ExpectError(R"(X1*D1)", ValueEID::globalMissingValue, 3);
@@ -339,38 +338,38 @@ TEST_F(UTASTInterpreter, ErrorsGlobalID) {
 
 	ExpectError(R"({ D1 })", ValueEID::globalMissingValue, 2);
 	ExpectError(R"((D1, X1))", ValueEID::globalMissingValue, 1);
-	ExpectError(CreateFilter("D1", R"(t=t)"), ValueEID::globalMissingValue, 8);
+	ExpectError(CreateFilter("D1", R"(t \eq t)"), ValueEID::globalMissingValue, 8);
 	ExpectError(CreateFilter("X1", R"(t \in D1)"), ValueEID::globalMissingValue, 19);
 
-	ExpectError(R"(D{a \in D1 | a=X1})", ValueEID::globalMissingValue, 8);
-	ExpectError(R"(D{a \in X1 | a=D1})", ValueEID::globalMissingValue, 15);
+	ExpectError(R"(D{a \in D1 | a \eq X1})", ValueEID::globalMissingValue, 8);
+	ExpectError(R"(D{a \in X1 | a \eq D1})", ValueEID::globalMissingValue, 19);
 
-	ExpectError(R"(R{a:=D1 | a \union X1})", ValueEID::globalMissingValue, 5);
-	ExpectError(R"(R{a:=X1 | a \union D1})", ValueEID::globalMissingValue, 19);
-	ExpectError(R"(R{a:=X1 | 1=1 | a \union D1})", ValueEID::globalMissingValue, 25);
-	ExpectError(R"(R{a:=X1 | D1=D1 | a \union X1})", ValueEID::globalMissingValue, 10);
+	ExpectError(R"(R{a \assign D1 | a \union X1})", ValueEID::globalMissingValue, 12);
+	ExpectError(R"(R{a \assign X1 | a \union D1})", ValueEID::globalMissingValue, 26);
+	ExpectError(R"(R{a \assign X1 | 1 \eq 1 | a \union D1})", ValueEID::globalMissingValue, 36);
+	ExpectError(R"(R{a \assign X1 | D1 \eq D1 | a \union X1})", ValueEID::globalMissingValue, 17);
 
-	ExpectError(R"(I{(a,b) | a \from D1; b:=a; b!=a})", ValueEID::globalMissingValue, 18);
-	ExpectError(R"(I{(a,b) | a \from X1; b:=a; b!=D1})", ValueEID::globalMissingValue, 31);
-	ExpectError(R"(I{(a,b) | a \from X1; b:=D1; b!=a})", ValueEID::globalMissingValue, 25);
+	ExpectError(R"(I{(a,b) | a \from D1; b \assign a; b \noteq a})", ValueEID::globalMissingValue, 18);
+	ExpectError(R"(I{(a,b) | a \from X1; b \assign a; b \noteq D1})", ValueEID::globalMissingValue, 44);
+	ExpectError(R"(I{(a,b) | a \from X1; b \assign D1; b \noteq a})", ValueEID::globalMissingValue, 32);
 }
 
 TEST_F(UTASTInterpreter, ErrorsPopup) {
 	ExpectError(R"(debool(X1))", ValueEID::invalidDebool, 0);
 
 	ExpectError(R"(card({debool(X1)}))", ValueEID::invalidDebool, 6);
-	ExpectError(R"(card({debool(X1)})+1)", ValueEID::invalidDebool, 6);
-	ExpectError(R"(1+card({debool(X1)}))", ValueEID::invalidDebool, 8);
+	ExpectError(R"(card({debool(X1)}) \plus 1)", ValueEID::invalidDebool, 6);
+	ExpectError(R"(1 \plus card({debool(X1)}))", ValueEID::invalidDebool, 14);
 
-	ExpectError(R"(\A a \in X1 {debool(X1)}=X1)", ValueEID::invalidDebool, 13);
-	ExpectError(R"(\A a \in {debool(X1)} 1=1)", ValueEID::invalidDebool, 10);
+	ExpectError(R"(\A a \in X1 {debool(X1)} \eq X1)", ValueEID::invalidDebool, 13);
+	ExpectError(R"(\A a \in {debool(X1)} 1 \eq 1)", ValueEID::invalidDebool, 10);
 
-	ExpectError(R"(\neg {debool(X1)}=X1)", ValueEID::invalidDebool, 6);
-	ExpectError(R"({debool(X1)}=X1 && 1=1)", ValueEID::invalidDebool, 1);
-	ExpectError(R"(1=1 && {debool(X1)}=X1)", ValueEID::invalidDebool, 8);
+	ExpectError(R"(\neg {debool(X1)} \eq X1)", ValueEID::invalidDebool, 6);
+	ExpectError(R"({debool(X1)} \eq X1 \and 1 \eq 1)", ValueEID::invalidDebool, 1);
+	ExpectError(R"(1 \eq 1 \and {debool(X1)} \eq X1)", ValueEID::invalidDebool, 14);
 
-	ExpectError(R"({debool(X1)}=X1)", ValueEID::invalidDebool, 1);
-	ExpectError(R"(X1={debool(X1)})", ValueEID::invalidDebool, 4);
+	ExpectError(R"({debool(X1)} \eq X1)", ValueEID::invalidDebool, 1);
+	ExpectError(R"(X1 \eq {debool(X1)})", ValueEID::invalidDebool, 8);
 	ExpectError(R"(B({debool(X1)}))", ValueEID::invalidDebool, 3);
 	ExpectError(R"((X1, debool(X1)))", ValueEID::invalidDebool, 5);
 	ExpectError(R"({X1, {debool(X1)}})", ValueEID::invalidDebool, 6);
@@ -385,21 +384,21 @@ TEST_F(UTASTInterpreter, ErrorsPopup) {
 	ExpectError(R"(red({{debool(X1)}}))", ValueEID::invalidDebool, 6);
 	ExpectError(R"(bool(debool(X1)))", ValueEID::invalidDebool, 5);
 
-	ExpectError(R"(D{a \in {debool(X1)} | a=X1})", ValueEID::invalidDebool, 9);
-	ExpectError(R"(D{a \in X1 | a=debool(X1)})", ValueEID::invalidDebool, 15);
+	ExpectError(R"(D{a \in {debool(X1)} | a \eq X1})", ValueEID::invalidDebool, 9);
+	ExpectError(R"(D{a \in X1 | a \eq debool(X1)})", ValueEID::invalidDebool, 19);
 
-	ExpectError(R"(R{a:=debool(X1) | a})", ValueEID::invalidDebool, 5);
-	ExpectError(R"(R{a:=X1 | a \union {debool(X1)}})", ValueEID::invalidDebool, 20);
-	ExpectError(R"(R{a:=X1 | 1=1 | a \union {debool(X1)}})", ValueEID::invalidDebool, 26);
-	ExpectError(R"(R{a:=X1 | debool(X1)=debool(X1) | a \union X1})", ValueEID::invalidDebool, 10);
+	ExpectError(R"(R{a \assign debool(X1) | a})", ValueEID::invalidDebool, 12);
+	ExpectError(R"(R{a \assign X1 | a \union {debool(X1)}})", ValueEID::invalidDebool, 27);
+	ExpectError(R"(R{a \assign X1 | 1 \eq 1 | a \union {debool(X1)}})", ValueEID::invalidDebool, 37);
+	ExpectError(R"(R{a \assign X1 | debool(X1) \eq debool(X1) | a \union X1})", ValueEID::invalidDebool, 17);
 
-	ExpectError(R"(I{(a,b) | a \from {debool(X1)}; b:=a; b!=a})", ValueEID::invalidDebool, 19);
-	ExpectError(R"(I{(a,b) | a \from X1; b:=a; b!=debool(X1)})", ValueEID::invalidDebool, 31);
-	ExpectError(R"(I{(a,b) | a \from X1; b:=debool(X1); b!=a})", ValueEID::invalidDebool, 25);
+	ExpectError(R"(I{(a,b) | a \from {debool(X1)}; b \assign a; b \noteq a})", ValueEID::invalidDebool, 19);
+	ExpectError(R"(I{(a,b) | a \from X1; b \assign a; b \noteq debool(X1)})", ValueEID::invalidDebool, 44);
+	ExpectError(R"(I{(a,b) | a \from X1; b \assign debool(X1); b \noteq a})", ValueEID::invalidDebool, 32);
 
-	ExpectError(R"(X4:==)", ValueEID::unknownError, 0);
-	ExpectError(R"(S4::=B(X1))", ValueEID::unknownError, 0);
-	ExpectError(R"(F1:==[a \in X1] {a})", ValueEID::unknownError, 0);
+	ExpectError(R"(X4 \defexpr )", ValueEID::unknownError, 0);
+	ExpectError(R"(S4 \deftype B(X1))", ValueEID::unknownError, 0);
+	ExpectError(R"(F1 \defexpr [a \in X1] {a})", ValueEID::unknownError, 0);
 }
 
 TEST_F(UTASTInterpreter, ErrorsBoolSetLimit) {
@@ -408,5 +407,5 @@ TEST_F(UTASTInterpreter, ErrorsBoolSetLimit) {
 }
 
 TEST_F(UTASTInterpreter, ErrorsIterateIntegers) {
-	ExpectError(R"(\A a \in Z a=a)", ValueEID::iterateInfinity, 9);
+	ExpectError(R"(\A a \in Z a \eq a)", ValueEID::iterateInfinity, 9);
 }

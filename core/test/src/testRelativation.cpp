@@ -100,21 +100,25 @@ TEST_F(UTRelativation, ExecuteModifyTerm) {
 	const auto& newSchema = *opReturn;
 	ASSERT_TRUE(newSchema.Contains(d1));
 	EXPECT_EQ(newSchema.GetRS(d1).definition,
-						R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 := __base1 \setminus __base1})"_rs);
+						R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 \assign __base1 \setminus __base1})"_rs);
 	EXPECT_EQ(newSchema.GetRS(d2).definition,
-						R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 := F1[__base1, D1] \setminus __base1})"_rs);
+						R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 \assign F1[__base1, D1] \setminus __base1})"_rs);
 	EXPECT_EQ(newSchema.GetRS(newSchema.Core().FindAlias("F1").value()).definition, 
 						"[" + R"(__base1 \in B(X1))"_rs + ", " + R"(__term \in B(B(X1)*R1))"_rs + "] " +
 						R"(debool(Pr2(Fi1[{__base1}](__term))))"_rs);
 }
 
 TEST_F(UTRelativation, ExecuteModifyAxiom) {
-	const auto expectedExpr1 = R"(\A __base1 \in S1 (Pr1(__base1)=X1 && 1=1))"_rs;
-	const auto expectedExpr2 = R"(\A __base1 \in S1 \A a \in __base1 a=a)"_rs; 
+	const auto expectedExpr1 = R"(\A __base1 \in S1 (Pr1(__base1) \eq X1 \and 1 \eq 1))"_rs;
+	const auto expectedExpr2 = R"(\A __base1 \in S1 \A a \in __base1 a \eq a)"_rs;
+
 	SetupMinimalSchema();
 
-	const auto a1 = schema.Emplace(CstType::axiom, R"(Pr1(S1)=X1 && 1=1)"_rs);
-	const auto a2 = schema.Emplace(CstType::axiom, R"(\A a \in S1 a=a)"_rs);
+	const auto a1 = schema.Emplace(CstType::axiom, R"(Pr1(S1) \eq X1 \and 1 \eq 1)"_rs);
+	const auto a2 = schema.Emplace(CstType::axiom, R"(\A a \in S1 a \eq a)"_rs);
+	ASSERT_EQ(schema.GetParse(a1).status, ccl::semantic::ParsingStatus::VERIFIED);
+	ASSERT_EQ(schema.GetParse(a2).status, ccl::semantic::ParsingStatus::VERIFIED);
+
 	const auto opReturn = OpRelativation(schema, s1, { x1, x2 }).Execute();
 	ASSERT_TRUE(opReturn != nullptr);
 	const auto& newSchema = *opReturn;
@@ -125,19 +129,22 @@ TEST_F(UTRelativation, ExecuteModifyAxiom) {
 }
 
 TEST_F(UTRelativation, ExecuteModifyFunction) {
-	const auto funcExpr = "[" + R"(a \in B(X1))"_rs + "] " + R"(a \setminus X1)"_rs;
+	const auto expectedFunc = R"([__base1 \in B(X1), a \in B(__base1)] a \setminus __base1)"_rs;
+	const auto expectedTerm = R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 \assign F1[__base1, F1[__base1, __base1]]})"_rs;
+	
 	SetupMinimalSchema();
 
-	const auto f1 = schema.Emplace(CstType::function, funcExpr);
+	const auto f1 = schema.Emplace(CstType::function, R"([a \in B(X1)] a \setminus X1)"_rs);
 	const auto d1 = schema.Emplace(CstType::term, "F1[F1[X1]]");
+	ASSERT_EQ(schema.GetParse(f1).status, ccl::semantic::ParsingStatus::VERIFIED);
+	ASSERT_EQ(schema.GetParse(d1).status, ccl::semantic::ParsingStatus::VERIFIED);
+
 	const auto opReturn = OpRelativation(schema, x1, { s1, x2 }).Execute();
 	ASSERT_TRUE(opReturn != nullptr);
 	const auto& newSchema = *opReturn;
 	ASSERT_TRUE(newSchema.Contains(f1));
-	EXPECT_EQ(newSchema.GetRS(f1).definition,
-						"[" + R"(__base1 \in B(X1))"_rs + ", " + R"(a \in B(__base1))"_rs + "] " + R"(a \setminus __base1)"_rs);
-	EXPECT_EQ(newSchema.GetRS(d1).definition,
-						R"(I{(__base1, __rt1) | __base1 \from S2; __rt1 := F1[__base1, F1[__base1, __base1]]})"_rs);
+	EXPECT_EQ(newSchema.GetRS(f1).definition, expectedFunc);
+	EXPECT_EQ(newSchema.GetRS(d1).definition, expectedTerm);
 }
 
 TEST_F(UTRelativation, ExecuteKeepIgnored) {

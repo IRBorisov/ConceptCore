@@ -21,9 +21,6 @@
     <ClCompile Include="src\testRSGenerator.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\testRSLexer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\testRSToken.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -61,6 +58,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\testLiterals.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testMathLexer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testParser.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,7 @@
 //! Unity build for RSlang
 
 #include "../src/AsciiLexer.cpp"
+#include "../src/MathLexer.cpp"
 #include "../src/ASTInterpreter.cpp"
 #include "../src/ASTNormalizer.cpp"
 #include "../src/GeneratorImplAST.cpp"

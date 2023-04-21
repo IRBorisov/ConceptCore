@@ -7,7 +7,7 @@ namespace ccl::semantic {
 
 rsCalculationFacet::rsCalculationFacet(RSModel& core)
 	: meta::MutatorFacet<RSModel>(core) {
-	calculator = std::make_unique<rslang::Interpreter<>>(core.RSLang(), core.RSLang().ASTContext(), Context());
+	calculator = std::make_unique<rslang::Interpreter>(core.RSLang(), core.RSLang().ASTContext(), Context());
 }
 
 rslang::DataContext rsCalculationFacet::Context() const {
@@ -84,7 +84,8 @@ bool rsCalculationFacet::CalculateCstInternal(const EntityUID target) {
 	const auto expression = Generator::GlobalDefinition(cst.alias, cst.definition,
 																											cst.type == CstType::structured);
 	calculatedEntities.emplace(target);
-	if (const auto calcResult = calculator->Evaluate(expression); !calcResult.has_value()) {
+	if (const auto calcResult = calculator->Evaluate(expression, rslang::Syntax::MATH);
+			!calcResult.has_value()) {
 		return false;
 	} else {
 		if (IsRSObject(cst.type)) {

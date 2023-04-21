@@ -5,8 +5,7 @@
 #include "FakeRSEnvironment.hpp"
 
 #include "ccl/rslang/RSGenerator.h"
-#include "ccl/rslang/RSParser.h"
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/Parser.h"
 
 using ccl::operator""_c17;
 
@@ -17,8 +16,7 @@ protected:
 	using TypedID = ccl::rslang::TypedID;
 	using FunctionArguments = ccl::rslang::FunctionArguments;
 	using AST2String = ccl::rslang::AST2String;
-	using RSParser = ccl::rslang::RSParser;
-	using RSLexer = ccl::rslang::RSLexer;
+	using Parser = ccl::rslang::Parser;
 	using Syntax = ccl::rslang::Syntax;
 
 protected:
@@ -34,13 +32,13 @@ void UTRSGenerator::SetupEnvironment() {
 }
 
 void UTRSGenerator::ExpectASTGeneration(const std::string& input, const std::string& output) const {
-	RSParser parser{};
-	ASSERT_TRUE(parser.Parse(RSLexer{input}.Stream())) << input;
+	Parser parser{};
+	ASSERT_TRUE(parser.Parse(input, Syntax::MATH)) << input;
 	const auto ast = parser.ExtractAST();
 	const auto generated = Generator::FromTree(*ast);
 	EXPECT_EQ(generated, output) << input;
 
-	ASSERT_TRUE(parser.Parse(RSLexer{ generated }.Stream())) << generated << " from " << input;
+	ASSERT_TRUE(parser.Parse(generated, Syntax::MATH)) << generated << " from " << input;
 	EXPECT_EQ(AST2String::Apply(*ast), AST2String::Apply(parser.AST())) << input << R"( != )" << generated;
 }
 
@@ -261,12 +259,12 @@ TEST_F(UTRSGenerator, GenerateStructure) {
 TEST_F(UTRSGenerator, Ascii2RS) {
 	using ccl::rslang::ConvertTo;
 
-	EXPECT_EQ(ConvertTo(R"(S1 \in B(X1))", Syntax::RSLANG), u8"S1\u2208\u212C(X1)"_c17);
-	EXPECT_EQ(ConvertTo("B(Y*(X1*X2)*BB(X3))", Syntax::RSLANG),
+	EXPECT_EQ(ConvertTo(R"(S1 \in B(X1))", Syntax::MATH), u8"S1\u2208\u212C(X1)"_c17);
+	EXPECT_EQ(ConvertTo("B(Y*(X1*X2)*BB(X3))", Syntax::MATH),
 						u8"\u212C(Y\u00D7(X1\u00D7X2)\u00D7\u212C\u212C(X3))"_c17);
 
-	EXPECT_EQ(ConvertTo("  X1  ", Syntax::RSLANG), "X1");
-	EXPECT_EQ(ConvertTo("a,?b", Syntax::RSLANG), "a,?b");
+	EXPECT_EQ(ConvertTo("  X1  ", Syntax::MATH), "X1");
+	EXPECT_EQ(ConvertTo("a,?b", Syntax::MATH), "a,?b");
 }
 
 TEST_F(UTRSGenerator, RS2Ascii) {

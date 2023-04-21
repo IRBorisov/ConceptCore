@@ -28,10 +28,10 @@ class SyntaxTree {
 public:
 	class Cursor;
 	class Node;
-	using NodePtr = meta::UniqueCPPtr<Node>;
+	using RawNode = meta::UniqueCPPtr<Node>;
 
 private:
-	NodePtr root;
+	RawNode root;
 
 public:
 	~SyntaxTree() noexcept = default;
@@ -40,7 +40,7 @@ public:
 	SyntaxTree(SyntaxTree&&) noexcept = default;
 	SyntaxTree& operator=(SyntaxTree&&) noexcept = default;
 
-	explicit SyntaxTree(NodePtr root) noexcept
+	explicit SyntaxTree(RawNode root) noexcept
 		: root{ std::move(root) } {
 		assert(this->root != nullptr);
 	}
@@ -63,7 +63,7 @@ public:
 
 	private:
 		const Node* parent{ nullptr };
-		std::vector<NodePtr> children{};
+		std::vector<RawNode> children{};
 	public:
 		Token token{};
 
@@ -84,14 +84,14 @@ public:
 
 		//! Add child by consuming son
 		/// Contract: son != nullptr
-		void AdoptChild(NodePtr son);
+		void AdoptChild(RawNode son);
 
 		//! Create intermediate node between this and child this(index) 
 		/// Contract: index should be in bounds
 		void ExtendChild(Index index, TokenID tid);
 
 		void RemoveChild(Index index) noexcept;
-		NodePtr ExtractChild(Index index);
+		RawNode ExtractChild(Index index);
 		void RemoveAll() noexcept;
 
 		//! \defgroup ASTNodeChildAccess Accessors for child nodes
@@ -151,9 +151,14 @@ public:
 			case TokenID::ID_RADICAL:
 				assert(ChildrenCount() == 0);
 				return visitor.ViGlobal(*this);
-			case TokenID::NT_GLOBAL_CALL:
+
+			case TokenID::NT_FUNC_DEFINITION:
+				assert(ChildrenCount() == 2);
+				return visitor.ViFunctionDefinition(*this);
+			case TokenID::NT_FUNC_CALL:
 				assert(ChildrenCount() > 1);
 				return visitor.ViFunctionCall(*this);
+
 			case TokenID::ID_LOCAL:
 				assert(ChildrenCount() == 0);
 				return visitor.ViLocal(*this);
@@ -174,7 +179,7 @@ public:
 				return visitor.ViLocalBind(*this);
 			case TokenID::NT_ENUM_DECL:
 				return visitor.ViLocalEnum(*this);
-			case TokenID::NT_ARG_TYPES_ENUM:
+			case TokenID::NT_ARGUMENTS:
 				assert(ChildrenCount() > 0);
 				return visitor.ViArgumentsEnum(*this);
 			case TokenID::NT_ARG_DECL:
@@ -316,6 +321,7 @@ protected:
 private:
 	bool ViGlobalDefinition(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
+	bool ViFunctionDefinition(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 	bool ViFunctionCall(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
 	bool ViGlobal(Cursor iter) { return this->BaseT().VisitDefault(iter); }

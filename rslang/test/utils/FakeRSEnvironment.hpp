@@ -8,7 +8,7 @@
 #include "ccl/rslang/ValueClass.hpp"
 #include "ccl/rslang/DataContext.hpp"
 #include "ccl/rslang/SyntaxTree.h"
-#include "ccl/rslang/Interpreter.hpp"
+#include "ccl/rslang/Interpreter.h"
 #include "ccl/rslang/Literals.h"
 
 using ccl::rslang::operator""_rs;
@@ -18,8 +18,8 @@ class RSEnvironment final : public ccl::rslang::TypeContext {
 	using DataContext = ccl::rslang::DataContext;
 	using SyntaxTree = ccl::rslang::SyntaxTree;
 	using StructuredData = ccl::object::StructuredData;
-	using AsciiLexer = ccl::rslang::AsciiLexer;
-	using RSParser = ccl::rslang::RSParser;
+	using AsciiLexer = ccl::rslang::detail::AsciiLexer;
+	using RSParser = ccl::rslang::detail::RSParser;
 	using ValueClass = ccl::rslang::ValueClass;
 	using ValueClassContext = ccl::rslang::ValueClassContext;
 	using SyntaxTreeContext = ccl::rslang::SyntaxTreeContext;
@@ -45,8 +45,9 @@ public:
 	std::unordered_map<std::string, Element> data{};
 
 public:
-	void Insert(const std::string& globalName, const ExpressionType type) {
+	void Insert(const std::string& globalName, const ExpressionType type, const ValueClass valueClass = ValueClass::value) {
 		data[globalName].type = type;
+		data[globalName].valueClass = valueClass;
 	}
 	void InsertBase(const std::string& globalName) {
 		Insert(globalName, Typification(globalName).Bool());

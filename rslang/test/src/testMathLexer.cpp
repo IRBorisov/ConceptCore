@@ -1,21 +1,21 @@
 #include "LexerTester.hpp"
 
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/MathLexer.h"
 
 #include <climits>
 
 using ccl::operator""_c17;
 
-class UTRSLexer : public LexerTester<ccl::rslang::RSLexer> {
+class UTMathLexer : public LexerTester<ccl::rslang::detail::MathLexer> {
 protected:
 	using LexerEID = ccl::rslang::LexerEID;
-	using RSLexer = ccl::rslang::RSLexer;
+	using MathLexer = ccl::rslang::detail::MathLexer;
 
 protected:
 	void ExpectError(const std::string& input, const LexerEID id, ccl::StrPos pos);
 };
 
-void UTRSLexer::ExpectError(const std::string& input, const LexerEID id, const ccl::StrPos pos) {
+void UTMathLexer::ExpectError(const std::string& input, const LexerEID id, const ccl::StrPos pos) {
 	log.Clear();
 	curToken = lex(input).Stream()();
 	ASSERT_FALSE(empty(log.All()));
@@ -23,12 +23,12 @@ void UTRSLexer::ExpectError(const std::string& input, const LexerEID id, const c
 	EXPECT_EQ(pos, log.FirstErrorPos()) << input;
 }
 
-TEST_F(UTRSLexer, DefaultConstruct) {
-	RSLexer newLex{};
+TEST_F(UTMathLexer, DefaultConstruct) {
+	MathLexer newLex{};
 	EXPECT_EQ(newLex.LastID(), TokenID::INTERRUPT);
 }
 
-TEST_F(UTRSLexer, BasicInterface) {
+TEST_F(UTMathLexer, BasicInterface) {
 	EXPECT_EQ(lex({}).lex(), TokenID::END);
 	EXPECT_EQ(lex("X1").lex(), TokenID::ID_GLOBAL);
 	EXPECT_EQ(lex.LastID(), TokenID::ID_GLOBAL);
@@ -37,7 +37,7 @@ TEST_F(UTRSLexer, BasicInterface) {
 	EXPECT_EQ(lex.ParseData().ToText(), "X1");
 }
 
-TEST_F(UTRSLexer, Positions) {
+TEST_F(UTMathLexer, Positions) {
 	EXPECT_EQ(lex(u8"\u212CX1"_c17).lex(), TokenID::BOOLEAN);
 	EXPECT_EQ(lex.Range(), StrRange(0, 1));
 	EXPECT_EQ(lex.RangeInBytes(), StrRange(0, 3));
@@ -46,7 +46,7 @@ TEST_F(UTRSLexer, Positions) {
 	EXPECT_EQ(lex.RangeInBytes(), StrRange(3, 5));
 }
 
-TEST_F(UTRSLexer, SingleSymbol) {
+TEST_F(UTMathLexer, SingleSymbol) {
 	TestSingle("(", TokenID::PUNC_PL);
 	TestSingle(")", TokenID::PUNC_PR);
 	TestSingle("{", TokenID::PUNC_CL);
@@ -97,7 +97,7 @@ TEST_F(UTRSLexer, SingleSymbol) {
 	TestSingle("::=", TokenID::PUNC_STRUCT);
 }
 
-TEST_F(UTRSLexer, SpecialSymbols) {
+TEST_F(UTMathLexer, SpecialSymbols) {
 	TestToken("", TokenID::END);
 	TestToken("'", TokenID::INTERRUPT);
 	TestToken("?", TokenID::INTERRUPT);
@@ -105,7 +105,7 @@ TEST_F(UTRSLexer, SpecialSymbols) {
 	TestToken(u8":\u2282"_c17, TokenID::INTERRUPT);
 }
 
-TEST_F(UTRSLexer, GlobalID) {
+TEST_F(UTMathLexer, GlobalID) {
 	TestText("X1", TokenID::ID_GLOBAL);
 	EXPECT_TRUE(curToken.data.HasValue());
 	TestPosition("X1", TokenID::ID_GLOBAL, StrRange{0, 2});
@@ -120,7 +120,7 @@ TEST_F(UTRSLexer, GlobalID) {
 	TestText("R1", TokenID::ID_RADICAL);
 }
 
-TEST_F(UTRSLexer, LocalID) {
+TEST_F(UTMathLexer, LocalID) {
 	TestText("a", TokenID::ID_LOCAL);
 	EXPECT_TRUE(curToken.data.HasValue());
 
@@ -136,7 +136,7 @@ TEST_F(UTRSLexer, LocalID) {
 	TestText("__variable__", TokenID::ID_LOCAL);
 }
 
-TEST_F(UTRSLexer, TextOperator) {
+TEST_F(UTMathLexer, TextOperator) {
 	TestSingle("red", TokenID::REDUCE);
 	TestSingle("R", TokenID::RECURSIVE);
 	TestSingle("I", TokenID::IMPERATIVE);
@@ -150,7 +150,7 @@ TEST_F(UTRSLexer, TextOperator) {
 	TestSingle("brol", TokenID::ID_LOCAL);
 }
 
-TEST_F(UTRSLexer, StructureManipulation) {
+TEST_F(UTMathLexer, StructureManipulation) {
 	TestTuple("Pr1", TokenID::BIGPR, { 1 });
 	TestTuple("pr1,20,3", TokenID::SMALLPR, { 1, 20, 3 });
 	TestTuple("Fi1,3", TokenID::FILTER, { 1, 3 });
@@ -161,14 +161,14 @@ TEST_F(UTRSLexer, StructureManipulation) {
 	TestSingle("po1", TokenID::ID_LOCAL);
 }
 
-TEST_F(UTRSLexer, Integer) {
+TEST_F(UTMathLexer, Integer) {
 	EXPECT_EQ(lex("123").lex(), TokenID::LIT_INTEGER);
 	EXPECT_EQ(lex.ParseData().ToInt(), 123);
 	lex("42").lex();
 	EXPECT_EQ(lex.ParseData().ToInt(), 42);
 }
 
-TEST_F(UTRSLexer, ReadMultipleTokens) {
+TEST_F(UTMathLexer, ReadMultipleTokens) {
 	const std::string input{ "X1 1 Pr1(a)" };
 	lex.SetInput(input);
 	ExpectNextIDPos(TokenID::ID_GLOBAL, StrRange{ 0, 2 });
@@ -187,20 +187,20 @@ TEST_F(UTRSLexer, ReadMultipleTokens) {
 	ExpectNextID(TokenID::END);
 }
 
-TEST_F(UTRSLexer, ReadMultipleLastSpace) {
+TEST_F(UTMathLexer, ReadMultipleLastSpace) {
 	const std::string input = "X1 ";
 	lex(input).lex();
 	ExpectNextID(TokenID::END);
 }
 
-TEST_F(UTRSLexer, SkipWhiteSpaces) {
+TEST_F(UTMathLexer, SkipWhiteSpaces) {
 	TestPosition(" X1 ", TokenID::ID_GLOBAL, StrRange{ 1, 3 });
 	TestPosition("  X1 ", TokenID::ID_GLOBAL, StrRange{ 2, 4 });
 	TestPosition("\nX1\n\t", TokenID::ID_GLOBAL, StrRange{ 1, 3 });
 	TestPosition("\tX1", TokenID::ID_GLOBAL, StrRange{ 1, 3 });
 }
 
-TEST_F(UTRSLexer, Errors) {
+TEST_F(UTMathLexer, Errors) {
 	ExpectError("@", LexerEID::unknownSymbol, 0);
 	ExpectError("?", LexerEID::unknownSymbol, 0);
 	ExpectError(":", LexerEID::unknownSymbol, 0);

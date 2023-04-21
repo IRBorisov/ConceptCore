@@ -83,7 +83,7 @@ TEST_F(UTRSWrap, ConvertToMath) {
 TEST_F(UTRSWrap, ConvertToASCII) {
 	TestASCIICall("", "");
 	TestASCIICall("a,?b", "a,?b");
-	TestASCIICall("1+1=2", "1+1=2");
+	TestASCIICall("1+1=2", R"(1 \plus 1 \eq 2)");
 	TestASCIICall("B(X1*X2)"_rs, "B(X1*X2)");
 	TestASCIICall("   X1   ", "X1");
 	TestASCIICall(u8"S1\u2208\u212C(X1)"_c17, R"(S1 \in B(X1))");
@@ -94,5 +94,5 @@ TEST_F(UTRSWrap, ASTString) {
 	TestASTCall("a,?b", "INVALID_INPUT");
 	TestASTCall("1+1=2", "[=[+[1][1]][2]]");
 	TestASTCall("B(X1*X2)", u8"[\u212C[\u00D7[X1][X2]]]"_c17);
-	TestASTCall(R"(\A a \in X1 1=2)", u8"[\u2200[a][X1][=[1][2]]]"_c17);
+	TestASTCall(R"(\A a \in X1 1 \eq 2)", u8"[\u2200[a][X1][=[1][2]]]"_c17);
 }

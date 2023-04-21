@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ccl/rslang/Auditor.hpp"
+#include "ccl/rslang/Auditor.h"
 #include "ccl/rslang/SyntaxTree.h"
 #include "ccl/semantic/RSConcept.h"
 #include "ccl/graph/CGraph.h"
@@ -49,9 +49,9 @@ class Schema final : public rslang::TypeContext {
 	std::unordered_map<EntityUID, ParsingInfo> info{};
 	mutable graph::UpdatableGraph graph;
 
-	// Note: Auditor should be created last because its needs context references
-	using RSAuditor = std::unique_ptr<rslang::Auditor<>>;
-	mutable RSAuditor auditor{ std::make_unique<rslang::Auditor<>>(*this, VCContext(), ASTContext()) };
+	// Note: Auditor should be created last because it needs context references
+	using RSAuditor = std::unique_ptr<rslang::Auditor>;
+	mutable RSAuditor auditor{ std::make_unique<rslang::Auditor>(*this, VCContext(), ASTContext()) };
 
 public:
 	~Schema() noexcept final = default;
@@ -104,10 +104,7 @@ public:
 	[[nodiscard]] static bool CheckTypeConstistency(const rslang::ExpressionType& type, CstType cstType) noexcept;
 	[[nodiscard]] std::optional<rslang::ExpressionType> Evaluate(const std::string& input) const;
 
-	template<typename Lexer = rslang::RSLexer>
-	[[nodiscard]] std::unique_ptr<rslang::Auditor<Lexer>> MakeAuditor() const {
-		return std::make_unique<rslang::Auditor<Lexer>>(*this, VCContext(), ASTContext());
-	}
+	[[nodiscard]] std::unique_ptr<rslang::Auditor> MakeAuditor() const;
 
 	void UpdateState();
 

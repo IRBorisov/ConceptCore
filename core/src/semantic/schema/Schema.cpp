@@ -298,7 +298,8 @@ void Schema::Erase(const EntityUID target)	{
 	UpdateState();
 }
 
-const rslang::ExpressionType* Schema::TypeFor(const std::string& globalName) const {
+const rslang::ExpressionType*
+Schema::TypeFor(const std::string& globalName) const {
 	if (const auto uid = FindAlias(globalName); 
 			!uid.has_value() || !info.at(uid.value()).exprType.has_value()) {
 		return nullptr;
@@ -307,7 +308,8 @@ const rslang::ExpressionType* Schema::TypeFor(const std::string& globalName) con
 		return &info.at(uid.value()).exprType.value();
 	}
 }
-const rslang::FunctionArguments* Schema::FunctionArgsFor(const std::string& globalName) const {
+const rslang::FunctionArguments*
+Schema::FunctionArgsFor(const std::string& globalName) const {
 	if (const auto uid = FindAlias(globalName); !uid.has_value() || !info.at(uid.value()).arguments.has_value()) {
 		return nullptr;
 	} else {
@@ -316,7 +318,8 @@ const rslang::FunctionArguments* Schema::FunctionArgsFor(const std::string& glob
 	}
 }
 
-std::optional<rslang::TypeTraits> Schema::TraitsFor(const rslang::Typification& type) const {
+std::optional<rslang::TypeTraits>
+Schema::TraitsFor(const rslang::Typification& type) const {
 	if (!type.IsElement()) {
 		return std::nullopt;
 	} else if (type == rslang::Typification::Integer()) {
@@ -352,12 +355,18 @@ rslang::ValueClassContext Schema::VCContext() const {
 	};
 }
 
-std::optional<rslang::ExpressionType> Schema::Evaluate(const std::string& input) const {
-	if (!auditor->CheckType(input)) {
+std::optional<rslang::ExpressionType>
+Schema::Evaluate(const std::string& input) const {
+	if (!auditor->CheckType(input, rslang::Syntax::MATH)) {
 		return std::nullopt;
 	} else {
 		return auditor->GetType();
 	}
+}
+
+[[nodiscard]] std::unique_ptr<rslang::Auditor>
+Schema::MakeAuditor() const {
+	return std::make_unique<rslang::Auditor>(*this, VCContext(), ASTContext());
 }
 
 void Schema::TriggerParse(const EntityUID target) {
@@ -376,7 +385,7 @@ void Schema::ParseCst(const EntityUID target) {
 	const auto& cst = At(target);
 	const auto expr = Generator::GlobalDefinition(cst.alias, cst.definition, cst.type == CstType::structured);
 	const auto isValid = 
-		auditor->CheckType(expr) 
+		auditor->CheckType(expr, rslang::Syntax::MATH) 
 		&& CheckTypeConstistency(auditor->GetType(), cst.type)
 		&& (IsBaseSet(cst.type) == std::empty(cst.definition));
 	
@@ -414,7 +423,7 @@ void Schema::SaveInfoTo(ParsingInfo& out) {
 		out.valueClass = auditor->GetValueClass();
 	}
 	if (auditor->isParsed) {
-		out.ast = auditor->ExtractAST();
+		out.ast = auditor->parser.ExtractAST();
 	}
 }
 

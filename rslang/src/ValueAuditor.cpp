@@ -69,13 +69,10 @@ bool ValueAuditor::AssertAllValues(Cursor iter) {
 bool ValueAuditor::ViGlobalDefinition(Cursor iter) {
 	if (iter->id == TokenID::PUNC_STRUCT) {
 		return VisitChild(iter, 1) && VisitAndReturn(ValueClass::value);
-	} else if (const auto childrenCount = iter.ChildrenCount();
-						 childrenCount == 1) {
+	} else if (iter.ChildrenCount() == 1) {
 		return VisitAndReturn(ValueClass::value);
-	} else if (childrenCount == 2) {
-		return VisitChild(iter, 1);
 	} else {
-		return VisitChild(iter, 1) && VisitChild(iter, 2);
+		return VisitChild(iter, 1);
 	}
 }
 
@@ -115,7 +112,7 @@ bool ValueAuditor::RunCheckOnFunc(Cursor iter,
 	}
 
 	ValueAuditor funcAuditor{ globalClass, globalAST };
-	const auto args = ast->Root().Child(1);
+	const auto args = ast->Root().Child(1).Child(0);
 	assert(args.ChildrenCount() == ssize(argumentVals));
 	for (Index child = 0; child < args.ChildrenCount(); ++child) {
 		if (argumentVals.at(static_cast<size_t>(child)) == ValueClass::props) {
@@ -123,7 +120,7 @@ bool ValueAuditor::RunCheckOnFunc(Cursor iter,
 		}
 	}
 
-	if (!ast->Root().Child(2).DispatchVisit(funcAuditor)) {
+	if (!ast->Root().Child(1).Child(1).DispatchVisit(funcAuditor)) {
 		OnError(SemanticEID::globalFuncNoInterpretation, iter->pos.start);
 		return false;
 	} else {

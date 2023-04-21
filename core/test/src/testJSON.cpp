@@ -162,6 +162,15 @@ TEST_F(UTjson, RSModel) {
 	EXPECT_EQ(restored.Values().StatementFor(a1.uid), initial.Values().StatementFor(a1.uid));
 }
 
+TEST_F(UTjson, RSModelMinimal) {
+	auto json = JSON::parse(R"({"items": [], "data": []})");
+	RSModel restored{};
+	json.get_to(restored);
+	EXPECT_EQ(restored.title, "");
+	EXPECT_EQ(restored.alias, "");
+	EXPECT_EQ(restored.comment, "");
+}
+
 TEST_F(UTjson, RSForm) {
 	RSForm initial{};
 	initial.title = "full";
@@ -190,6 +199,14 @@ TEST_F(UTjson, RSForm) {
 	EXPECT_EQ(restored.GetRS(cst.uid).type, cst.type);
 	EXPECT_EQ(restored.Mods()(cst.uid)->convention, flags.convention);
 	EXPECT_EQ(restored.Mods()(cst.uid)->allowEdit, flags.allowEdit);
+}
+
+TEST_F(UTjson, RSFormMinimal) {
+	auto json = JSON::parse(R"({"items": []})");
+	const auto restored = json.get<RSForm>();
+	EXPECT_EQ(restored.title, "");
+	EXPECT_EQ(restored.alias, "");
+	EXPECT_EQ(restored.comment, "");
 }
 
 TEST_F(UTjson, RSCore) {
@@ -255,6 +272,14 @@ TEST_F(UTjson, ConceptRecord) {
 	EXPECT_EQ(restored.definition.Raw(), initial.definition.Raw());
 }
 
+TEST_F(UTjson, ConceptRecordMinimal) {
+	auto json = JSON::parse(R"({"entityUID": 1, "cstType": "base", "alias": "X1"})");
+	const auto restored = json.get<ConceptRecord>();
+	EXPECT_EQ(restored.uid, 1U);
+	EXPECT_EQ(restored.type, CstType::base);
+	EXPECT_EQ(restored.alias, "X1");
+}
+
 TEST_F(UTjson, TrackingFlags) {
 	TrackingFlags initial{};
 	initial.allowEdit = true;
@@ -283,6 +308,12 @@ TEST_F(UTjson, LexicalTerm) {
 	EXPECT_EQ(restored.GetForm(form), initial.GetForm(form));
 }
 
+TEST_F(UTjson, LexicalTermMinimal) {
+	auto json = JSON::parse(R"({"raw": "test"})");
+	const auto restored = json.get<LexicalTerm>();
+	EXPECT_EQ(restored.Text().Str(), "test");
+}
+
 TEST_F(UTjson, ManagedText) {
 	ManagedText initial{ "Test_raw", "Test_resolved" };
 	const auto json = JSON(initial);
@@ -290,6 +321,13 @@ TEST_F(UTjson, ManagedText) {
 	EXPECT_EQ(restored, initial);
 	EXPECT_EQ(restored.Raw(), initial.Raw());
 	EXPECT_EQ(restored.Str(), initial.Str());
+}
+
+TEST_F(UTjson, ManagedTextMinimal) {
+	auto json = JSON::parse(R"({"raw": "test"})");
+	const auto restored = json.get<ManagedText>();
+	EXPECT_EQ(restored.Raw(), "test");
+	EXPECT_EQ(restored.Str(), "test");
 }
 
 TEST_F(UTjson, SrcHandle) {
@@ -497,7 +535,7 @@ TEST_F(UTjson, SyntaxTree) {
 	SyntaxTree ast{ std::make_unique<Node>(root) };
 
 	JSON jsonAST(ast);
-	ASSERT_EQ(jsonAST.size(), 6);
+	ASSERT_EQ(jsonAST.size(), 6U);
 	EXPECT_EQ(jsonAST[0].at("uid").get<int32_t>(), 0);
 	EXPECT_EQ(jsonAST[0].at("parent").get<int32_t>(), 0);
 	EXPECT_EQ(jsonAST[0].at("typeID").get<TokenID>(), TokenID::AND);

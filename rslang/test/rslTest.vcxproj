@@ -76,9 +76,10 @@
     <ClCompile Include="src\testInterpreter.cpp" />
     <ClCompile Include="src\testLiterals.cpp" />
     <ClCompile Include="src\testLogger.cpp" />
+    <ClCompile Include="src\testParser.cpp" />
     <ClCompile Include="src\testRSExpr.cpp" />
     <ClCompile Include="src\testRSGenerator.cpp" />
-    <ClCompile Include="src\testRSLexer.cpp" />
+    <ClCompile Include="src\testMathLexer.cpp" />
     <ClCompile Include="src\testRSParser.cpp" />
     <ClCompile Include="src\testRSToken.cpp" />
     <ClCompile Include="src\testSDCompact.cpp" />

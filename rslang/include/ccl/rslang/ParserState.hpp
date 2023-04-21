@@ -6,14 +6,14 @@
 
 #include <functional>
 
-namespace ccl::rslang::parse {
+namespace ccl::rslang::detail {
 
 struct Node;
-using NodePtr = std::shared_ptr<Node>;
+using RawNode = std::shared_ptr<Node>;
 
 struct Node {
 	Token token{};
-	std::vector<NodePtr> children{};
+	std::vector<RawNode> children{};
 
 public:
 	explicit Node(Token token) noexcept
@@ -54,11 +54,10 @@ public:
 		}
 	}
 
-	void FinalizeASTExpression(NodePtr expr);
-	void FinalizeASTCstNoExpr(NodePtr cst, NodePtr mode);
-	void FinalizeASTCstExpr(NodePtr cst, NodePtr mode, NodePtr data);
-	void FinalizeASTFunction(NodePtr tf, NodePtr mode, NodePtr argdecl, NodePtr expr);
-	void CreateSyntaxTree(NodePtr root);
+	void CreateSyntaxTree(RawNode root);
+	void FinalizeExpression(RawNode expr);
+	void FinalizeCstEmpty(RawNode cst, RawNode mode);
+	void FinalizeCstExpression(RawNode cst, RawNode mode, RawNode data);
 };
 
-} // namespace ccl::rslang::parse
+} // namespace ccl::rslang::detail

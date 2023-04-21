@@ -1,0 +1,16 @@
+version: "3.9"
+
+volumes:
+  concept_volume:
+    name: "concept-libs"
+
+services: 
+  builder:
+    restart: no
+    build:
+      context: ./
+    volumes:
+      - concept_volume:/home/output
+    # command:
+    #   bash
+

@@ -10,7 +10,7 @@ class GeneratorImplAST final : public ASTVisitor<GeneratorImplAST> {
 	friend class ASTVisitor<GeneratorImplAST>;
 
 	std::string rsText{};
-	Syntax syntax{ Syntax::RSLANG };
+	Syntax syntax{ Syntax::MATH };
 
 public:
 	static std::string FromTree(const SyntaxTree& ast, Syntax syntax);
@@ -20,6 +20,7 @@ private:
 
 	bool ViGlobalDefinition(Cursor iter);
 
+	bool ViFunctionDefinition(Cursor iter);
 	bool ViFunctionCall(Cursor iter);
 
 	// bool ViGlobal(Cursor iter);

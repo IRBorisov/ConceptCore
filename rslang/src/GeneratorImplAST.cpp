@@ -25,10 +25,13 @@ bool GeneratorImplAST::ViGlobalDefinition(Cursor iter) {
 	if (iter.ChildrenCount() > 1) {
 		OutputChild(iter, 1);
 	}
-	if (iter.ChildrenCount() > 2) {
-		rsText += ' ';
-		OutputChild(iter, 2);
-	}
+	return true;
+}
+
+bool GeneratorImplAST::ViFunctionDefinition(Cursor iter) {
+	OutputChild(iter, 0);
+	rsText += ' ';
+	OutputChild(iter, 1);
 	return true;
 }
 

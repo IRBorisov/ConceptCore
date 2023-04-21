@@ -33,7 +33,7 @@
 
 /**
  ** \file ../header/RSParserImpl.h
- ** Define the ccl::rslang::parse::parser class.
+ ** Define the ccl::rslang::detail::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -49,32 +49,34 @@
 #include "ccl/rslang/SyntaxTree.h"
 #include "ccl/rslang/ParserState.hpp"
 
-namespace ccl::rslang::parse {
+namespace ccl::rslang::detail {
 
-#define YYSTYPE NodePtr
+#define YYSTYPE RawNode
 struct ParserState;
 
-NodePtr AddNode(TokenID token, NodePtr son);
-NodePtr AddNode(TokenID token, NodePtr son1, NodePtr son2);
-NodePtr BinaryOperation(NodePtr op1, NodePtr operation, NodePtr op2);
-NodePtr UnaryOperation(NodePtr operation, NodePtr operand);
-NodePtr RemoveBrackets(NodePtr br1, NodePtr operand, NodePtr br2);
-NodePtr ReplaceBrackets(TokenID token, NodePtr br1, NodePtr argList, NodePtr br2);
-NodePtr Enumeration(TokenID token, NodePtr el1, NodePtr el2);
-NodePtr Decartian(NodePtr op1, NodePtr decart, NodePtr op2);
+RawNode AddNode(TokenID token, RawNode son);
+RawNode AddNode(TokenID token, RawNode son1, RawNode son2);
 
-NodePtr Quantifier(NodePtr quant, NodePtr declaration, NodePtr domain, NodePtr predicate);
-NodePtr FunctionCall(NodePtr function, NodePtr args, NodePtr rs);
-NodePtr FilterCall(NodePtr filter, NodePtr params, NodePtr argument, NodePtr rp);
-NodePtr TextOperator(NodePtr oper, NodePtr args, NodePtr rp);
-NodePtr TermDeclaration(NodePtr lc, NodePtr declaration, NodePtr domain, NodePtr predicate, NodePtr rc);
-NodePtr FullRecursion(NodePtr rec, NodePtr localid, NodePtr domain, NodePtr condition, NodePtr iteration, NodePtr rc);
-NodePtr ShortRecursion(NodePtr rec, NodePtr localid, NodePtr domain, NodePtr iteration, NodePtr rc);
-NodePtr Imperative(NodePtr imp, NodePtr value, NodePtr actions, NodePtr rc);
+RawNode BinaryOperation(RawNode op1, RawNode operation, RawNode op2);
+RawNode UnaryOperation(RawNode operation, RawNode operand);
+RawNode RemoveBrackets(RawNode br1, RawNode operand, RawNode br2);
+RawNode ReplaceBrackets(TokenID token, RawNode br1, RawNode argList, RawNode br2);
+RawNode Enumeration(TokenID token, RawNode el1, RawNode el2);
+RawNode Decartian(RawNode op1, RawNode decart, RawNode op2);
 
-int yylex(NodePtr* yylval, ParserState* state);
+RawNode Quantifier(RawNode quant, RawNode declaration, RawNode domain, RawNode predicate);
+RawNode FunctionDeclaration(RawNode start, RawNode argdecl, RawNode expr);
+RawNode FunctionCall(RawNode function, RawNode args, RawNode rs);
+RawNode FilterCall(RawNode filter, RawNode params, RawNode argument, RawNode rp);
+RawNode TextOperator(RawNode oper, RawNode args, RawNode rp);
+RawNode TermDeclaration(RawNode lc, RawNode declaration, RawNode domain, RawNode predicate, RawNode rc);
+RawNode FullRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode condition, RawNode iteration, RawNode rc);
+RawNode ShortRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode iteration, RawNode rc);
+RawNode Imperative(RawNode imp, RawNode value, RawNode actions, RawNode rc);
 
-} // namespace ccl::rslang::parse
+int yylex(RawNode* yylval, ParserState* state);
+
+} // namespace ccl::rslang::detail
 
 
 
@@ -187,7 +189,7 @@ int yylex(NodePtr* yylval, ParserState* state);
 #endif
 
 
-namespace ccl { namespace rslang { namespace parse {
+namespace ccl { namespace rslang { namespace detail {
 
 
 
@@ -736,9 +738,9 @@ namespace ccl { namespace rslang { namespace parse {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 624,     ///< Last index in yytable_.
-      yynnts_ = 40,  ///< Number of nonterminal symbols.
-      yyfinal_ = 79, ///< Termination state number.
+      yylast_ = 589,     ///< Last index in yytable_.
+      yynnts_ = 41,  ///< Number of nonterminal symbols.
+      yyfinal_ = 85, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 61  ///< Number of tokens.
@@ -751,7 +753,7 @@ namespace ccl { namespace rslang { namespace parse {
 
 
 
-} } } // ccl::rslang::parse
+} } } // ccl::rslang::detail
 
 
 

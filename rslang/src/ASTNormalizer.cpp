@@ -22,7 +22,7 @@ void Normalizer::Normalize(SyntaxTree::Node& root) {
 		}
 		break;
 	}
-	case TokenID::NT_GLOBAL_CALL: {
+	case TokenID::NT_FUNC_CALL: {
 		Function(root);
 		break;
 	}
@@ -137,13 +137,13 @@ void Normalizer::Function(SyntaxTree::Node& func) {
 	
 	const auto* funcTree = termFuncs(func(0).token.data.ToText());
 	if (funcTree != nullptr) {
-		const auto argNames = ArgNames(funcTree->root->At(1));
+		const auto argNames = ArgNames(funcTree->root->At(1).At(0));
 		for (Index child = 1; child < func.ChildrenCount(); ++child) {
 			nodes.insert({ argNames.at(static_cast<size_t>(child) - 1), &func(child) });
 		}
 		SyntaxTree newTree = *funcTree;
-		SubstituteArgs(newTree.root->At(2), func.token.pos);
-		func = newTree.root->At(2);
+		SubstituteArgs(newTree.root->At(1).At(1), func.token.pos);
+		func = newTree.root->At(1).At(1);
 		Normalize(func);
 	}
 }

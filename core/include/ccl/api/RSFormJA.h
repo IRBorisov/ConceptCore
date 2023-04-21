@@ -4,11 +4,13 @@
 
 namespace ccl::api {
 
+static constexpr int JSON_IDENT = 4;
+std::string ParseExpression(const std::string& expression, rslang::Syntax syntaxHint = rslang::Syntax::UNDEF);
+
 //! JSON accessor wrapper for RSForm object
 class RSFormJA {
 private:
 	std::unique_ptr<semantic::RSForm> schema{};
-	static constexpr int JSON_IDENT = 4;
 
 private:
 	RSFormJA() noexcept = default;
@@ -22,7 +24,7 @@ public:
 	[[nodiscard]] std::string ToJSON() const;
 	[[nodiscard]] std::string ToMinimalJSON() const;
 
-	[[nodiscard]] std::string ParseExpression(const std::string& text) const;
+	[[nodiscard]] std::string CheckExpression(const std::string& text, rslang::Syntax syntaxHint = rslang::Syntax::UNDEF) const;
 };
 
 } // namespace ccl::api

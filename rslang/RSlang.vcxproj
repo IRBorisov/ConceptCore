@@ -22,13 +22,16 @@
     <ClCompile Include="src\AsciiLexer.cpp" />
     <ClCompile Include="src\ASTInterpreter.cpp" />
     <ClCompile Include="src\ASTNormalizer.cpp" />
+    <ClCompile Include="src\Auditor.cpp" />
     <ClCompile Include="src\ErrorLogger.cpp" />
     <ClCompile Include="src\GeneratorImplAST.cpp" />
+    <ClCompile Include="src\Interpreter.cpp" />
     <ClCompile Include="src\Literals.cpp" />
     <ClCompile Include="src\NameCollector.cpp" />
+    <ClCompile Include="src\Parser.cpp" />
     <ClCompile Include="src\RSExpr.cpp" />
     <ClCompile Include="src\RSGenerator.cpp" />
-    <ClCompile Include="src\RSLexer.cpp" />
+    <ClCompile Include="src\MathLexer.cpp" />
     <ClCompile Include="src\RSParser.cpp" />
     <ClCompile Include="src\RSParserImpl.cpp" />
     <ClCompile Include="src\RSToken.cpp" />
@@ -96,7 +99,7 @@
     </Bison>
     <None Include="script\build_lexers.bat" />
     <None Include="src\AsciiLexerImpl.l" />
-    <None Include="src\RSLexerImpl.l" />
+    <None Include="src\MathLexerImpl.l" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\AsciiLexerImpl.hpp">
@@ -108,7 +111,7 @@
     <ClInclude Include="header\ASTNormalizer.h" />
     <ClInclude Include="header\GeneratorImplAST.h" />
     <ClInclude Include="header\NameCollector.h" />
-    <ClInclude Include="header\RSLexerImpl.hpp">
+    <ClInclude Include="header\MathLexerImpl.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -118,18 +121,19 @@
     <ClInclude Include="header\SDImplementation.h" />
     <ClInclude Include="include\ccl\rslang\AsciiLexer.h" />
     <ClInclude Include="include\ccl\rslang\ASTInterpreter.h" />
-    <ClInclude Include="include\ccl\rslang\Auditor.hpp" />
+    <ClInclude Include="include\ccl\rslang\Auditor.h" />
     <ClInclude Include="include\ccl\rslang\DataContext.hpp" />
     <ClInclude Include="include\ccl\rslang\Error.hpp" />
     <ClInclude Include="include\ccl\rslang\ErrorLogger.h" />
-    <ClInclude Include="include\ccl\rslang\Interpreter.hpp" />
+    <ClInclude Include="include\ccl\rslang\Interpreter.h" />
     <ClInclude Include="include\ccl\rslang\LexerBase.hpp" />
     <ClInclude Include="include\ccl\rslang\Literals.h" />
+    <ClInclude Include="include\ccl\rslang\Parser.h" />
     <ClInclude Include="include\ccl\rslang\ParserState.hpp" />
     <ClInclude Include="include\ccl\rslang\RSErrorCodes.hpp" />
     <ClInclude Include="include\ccl\rslang\RSExpr.h" />
     <ClInclude Include="include\ccl\rslang\RSGenerator.h" />
-    <ClInclude Include="include\ccl\rslang\RSLexer.h" />
+    <ClInclude Include="include\ccl\rslang\MathLexer.h" />
     <ClInclude Include="include\ccl\rslang\RSParser.h" />
     <ClInclude Include="include\ccl\rslang\RSToken.h" />
     <ClInclude Include="include\ccl\rslang\SDataCompact.h" />
@@ -236,7 +240,7 @@ xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
       <Outputs>header\AsciiLexerImpl.hpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>src\AsciiLexerImpl.l;src\RSLexerImpl.l</Inputs>
+      <Inputs>src\AsciiLexerImpl.l;src\MathLexerImpl.l</Inputs>
       <Message>Generating Lexer</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
@@ -268,7 +272,7 @@ xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
       <Outputs>header\AsciiLexerImpl.hpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>src\AsciiLexerImpl.l;src\RSLexerImpl.l</Inputs>
+      <Inputs>src\AsciiLexerImpl.l;src\MathLexerImpl.l</Inputs>
       <Message>Generating Lexer</Message>
     </CustomBuildStep>
     <PostBuildEvent>
@@ -309,7 +313,7 @@ xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
       <Outputs>header\AsciiLexerImpl.hpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>src\AsciiLexerImpl.l;src\RSLexerImpl.l</Inputs>
+      <Inputs>src\AsciiLexerImpl.l;src\MathLexerImpl.l</Inputs>
       <Message>Generating Lexer</Message>
     </CustomBuildStep>
   </ItemDefinitionGroup>
@@ -342,7 +346,7 @@ xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
       <Outputs>header\AsciiLexerImpl.hpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>src\AsciiLexerImpl.l;src\RSLexerImpl.l</Inputs>
+      <Inputs>src\AsciiLexerImpl.l;src\MathLexerImpl.l</Inputs>
       <Message>Generating Lexer</Message>
     </CustomBuildStep>
     <PostBuildEvent>

@@ -280,35 +280,26 @@ bool TypeAuditor::ViGlobalDefinition(Cursor iter) {
 		assert(iter->id == TokenID::PUNC_DEFINE);
 		if (childrenCount == 1) {
 			return VisitAndReturn(Typification{ iter(0).data.ToText() }.ApplyBool());
-		} else if (childrenCount == 2) {
-			if (const auto type = ChildType(iter, 1); !type.has_value()) {
+		} else if (const auto type = ChildType(iter, 1); !type.has_value()) {
 				return false;
-			} else {
-				return VisitAndReturn(type.value());
-			}
-		} else if (iter.ChildrenCount() != 3) {
-			OnError(SemanticEID::globalExpectedFunction, iter(0).pos.finish);
-			return false;
 		} else {
-			if (!VisitTemplateDeclaration(iter)) {
-				return false;
-			} else if (const auto type = ChildType(iter, 2); !type.has_value()) {
-				return false;
-			} else {
-				return VisitAndReturn(type.value());
-			}
+			return VisitAndReturn(type.value());
 		}
 	}
 }
 
-bool TypeAuditor::VisitTemplateDeclaration(Cursor iter) {
-	if (const auto guard = isFuncDeclaration.CreateGuard(); !VisitChild(iter, 1)) {
+bool TypeAuditor::ViFunctionDefinition(Cursor iter) {
+	if (const auto guard = isFuncDeclaration.CreateGuard(); !VisitChild(iter, 0)) {
 		return false;
 	}
 	for (auto n : functionArgsID) {
 		functionArgs.emplace_back(localVars.at(n).arg);
 	}
-	return true;
+	if (const auto type = ChildType(iter, 1); !type.has_value()) {
+		return false;
+	} else {
+		return VisitAndReturn(type.value());
+	}
 }
 
 bool TypeAuditor::ViFunctionCall(Cursor iter) {

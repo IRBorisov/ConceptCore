@@ -52,7 +52,16 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 		{ ValueClass::value, "value" },
 		{ ValueClass::props, "property" },
 	}
-	)
+)
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+	Syntax,
+	{
+		{ Syntax::UNDEF, "undefined" },
+		{ Syntax::ASCII, "ascii" },
+		{ Syntax::MATH, "math" },
+	}
+)
 
 } // namespace ccl::rslang
 

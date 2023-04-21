@@ -13,22 +13,20 @@
 
 class UTValueAuditor : public ::testing::Test {
 protected:
-	using AsciiLexer = ccl::rslang::AsciiLexer;
 	using ErrorLogger = ccl::rslang::ErrorLogger;
 	using ValueAuditor = ccl::rslang::ValueAuditor;
 	using SemanticEID = ccl::rslang::SemanticEID;
-	using RSParser = ccl::rslang::RSParser;
+	using Parser = ccl::rslang::Parser;
 	using ValueClass = ccl::rslang::ValueClass;
 	using ValueClassContext = ccl::rslang::ValueClassContext;
+	using Syntax = ccl::rslang::Syntax;
 
 protected:
 	UTValueAuditor();
 
-	ErrorLogger log{};
 	RSEnvironment env{};
-	AsciiLexer lexer{ log.SendReporter() };
-	RSParser parser{ log.SendReporter() };
-	ValueAuditor auditor{ env.GetValueContext(), env.GetAST(), log.SendReporter() };
+	Parser parser{};
+	ValueAuditor auditor{ env.GetValueContext(), env.GetAST(), parser.log.SendReporter() };
 
 	void ExpectNoWarnings(const std::string& input);
 	void ExpectClass(const std::string& input, ValueClass vclass);
@@ -45,21 +43,21 @@ UTValueAuditor::UTValueAuditor() {
 
 void UTValueAuditor::ExpectError(const std::string& input, const SemanticEID id, const ccl::StrPos pos) {
 	ExpectError(input, id);
-	EXPECT_EQ(log.FirstErrorPos(), pos) << input;
+	EXPECT_EQ(parser.log.FirstErrorPos(), pos) << input;
 }
 
 void UTValueAuditor::ExpectError(const std::string& input, const SemanticEID id) {
-	log.Clear();
-	ASSERT_TRUE(parser.Parse(lexer(input).Stream())) << input;
+	parser.log.Clear();
+	ASSERT_TRUE(parser.Parse(input, Syntax::ASCII)) << input;
 	ASSERT_FALSE(auditor.Check(parser.AST())) << input;
-	EXPECT_EQ(begin(log.All())->eid, static_cast<uint32_t>(id)) << input;
+	EXPECT_EQ(begin(parser.log.All())->eid, static_cast<uint32_t>(id)) << input;
 }
 
 void UTValueAuditor::ExpectNoWarnings(const std::string& input) {
-	log.Clear();
-	ASSERT_TRUE(parser.Parse(lexer(input).Stream())) << input;
+	parser.log.Clear();
+	ASSERT_TRUE(parser.Parse(input, Syntax::ASCII)) << input;
 	ASSERT_TRUE(auditor.Check(parser.AST())) << input;
-	EXPECT_EQ(ssize(log.All()), 0) << input;
+	EXPECT_EQ(ssize(parser.log.All()), 0) << input;
 }
 
 void UTValueAuditor::ExpectClass(const std::string& input, const ValueClass vclass) {
@@ -70,7 +68,7 @@ void UTValueAuditor::ExpectClass(const std::string& input, const ValueClass vcla
 TEST_F(UTValueAuditor, NumericCorrect) {
 	ExpectClass(R"(1)", ValueClass::value);
 	ExpectClass(R"(Z)", ValueClass::props);
-	ExpectClass(R"(1+2)", ValueClass::value);
+	ExpectClass(R"(1 \plus 2)", ValueClass::value);
 	ExpectClass(R"(1 \multiply 2)", ValueClass::value);
 	ExpectClass(R"(card(X1))", ValueClass::value);
 	ExpectClass(R"(card(D1))", ValueClass::value);
@@ -82,38 +80,38 @@ TEST_F(UTValueAuditor, NumericErrors) {
 }
 
 TEST_F(UTValueAuditor, LogicCorrect) {
-	ExpectClass(R"(1<1)", ValueClass::value);
-	ExpectClass(R"(1=1)", ValueClass::value);
-	ExpectClass(R"(1!=1)", ValueClass::value);
-	ExpectClass(R"(\neg 1=1)", ValueClass::value);
-	ExpectClass(R"(1=1 && 1=1)", ValueClass::value);
+	ExpectClass(R"(1 \ls 1)", ValueClass::value);
+	ExpectClass(R"(1 \eq 1)", ValueClass::value);
+	ExpectClass(R"(1 \noteq 1)", ValueClass::value);
+	ExpectClass(R"(\neg 1 \eq 1)", ValueClass::value);
+	ExpectClass(R"(1 \eq 1 \and 1 \eq 1)", ValueClass::value);
 
-	ExpectClass(R"(X1=X1)", ValueClass::value);
-	ExpectClass(R"(X1={})", ValueClass::value);
+	ExpectClass(R"(X1 \eq X1)", ValueClass::value);
+	ExpectClass(R"(X1 \eq {})", ValueClass::value);
 	ExpectClass(R"(X1 \in D1)", ValueClass::value);
 	ExpectClass(R"(X1 \in D2)", ValueClass::value);
 	ExpectClass(R"(X1 \notin D1)", ValueClass::value);
 	ExpectClass(R"(X1 \subset X1)", ValueClass::value);
 	ExpectClass(R"(X1 \subseteq D2)", ValueClass::value);
 
-	ExpectClass(R"(\E a \in X1 a=a)", ValueClass::value);
-	ExpectClass(R"(\E a \in D1 a=a)", ValueClass::value);
-	ExpectClass(R"(\A a \in X1 a=a)", ValueClass::value);
-	ExpectClass(R"(\A a \in D1 a=a)", ValueClass::value);
-	ExpectClass(R"(\A a,b \in D1 a=a)", ValueClass::value);
-	ExpectClass(R"(\A (a,b) \in D1 a=b)", ValueClass::value);
+	ExpectClass(R"(\E a \in X1 a \eq a)", ValueClass::value);
+	ExpectClass(R"(\E a \in D1 a \eq a)", ValueClass::value);
+	ExpectClass(R"(\A a \in X1 a \eq a)", ValueClass::value);
+	ExpectClass(R"(\A a \in D1 a \eq a)", ValueClass::value);
+	ExpectClass(R"(\A a,b \in D1 a \eq a)", ValueClass::value);
+	ExpectClass(R"(\A (a,b) \in D1 a \eq b)", ValueClass::value);
 }
 
 TEST_F(UTValueAuditor, LogicErrors) {
-	ExpectError(R"(D2=X1)", SemanticEID::invalidPropertyUsage, 0);
-	ExpectError(R"(X1=D2)", SemanticEID::invalidPropertyUsage, 3);
+	ExpectError(R"(D2 \eq X1)", SemanticEID::invalidPropertyUsage, 0);
+	ExpectError(R"(X1 \eq D2)", SemanticEID::invalidPropertyUsage, 7);
 	ExpectError(R"(X1 \in D3)", SemanticEID::globalNoValue, 7);
 	ExpectError(R"(D2 \in X1)", SemanticEID::invalidPropertyUsage, 0);
 	ExpectError(R"(X1 \subset D2)", SemanticEID::invalidPropertyUsage, 11);
 	ExpectError(R"(X1 \notsubset D2)", SemanticEID::invalidPropertyUsage, 14);
-	ExpectError(R"(\E a \in D2 a=a)", SemanticEID::invalidPropertyUsage, 9);
-	ExpectError(R"(\A a \in D3 a=a)", SemanticEID::globalNoValue, 9);
-	ExpectError(R"(\E a \in D3 a=a)", SemanticEID::globalNoValue, 9);
+	ExpectError(R"(\E a \in D2 a \eq a)", SemanticEID::invalidPropertyUsage, 9);
+	ExpectError(R"(\A a \in D3 a \eq a)", SemanticEID::globalNoValue, 9);
+	ExpectError(R"(\E a \in D3 a \eq a)", SemanticEID::globalNoValue, 9);
 }
 
 TEST_F(UTValueAuditor, TypedCorrect) {
@@ -158,12 +156,12 @@ TEST_F(UTValueAuditor, TypedCorrect) {
 	ExpectClass(R"((X1, D1))", ValueClass::value);
 	ExpectClass(R"({D1, X1})", ValueClass::value);
 
-	ExpectClass(R"(D{t \in X1 | t=t})", ValueClass::value);
+	ExpectClass(R"(D{t \in X1 | t \eq t})", ValueClass::value);
 	ExpectClass(R"(D{t \in X1 | t \in D2})", ValueClass::value);
-	ExpectClass(R"(D{t \in D2 | t=t})", ValueClass::props);
-	ExpectClass(R"(R{a:=X1 | a \setminus a })", ValueClass::value);
-	ExpectClass(R"(R{(a,b):=(0,1) | a<3 | (a+1, b+1) })", ValueClass::value);
-	ExpectClass(R"(I{(a,b) | a \from X1; X1 \setminus X1={}; b:=D1 })", ValueClass::value);
+	ExpectClass(R"(D{t \in D2 | t \eq t})", ValueClass::props);
+	ExpectClass(R"(R{a \assign X1 | a \setminus a })", ValueClass::value);
+	ExpectClass(R"(R{(a,b) \assign (0,1) | a \ls 3 | (a \plus 1, b \plus 1) })", ValueClass::value);
+	ExpectClass(R"(I{(a,b) | a \from X1; X1 \setminus X1 \eq {}; b \assign D1 })", ValueClass::value);
 }
 
 TEST_F(UTValueAuditor, TypedErrors) {
@@ -192,47 +190,47 @@ TEST_F(UTValueAuditor, TypedErrors) {
 	ExpectError(R"({D2, X1})", SemanticEID::invalidPropertyUsage, 1);
 	ExpectError(R"({X1, D3})", SemanticEID::globalNoValue, 5);
 
-	ExpectError(R"(D{t \in D3 | t=t})", SemanticEID::globalNoValue, 8);
-	ExpectError(R"(R{a := X1 | D2 \setminus a})", SemanticEID::invalidPropertyUsage, 12);
-	ExpectError(R"(R{a := X1 | D3 \setminus a})", SemanticEID::globalNoValue, 12);
-	ExpectError(R"(R{a := D2 | a \setminus a})", SemanticEID::invalidPropertyUsage, 7);
-	ExpectError(R"(R{a := D3 | a \setminus a})", SemanticEID::globalNoValue, 7);
-	ExpectError(R"(I{(a,b) | a \from D2; X1 \setminus X1={}; b:=D1})", SemanticEID::invalidPropertyUsage, 18);
-	ExpectError(R"(I{(a,b) | a \from D3; X1 \setminus X1={}; b:=D1})", SemanticEID::globalNoValue, 18);
-	ExpectError(R"(I{(a,b) | a \from X1; D2 \setminus X1={}; b:=D1})", SemanticEID::invalidPropertyUsage, 22);
-	ExpectError(R"(I{(a,b) | a \from X1; D3 \setminus X1={}; b:=D1})", SemanticEID::globalNoValue, 22);
-	ExpectError(R"(I{(a,b) | a \from X1; X1 \setminus X1={}; b:=D2})", SemanticEID::invalidPropertyUsage, 45);
-	ExpectError(R"(I{(a,b) | a \from X1; X1 \setminus X1={}; b:=D3})", SemanticEID::globalNoValue, 45);
+	ExpectError(R"(D{t \in D3 | t \eq t})", SemanticEID::globalNoValue, 8);
+	ExpectError(R"(R{a \assign X1 | D2 \setminus a})", SemanticEID::invalidPropertyUsage, 17);
+	ExpectError(R"(R{a \assign X1 | D3 \setminus a})", SemanticEID::globalNoValue, 17);
+	ExpectError(R"(R{a \assign D2 | a \setminus a})", SemanticEID::invalidPropertyUsage, 12);
+	ExpectError(R"(R{a \assign D3 | a \setminus a})", SemanticEID::globalNoValue, 12);
+	ExpectError(R"(I{(a,b) | a \from D2; X1 \setminus X1 \eq {}; b \assign D1})", SemanticEID::invalidPropertyUsage, 18);
+	ExpectError(R"(I{(a,b) | a \from D3; X1 \setminus X1 \eq {}; b \assign D1})", SemanticEID::globalNoValue, 18);
+	ExpectError(R"(I{(a,b) | a \from X1; D2 \setminus X1 \eq {}; b \assign D1})", SemanticEID::invalidPropertyUsage, 22);
+	ExpectError(R"(I{(a,b) | a \from X1; D3 \setminus X1 \eq {}; b \assign D1})", SemanticEID::globalNoValue, 22);
+	ExpectError(R"(I{(a,b) | a \from X1; X1 \setminus X1 \eq {}; b \assign D2})", SemanticEID::invalidPropertyUsage, 56);
+	ExpectError(R"(I{(a,b) | a \from X1; X1 \setminus X1 \eq {}; b \assign D3})", SemanticEID::globalNoValue, 56);
 }
 
 TEST_F(UTValueAuditor, GlobalDeclCorrect) {
-	ExpectClass(R"(X2:==)", ValueClass::value);
+	ExpectClass(R"(X2 \defexpr )", ValueClass::value);
 
-	ExpectClass(R"(S1::=X1)", ValueClass::value);
-	ExpectClass(R"(S1::=B(X1))", ValueClass::value);
-	ExpectClass(R"(S1::=B(D1))", ValueClass::value);
-	ExpectClass(R"(S1::=B(D2))", ValueClass::value);
+	ExpectClass(R"(S1 \deftype X1)", ValueClass::value);
+	ExpectClass(R"(S1 \deftype B(X1))", ValueClass::value);
+	ExpectClass(R"(S1 \deftype B(D1))", ValueClass::value);
+	ExpectClass(R"(S1 \deftype B(D2))", ValueClass::value);
 
-	ExpectClass(R"(D4:==X1)", ValueClass::value);
-	ExpectClass(R"(D4:==B(X1))", ValueClass::props);
-	ExpectClass(R"(D4:==D2)", ValueClass::props);
+	ExpectClass(R"(D4 \defexpr X1)", ValueClass::value);
+	ExpectClass(R"(D4 \defexpr B(X1))", ValueClass::props);
+	ExpectClass(R"(D4 \defexpr D2)", ValueClass::props);
 
-	ExpectClass(R"(A1:==1=1)", ValueClass::value);
-	ExpectClass(R"(T1:==1=1)", ValueClass::value);
+	ExpectClass(R"(A1 \defexpr 1 \eq 1)", ValueClass::value);
+	ExpectClass(R"(T1 \defexpr 1 \eq 1)", ValueClass::value);
 
-	ExpectClass(R"(F1:==[a \in X1] {a} \union X1)", ValueClass::value);
-	ExpectClass(R"(F1:==[a \in R1] {a})", ValueClass::value);
-	ExpectClass(R"(F1:==[a \in D2] {a} \union X1)", ValueClass::value);
-	ExpectClass(R"(F1:==[a \in X1] {a} \union D2)", ValueClass::props);
+	ExpectClass(R"(F1 \defexpr [a \in X1] {a} \union X1)", ValueClass::value);
+	ExpectClass(R"(F1 \defexpr [a \in R1] {a})", ValueClass::value);
+	ExpectClass(R"(F1 \defexpr [a \in D2] {a} \union X1)", ValueClass::value);
+	ExpectClass(R"(F1 \defexpr [a \in X1] {a} \union D2)", ValueClass::props);
 }
 
 TEST_F(UTValueAuditor, GlobalDeclErrors) {
-	ExpectError(R"(S1:==B(D3))", SemanticEID::globalNoValue, 7);
-	ExpectError(R"(D4:==D3 \setminus D3)", SemanticEID::globalNoValue, 5);
-	ExpectError(R"(A1:==D3=D3)", SemanticEID::globalNoValue, 5);
-	ExpectError(R"(F1:==[a \in X1] {a} \union red(D2))", SemanticEID::invalidPropertyUsage, 31);
-	ExpectError(R"(F1:==[a \in D3] {a} \union X1)", SemanticEID::globalNoValue, 12);
-	ExpectError(R"(F1:==[a \in X1] {a} \union D3)", SemanticEID::globalNoValue, 27);
+	ExpectError(R"(S1 \defexpr B(D3))", SemanticEID::globalNoValue, 14);
+	ExpectError(R"(D4 \defexpr D3 \setminus D3)", SemanticEID::globalNoValue, 12);
+	ExpectError(R"(A1 \defexpr D3 \eq D3)", SemanticEID::globalNoValue, 12);
+	ExpectError(R"(F1 \defexpr [a \in X1] {a} \union red(D2))", SemanticEID::invalidPropertyUsage, 38);
+	ExpectError(R"(F1 \defexpr [a \in D3] {a} \union X1)", SemanticEID::globalNoValue, 19);
+	ExpectError(R"(F1 \defexpr [a \in X1] {a} \union D3)", SemanticEID::globalNoValue, 34);
 }
 
 TEST_F(UTValueAuditor, Functions) {
@@ -242,9 +240,9 @@ TEST_F(UTValueAuditor, Functions) {
 	env.data["F3"].valueClass = ValueClass::value;
 	env.data["F4"].valueClass = ValueClass::invalid;
 
-	env.AddAST("F1", R"(F1:==[a \in X1, b \in X1] a \setminus b)");
-	env.AddAST("P1", R"(P1:==[a \in X1, b \in X1] a = b)");
-	env.AddAST("F2", R"(F2:==[a \in X1, b \in X1] D2 \union (red(a) \setminus b))");
+	env.AddAST("F1", R"(F1 \defexpr [a \in X1, b \in X1] a \setminus b)");
+	env.AddAST("P1", R"(P1 \defexpr [a \in X1, b \in X1] a \eq b)");
+	env.AddAST("F2", R"(F2 \defexpr [a \in X1, b \in X1] D2 \union (red(a) \setminus b))");
 
 	ExpectClass(R"(F1[X1, X1])", ValueClass::value);
 	ExpectClass(R"(P1[X1, X1])", ValueClass::value);

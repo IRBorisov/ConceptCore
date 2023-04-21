@@ -1,7 +1,6 @@
 #include "ccl/rslang/RSExpr.h"
 
-#include "ccl/rslang/RSParser.h"
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/Parser.h"
 
 #include <vector>
 #include <unordered_set>
@@ -9,8 +8,8 @@
 namespace ccl::rslang {
 
 meta::UniqueCPPtr<SyntaxTree> GenerateAST(const std::string& str) {
-	RSParser parser{};
-	if (!parser.Parse(RSLexer{ str }.Stream())) {
+	Parser parser{};
+	if (!parser.Parse(str, Syntax::MATH)) {
 		return nullptr;
 	} else {
 		return parser.ExtractAST();
@@ -18,15 +17,10 @@ meta::UniqueCPPtr<SyntaxTree> GenerateAST(const std::string& str) {
 }
 
 [[nodiscard]] std::unordered_set<std::string> ExtractUGlobals(const std::string& str) {
-	// TODO: figure out why it doesnt work for MFC build but works in google test
-	/*static const reflex::Pattern pattern("\\<[XCSFPDAT][0-9]+\\>");
-	reflex::Matcher matcher(pattern, str);
 	std::unordered_set<std::string> result{};
-	while (matcher.find()) {
-		result.emplace(matcher.text());
-	}*/
-	std::unordered_set<std::string> result{};
-	RSLexer lex{ str };
+
+	// Note: using MathLexer because it fits both MATH and ASCII patterns for globals
+	detail::MathLexer lex{ str }; 
 	for (auto token = lex.lex(); token != TokenID::END; token = lex.lex()) {
 		if (TFFactory::FilterGlobals()(token)) {
 			result.emplace(lex.Text());
@@ -37,7 +31,9 @@ meta::UniqueCPPtr<SyntaxTree> GenerateAST(const std::string& str) {
 
 std::unordered_set<std::string> ExtractULocals(const std::string &str) {
 	std::unordered_set<std::string> result{};
-	RSLexer lex{ str };
+
+	// Note: using MathLexer because it fits both MATH and ASCII patterns for locals
+	detail::MathLexer lex{ str };
 	for (auto token = lex.lex(); token != TokenID::END; token = lex.lex()) {
 		if (token == TokenID::ID_LOCAL) {
 			result.emplace(lex.Text());
@@ -53,7 +49,7 @@ int32_t SubstituteGlobals(std::string& str, const StrSubstitutes& substitutes) {
 int32_t TranslateRS(std::string& str, TokenFilter filter, StrTranslator old2New) {
 	int32_t count = 0;
 	const std::string copy = str;
-	rslang::RSLexer lex{ copy };
+	detail::MathLexer lex{ copy };
 	int32_t offset = 0;
 	for (auto token = lex.lex(); token != TokenID::END; token = lex.lex()) {
 		if (filter(token)) {
@@ -107,7 +103,7 @@ const TokenFilter& TFFactory::FilterIdentifiers() {
 		rslang::TokenID::ID_FUNCTION,
 		rslang::TokenID::ID_PREDICATE,
 		rslang::TokenID::ID_LOCAL
-																 });
+	});
 	return filter;
 }
 

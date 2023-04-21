@@ -4,9 +4,7 @@
 
 #include "ccl/Substitutes.hpp"
 #include "ccl/rslang/RSExpr.h"
-#include "ccl/rslang/RSParser.h"
-#include "ccl/rslang/AsciiLexer.h"
-#include "ccl/rslang/RSLexer.h"
+#include "ccl/rslang/Parser.h"
 
 namespace ccl::rslang {
 
@@ -126,7 +124,7 @@ std::string Generator::FromTree(const SyntaxTree& ast, const Syntax syntax) {
 
 std::string Generator::GlobalDefinition(std::string globalID, std::string expr, const bool isStruct) {
 	std::string result = std::move(globalID);
-	result += Token::Str(isStruct ? TokenID::PUNC_STRUCT : TokenID::PUNC_DEFINE, Syntax::RSLANG);
+	result += Token::Str(isStruct ? TokenID::PUNC_STRUCT : TokenID::PUNC_DEFINE, Syntax::MATH);
 	result += expr;
 	return result;
 }
@@ -215,20 +213,13 @@ Generator::StructureDescription Generator::StructureFor(const std::string& globa
 	return StructureContextGenerator::GenerateFor(globalName, type);
 }
 
-std::string ConvertTo(const std::string& input, const Syntax syntax) {
-	RSParser parser{};
-	if (syntax == Syntax::ASCII) {
-		if (!parser.Parse(RSLexer{ input }.Stream())) {
-			return input;
-		} else {
-			return Generator::FromTree(parser.AST(), Syntax::ASCII);
-		}
+std::string ConvertTo(const std::string& input, const Syntax targetSyntax) {
+	Parser parser{};
+	const auto initialSyntax = targetSyntax == Syntax::MATH ? Syntax::ASCII : Syntax::MATH;
+	if (!parser.Parse(input, initialSyntax)) {
+		return input;
 	} else {
-		if (!parser.Parse(AsciiLexer{ input }.Stream())) {
-			return input;
-		} else {
-			return Generator::FromTree(parser.AST(), Syntax::RSLANG);
-		}
+		return Generator::FromTree(parser.AST(), targetSyntax);
 	}
 }
 

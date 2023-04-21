@@ -13,7 +13,7 @@ namespace {
 std::string ConvertID(std::string_view id, const Syntax syntax) {
 	static constexpr std::string_view substitutes = "abgdezhviklmnxoprsstqfcjw";
 	static constexpr auto piPosition = 0xBF - 0xB1 + 1;
-	if (syntax == Syntax::RSLANG) {
+	if (syntax == Syntax::MATH) {
 		return std::string{ id };
 	}
 	std::string result{};
@@ -40,7 +40,7 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 }
 // NOLINTEND
 
-[[nodiscard]] std::string AsciiStr(const TokenID id) {
+[[nodiscard]] std::string SharedStr(const TokenID id) {
 	switch (id) {
 	default: return "UNKNOWN TOKEN";
 
@@ -53,46 +53,12 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 	case TokenID::ID_PREDICATE: return "PREDICATE";
 	case TokenID::ID_RADICAL: return "RADICAL";
 
-	case TokenID::LIT_INTSET: return "Z";
-	case TokenID::LIT_EMPTYSET: return "{}";
 	case TokenID::LIT_INTEGER: return "INT";
-
-	case TokenID::PLUS: return "+";
-	case TokenID::MINUS: return "-";
-	case TokenID::MULTIPLY: return R"( \multiply )";
-
-	case TokenID::GREATER: return ">";
-	case TokenID::LESSER: return "<";
-	case TokenID::GREATER_OR_EQ: return ">=";
-	case TokenID::LESSER_OR_EQ: return "<=";
-
-	case TokenID::EQUAL: return "=";
-	case TokenID::NOTEQUAL: return "!=";
-
-	case TokenID::FORALL: return R"( \A )";
-	case TokenID::EXISTS: return R"( \E )";
-	case TokenID::NOT: return R"( \neg )";
-	case TokenID::AND: return "&&";
-	case TokenID::OR: return "||";
-	case TokenID::IMPLICATION: return "=>";
-	case TokenID::EQUIVALENT: return "<=>";
-
-	case TokenID::IN: return R"( \in )";
-	case TokenID::NOTIN: return R"( \notin )";
-	case TokenID::SUBSET: return R"( \subset )";
-	case TokenID::SUBSET_OR_EQ: return R"( \subseteq )";
-	case TokenID::NOTSUBSET: return R"( \notsubset )";
-
-	case TokenID::UNION: return R"( \union )";
-	case TokenID::INTERSECTION: return R"( \intersect )";
-	case TokenID::SET_MINUS: return R"( \setminus )";
-	case TokenID::SYMMINUS: return R"( \symmdiff )";
-	case TokenID::DECART: return "*";
-
-	case TokenID::BOOLEAN: return "B";
+	case TokenID::LIT_INTSET: return "Z";
 
 	case TokenID::BIGPR: return "Pr";
 	case TokenID::SMALLPR: return "pr";
+
 	case TokenID::FILTER: return "Fi";
 	case TokenID::CARD: return "card";
 	case TokenID::BOOL: return "bool";
@@ -103,10 +69,6 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 	case TokenID::RECURSIVE: return "R";
 	case TokenID::IMPERATIVE: return "I";
 
-	case TokenID::PUNC_DEFINE: return ":==";
-	case TokenID::PUNC_STRUCT: return "::=";
-	case TokenID::PUNC_ASSIGN: return ":=";
-	case TokenID::PUNC_ITERATE: return R"( \from )";
 	case TokenID::PUNC_PL: return "(";
 	case TokenID::PUNC_PR: return ")";
 	case TokenID::PUNC_CL: return "{";
@@ -123,8 +85,9 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 	case TokenID::NT_ENUM_DECL: return "ENUM_DECLARATION";
 	case TokenID::NT_TUPLE_DECL: return "TUPLE_DECLARATION";
 	case TokenID::NT_ARG_DECL: return "ARG";
-	case TokenID::NT_GLOBAL_CALL: return "CALL";
-	case TokenID::NT_ARG_TYPES_ENUM: return "ARGS";
+	case TokenID::NT_FUNC_CALL: return "CALL";
+	case TokenID::NT_ARGUMENTS: return "ARGS";
+	case TokenID::NT_FUNC_DEFINITION: return "FUNCTION_DEFINITION";
 
 	case TokenID::NT_DECLARATIVE_EXPR: return "DECLARATIVE";
 	case TokenID::NT_IMPERATIVE_EXPR: return "IMPERATIVE";
@@ -137,18 +100,70 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 	}
 }
 
+[[nodiscard]] std::string AsciiStr(const TokenID id) {
+	switch (id) {
+	default: return SharedStr(id);
+
+	case TokenID::LIT_EMPTYSET: return "{}";
+	
+
+	case TokenID::PLUS: return R"( \plus )";
+	case TokenID::MINUS: return R"( \minus )";
+	case TokenID::MULTIPLY: return R"( \multiply )";
+
+	case TokenID::GREATER: return R"( \gr )";
+	case TokenID::LESSER: return R"( \less )";
+	case TokenID::GREATER_OR_EQ: return R"( \ge )";
+	case TokenID::LESSER_OR_EQ: return R"( \le )";
+
+	case TokenID::EQUAL: return R"( \eq )";
+	case TokenID::NOTEQUAL: return R"( \noteq )";
+
+	case TokenID::FORALL: return R"( \A )";
+	case TokenID::EXISTS: return R"( \E )";
+	case TokenID::NOT: return R"( \neg )";
+	case TokenID::AND: return R"( \and )";
+	case TokenID::OR: return R"( \or )";
+	case TokenID::IMPLICATION: return R"( \impl )";
+	case TokenID::EQUIVALENT: return R"( \equiv )";
+
+	case TokenID::IN: return R"( \in )";
+	case TokenID::NOTIN: return R"( \notin )";
+	case TokenID::SUBSET: return R"( \subset )";
+	case TokenID::SUBSET_OR_EQ: return R"( \subseteq )";
+	case TokenID::NOTSUBSET: return R"( \notsubset )";
+
+	case TokenID::UNION: return R"( \union )";
+	case TokenID::INTERSECTION: return R"( \intersect )";
+	case TokenID::SET_MINUS: return R"( \setminus )";
+	case TokenID::SYMMINUS: return R"( \symmdiff )";
+	case TokenID::DECART: return "*";
+
+	case TokenID::BOOLEAN: return "B";
+
+	case TokenID::PUNC_DEFINE: return R"( \defexpr )";
+	case TokenID::PUNC_STRUCT: return R"( \deftype )";
+	case TokenID::PUNC_ASSIGN: return R"( \assign )";
+	case TokenID::PUNC_ITERATE: return R"( \from )";
+	}
+}
+
 [[nodiscard]] std::string RSStr(const TokenID id) {
 	switch (id) {
-	default: return AsciiStr(id);
+	default: return SharedStr(id);
 
-	case TokenID::LIT_INTSET: return "Z";
 	case TokenID::LIT_EMPTYSET: return "\xE2\x88\x85"; // \u2205
 
+	case TokenID::PLUS: return "+";
+	case TokenID::MINUS: return "-";
 	case TokenID::MULTIPLY: return "*";
 
+	case TokenID::GREATER: return ">";
+	case TokenID::LESSER: return "<";
 	case TokenID::GREATER_OR_EQ: return "\xE2\x89\xA5"; // \u2265
 	case TokenID::LESSER_OR_EQ: return "\xE2\x89\xA4"; // \u2264
 
+	case TokenID::EQUAL: return "=";
 	case TokenID::NOTEQUAL: return "\xE2\x89\xA0"; // \u2260
 
 	case TokenID::FORALL: return "\xE2\x88\x80"; // \u2200
@@ -159,7 +174,11 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 	case TokenID::IMPLICATION: return "\xE2\x87\x92"; // \u21D2
 	case TokenID::EQUIVALENT: return "\xE2\x87\x94"; // \u21D4
 
+	case TokenID::PUNC_DEFINE: return ":==";
+	case TokenID::PUNC_STRUCT: return "::=";
+	case TokenID::PUNC_ASSIGN: return ":=";
 	case TokenID::PUNC_ITERATE: return ":\xE2\x88\x88"; // \u2208
+
 	case TokenID::IN: return "\xE2\x88\x88"; // \u2208
 	case TokenID::NOTIN: return "\xE2\x88\x89"; // \u2209
 	case TokenID::SUBSET: return "\xE2\x8A\x82"; // \u2282
@@ -252,7 +271,7 @@ std::string Token::ToString(const Syntax syntax) const {
 }
 
 std::string Token::Str(const TokenID id, const Syntax syntax) {
-	if (syntax == Syntax::RSLANG) {
+	if (syntax == Syntax::MATH) {
 		return RSStr(id);
 	} else {
 		return AsciiStr(id);

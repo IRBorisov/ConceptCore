@@ -41,7 +41,7 @@
 	#pragma GCC diagnostic pop
 #endif
 
-namespace ccl::rslang {
+namespace ccl::rslang::detail {
 
 using asciilex::AsciiLexerImpl;
 
@@ -81,4 +81,4 @@ StrRange AsciiLexer::RangeInBytes() const {
 	return Range();
 }
 
-} // namespace ccl::rslang
+} // namespace ccl::rslang::detail

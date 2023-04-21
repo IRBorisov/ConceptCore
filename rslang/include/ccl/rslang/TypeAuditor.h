@@ -72,6 +72,7 @@ public:
 protected:
 	bool ViGlobalDefinition(Cursor iter);
 
+	bool ViFunctionDefinition(Cursor iter);
 	bool ViFunctionCall(Cursor iter);
 
 	bool ViGlobal(Cursor iter);
@@ -120,7 +121,6 @@ private:
 	void Clear() noexcept;
 
 	[[nodiscard]] bool VisitChildDeclaration(const Cursor& iter, Index index, const Typification& domain);
-	[[nodiscard]] bool VisitTemplateDeclaration(Cursor iter);
 
 	[[nodiscard]] bool VisitAndReturn(ExpressionType type) noexcept;
 	[[nodiscard]] bool VisitAllAndReturn(Cursor iter, const ExpressionType& type);

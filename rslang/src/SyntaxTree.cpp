@@ -48,7 +48,7 @@ const SyntaxTree::Node& SyntaxTree::Node::At(const Index index) const {
 	return *children.at(static_cast<size_t>(index));
 }
 
-void SyntaxTree::Node::AdoptChild(NodePtr son) {
+void SyntaxTree::Node::AdoptChild(RawNode son) {
 	assert(son != nullptr);
 	children.emplace_back(std::move(son))->parent = this;
 }
@@ -79,9 +79,9 @@ void SyntaxTree::Node::RemoveChild(const Index index) noexcept {
 	children.erase(children.begin() + static_cast<ptrdiff_t>(index));
 }
 
-SyntaxTree::NodePtr SyntaxTree::Node::ExtractChild(const Index index) {
+SyntaxTree::RawNode SyntaxTree::Node::ExtractChild(const Index index) {
 	assert(index < ChildrenCount() && index >= 0);
-	NodePtr result = std::move(children.at(static_cast<size_t>(index)));
+	RawNode result = std::move(children.at(static_cast<size_t>(index)));
 	children.erase(begin(children) + static_cast<ptrdiff_t>(index));
 	return result;
 }

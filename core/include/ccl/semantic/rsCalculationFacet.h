@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ccl/Entity.hpp"
-#include "ccl/rslang/Interpreter.hpp"
+#include "ccl/rslang/Interpreter.h"
 
 namespace ccl::semantic {
 
@@ -22,7 +22,7 @@ class rsCalculationFacet final : public meta::MutatorFacet<RSModel> {
 	friend class RSModel;
 
 	SetOfEntities calculatedEntities{};
-	std::unique_ptr<rslang::Interpreter<>> calculator{ nullptr };
+	std::unique_ptr<rslang::Interpreter> calculator{ nullptr };
 
 public:
 	explicit rsCalculationFacet(RSModel& core);
