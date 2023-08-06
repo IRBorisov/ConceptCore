@@ -2,6 +2,7 @@
 
 #include "ccl/lang/RefsManager.h"
 #include "ccl/lang/EntityTermContext.hpp"
+#include "ccl/lang/TextEnvironment.h"
 
 namespace ccl::lang {
 
@@ -38,7 +39,9 @@ void ManagedText::TranslateRaw(const StrTranslator& old2New) {
 }
 
 void ManagedText::UpdateFrom(const EntityTermContext& cntxt) {
-	cache = lang::RefsManager{ cntxt }.Resolve(rawText);
+	if (!TextEnvironment::Instance().skipResolving) {
+		cache = lang::RefsManager{ cntxt }.Resolve(rawText);
+	}
 }
 
 std::unordered_set<std::string> ManagedText::Referals() const {

@@ -109,15 +109,26 @@ TEST_F(UTRSFormJA, CheckExpression) {
 	{
 		auto reponse = JSON::parse(wrapper.CheckExpression("X1=X2", Syntax::MATH));
 		EXPECT_EQ(reponse.at("parseResult").get<bool>(), false);
+		EXPECT_EQ(reponse.at("syntax"), "math");
 		EXPECT_EQ(reponse.at("astText"), "[=[X1][X2]]");
 		EXPECT_EQ(reponse.at("errors").size(), 1U);
 		EXPECT_NE(reponse.at("errors")[0].at("position").get<int32_t>(), 0);
+		EXPECT_EQ(reponse.at("args").size(), 0U);
 	}
 	{
 		auto reponse = JSON::parse(wrapper.CheckExpression("X1=X1", Syntax::MATH));
 		EXPECT_EQ(reponse.at("parseResult").get<bool>(), true);
+		EXPECT_EQ(reponse.at("syntax"), "math");
 		EXPECT_EQ(reponse.at("typification"), "LOGIC");
 		EXPECT_EQ(reponse.at("astText"), "[=[X1][X1]]");
 		EXPECT_EQ(reponse.at("errors").size(), 0U);
+	}
+	{
+		auto reponse = JSON::parse(wrapper.CheckExpression(R"([a \in X1] a \eq a)", Syntax::ASCII));
+		EXPECT_EQ(reponse.at("parseResult").get<bool>(), true);
+		EXPECT_EQ(reponse.at("syntax"), "ascii");
+		EXPECT_EQ(reponse.at("args").size(), 1U);
+		EXPECT_EQ(reponse.at("args")[0].at("alias"), "a");
+		EXPECT_EQ(reponse.at("args")[0].at("typification"), "X1");
 	}
 }

@@ -36,6 +36,7 @@ namespace rslang {
 
 void to_json(nlohmann::ordered_json& object, const ExpressionType& type);
 void to_json(nlohmann::ordered_json& object, const Typification& typif);
+void to_json(nlohmann::ordered_json& object, const FunctionArguments& args);
 void to_json(nlohmann::ordered_json& object, const TokenData& data);
 void to_json(nlohmann::ordered_json& object, const SyntaxTree& ast);
 void to_json(nlohmann::ordered_json& object, const Error& error);

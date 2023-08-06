@@ -22,6 +22,7 @@
 #include "../src/testInterpretationStorage.cpp"
 #include "../src/testMaxPart.cpp"
 #include "../src/testOSS.cpp"
+#include "../src/testOperation.cpp"
 #include "../src/testOSSComplex.cpp"
 #include "../src/testOSSGraphFacet.cpp"
 #include "../src/testOSSGridFacet.cpp"

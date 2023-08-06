@@ -3,7 +3,7 @@
 
 #ifdef _MSC_VER
 	#pragma warning( push )
-	#pragma warning( disable : 4127 4244 4245 4456 4996 )
+	#pragma warning( disable : 4127 4244 4245 4456 4706 4996 )
 	#pragma warning( disable : 6011 6031 6246 6297 6323 6330 6340 6385 6386 6387 )
 	#pragma warning( disable : 26400 26401 26408 26426 26438 26440 26446 26447 )
 	#pragma warning( disable : 26451 26456 26462 26474 26481 26482 26485 )
@@ -30,7 +30,11 @@
 #include "../lib/error.cpp"
 #include "../lib/input.cpp"
 #include "../lib/matcher.cpp"
+
+#undef min
+#undef max
 #include "../lib/pattern.cpp"
+
 #include "../lib/posix.cpp"
 #include "../lib/unicode.cpp"
 #include "../lib/utf8.cpp"

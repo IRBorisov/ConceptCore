@@ -1,6 +1,7 @@
 #include "ccl/api/RSFormJA.h"
 
 #include "ccl/tools/JSON.h"
+#include "ccl/lang/TextEnvironment.h"
 
 using JSON = nlohmann::ordered_json;
 
@@ -24,7 +25,7 @@ std::string ParseExpression(const std::string& expression, const rslang::Syntax 
 		result["ast"] = parser.AST();
 	} else {
 		result["astText"] = "";
-		result["ast"] = "";
+		result["ast"] = JSON::array();
 	}
 	return result.dump(JSON_IDENT);
 }
@@ -77,6 +78,7 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
 	const auto valueOK = typeOK && analyser->CheckValue();
 
 	result["parseResult"] = typeOK;
+	result["syntax"] = analyser->parser.syntax;
 	if (typeOK) {
 		result["typification"] = analyser->GetType();
 	} else {
@@ -87,6 +89,7 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
 	} else {
 		result["valueClass"] = ccl::rslang::ValueClass::invalid;
 	}
+	result["args"] = analyser->GetDeclarationArgs();
 
 	result["errors"] = JSON::array();
 	for (const auto& error : analyser->Errors().All()) {
@@ -98,7 +101,7 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
 		result["ast"] = analyser->parser.AST();
 	} else {
 		result["astText"] = "";
-		result["ast"] = "";
+		result["ast"] = JSON::array();
 	}
 
   return result.dump(JSON_IDENT);

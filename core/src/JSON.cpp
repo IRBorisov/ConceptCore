@@ -237,6 +237,11 @@ void to_json(JSON& object, const RSCore& core) {
 		} else {
 			cstJSON["parse"]["syntaxTree"] = "";
 		}
+		if (parse.arguments.has_value()) {
+			cstJSON["parse"]["args"] = parse.arguments.value();
+		} else {
+			cstJSON["parse"]["args"] = JSON::array();
+		}
 		object += std::move(cstJSON);
 	}
 }
@@ -314,6 +319,16 @@ void to_json(JSON& object, const ExpressionType& type) {
 		[](const Typification& t) { return t.ToString();	},
 		[](const LogicT& /*t*/) { return std::string{"LOGIC"}; },
 											}, type);
+}
+
+void to_json(JSON& object, const FunctionArguments& args) {
+	object = JSON::array();
+	for (const auto& arg: args) {
+		object += {
+			{ "alias", arg.name },
+			{ "typification", arg.type.ToString() }
+		};
+	}
 }
 
 void to_json(JSON& object, const Typification& typif) {

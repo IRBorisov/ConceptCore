@@ -7,6 +7,7 @@
 
 #include "ccl/lang/ManagedText.h"
 #include "ccl/lang/Reference.h"
+#include "ccl/lang/TextEnvironment.h"
 
 class UTManagedText : public ::testing::Test {
 protected:
@@ -58,10 +59,19 @@ TEST_F(UTManagedText, SetRaw) {
 }
 
 TEST_F(UTManagedText, UpdateFrom) {
-	ManagedText text{ tccl::EntityRef("X1") };
-	EXPECT_EQ(text.Str(), tccl::EntityRef("X1"));
+	ManagedText text{ tccl::EntityRef("X1"), "cache" };
+	EXPECT_EQ(text.Str(), "cache");
 	text.UpdateFrom(context);
 	EXPECT_EQ(text.Str(), "Test");
+}
+
+TEST_F(UTManagedText, UpdateFromSkipResolution) {
+	ManagedText text{ tccl::EntityRef("X1"), "cache" };
+	EXPECT_EQ(text.Str(), "cache");
+	ccl::lang::TextEnvironment::Instance().skipResolving = true;
+	text.UpdateFrom(context);
+	ccl::lang::TextEnvironment::Instance().skipResolving = false;
+	EXPECT_EQ(text.Str(), "cache");
 }
 
 TEST_F(UTManagedText, TranslateRaw) {

@@ -52,20 +52,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>build\x86\$(Configuration)\</OutDir>
     <IntDir>build\x86\$(Configuration)\</IntDir>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>build\x64\$(Configuration)\</OutDir>
     <IntDir>build\x64\$(Configuration)\</IntDir>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>build\x86\$(Configuration)\</OutDir>
     <IntDir>build\x86\$(Configuration)\</IntDir>
     <GenerateManifest>false</GenerateManifest>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <GenerateManifest>false</GenerateManifest>
     <OutDir>build\x64\$(Configuration)\</OutDir>
     <IntDir>build\x64\$(Configuration)\</IntDir>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="src\testAsciiLexer.cpp" />

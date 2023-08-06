@@ -35,6 +35,7 @@
 */
 
 #include <reflex/pattern.h>
+#include <reflex/simd.h>
 #include <reflex/timer.h>
 #include <algorithm>
 #include <cstdlib>
@@ -158,7 +159,7 @@ void Pattern::error(regex_error_type code, size_t pos) const
   regex_error err(code, rex_, pos);
   if (opt_.w)
     std::cerr << err.what();
-  if (code == regex_error::exceeds_limits || opt_.r)
+  if (code == regex_error::exceeds_length || code == regex_error::exceeds_limits || opt_.r)
     throw err;
 }
 
@@ -168,13 +169,20 @@ void Pattern::init(const char *options, const uint8_t *pred)
   nop_ = 0;
   len_ = 0;
   min_ = 0;
+  pin_ = 0;
+  lcp_ = 0;
+  lcs_ = 0;
+  bmd_ = 0;
+  npy_ = 0;
   one_ = false;
   vno_ = 0;
   eno_ = 0;
+  hno_ = 0;
   pms_ = 0.0;
   vms_ = 0.0;
   ems_ = 0.0;
   wms_ = 0.0;
+  hms_ = 0.0;
   if (opc_ != NULL || fsm_ != NULL )
   {
     if (pred != NULL)
@@ -182,7 +190,7 @@ void Pattern::init(const char *options, const uint8_t *pred)
       len_ = pred[0];
       min_ = pred[1] & 0x0f;
       one_ = pred[1] & 0x10;
-      memcpy(pre_, pred + 2, len_);
+      memcpy(chr_, pred + 2, len_);
       if (min_ > 0)
       {
         size_t n = len_ + 2;
@@ -232,7 +240,7 @@ void Pattern::init(const char *options, const uint8_t *pred)
             Char c = t->first;
             if (c >= 'a' && c <= 'z')
             {
-              state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), t->second.second);
+              state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), t->second.second);
               ++eno_;
             }
           }
@@ -259,11 +267,178 @@ void Pattern::init(const char *options, const uint8_t *pred)
     // delete the tree DFA
     tfa_.clear();
   }
+  // clean up bitap and compute bitap entropy
+  if (min_ > 0 && len_ == 0)
+  {
+    // bitap entropy to estimate false positive rate
+    npy_ = 0;
+    for (Char i = 0; i < 256; ++i)
+    {
+      bit_[i] |= ~((1 << min_) - 1);
+      npy_ += (bit_[i] & 0x01) == 0;
+      npy_ += (bit_[i] & 0x02) == 0;
+      npy_ += (bit_[i] & 0x04) == 0;
+      npy_ += (bit_[i] & 0x08) == 0;
+      npy_ += (bit_[i] & 0x10) == 0;
+      npy_ += (bit_[i] & 0x20) == 0;
+      npy_ += (bit_[i] & 0x40) == 0;
+      npy_ += (bit_[i] & 0x80) == 0;
+    }
+    // average entropy per bitap position, we don't use bitap when entropy is too high for short patterns
+    npy_ /= min_;
+    // if patterns are longer then 4, we use bitap to increase accuracy, unless entropy is very high
+    if (min_ > 4 && npy_ < 200)
+      npy_ = 0;
+    // needle count and frequency thresholds to enable needle-based search
+    uint16_t pinmax = 8;
+    uint8_t freqmax = 251;
+#if defined(HAVE_AVX512BW) || defined(HAVE_AVX2) || defined(HAVE_SSE2)
+    if (have_HW_AVX512BW() || have_HW_AVX2())
+      pinmax = 16;
+    else if (have_HW_SSE2())
+      pinmax = 8;
+    else
+      pinmax = 1;
+#elif defined(HAVE_NEON)
+    pinmax = 8;
+#else
+    pinmax = 1;
+#endif
+    // get needles
+    pin_ = 0;
+    lcp_ = 0;
+    lcs_ = 0;
+    uint16_t nlcp = 65535; // max and undefined
+    uint16_t nlcs = 65535; // max and undefined
+    uint8_t freqlcp = 255; // max
+    uint8_t freqlcs = 255; // max
+    for (uint16_t k = 0; k < min_; ++k)
+    {
+      Pred mask = 1 << k;
+      uint16_t n = 0;
+      uint8_t freq = 0;
+      // at position k count the matching characters and find the max character frequency
+      for (uint16_t i = 0; i < 256; ++i)
+      {
+        if ((bit_[i] & mask) == 0)
+        {
+          ++n;
+          if (frequency(static_cast<uint8_t>(i)) > freq)
+            freq = frequency(static_cast<uint8_t>(i));
+        }
+      }
+      if (n <= pinmax)
+      {
+        // pick the fewest and rarest (least frequently occurring) needles to search
+        if (freq < freqlcp || (n < nlcp && freq == freqlcp))
+        {
+          lcs_ = lcp_;
+          nlcs = nlcp;
+          freqlcs = freqlcp;
+          lcp_ = static_cast<uint8_t>(k);
+          nlcp = n;
+          freqlcp = freq;
+        }
+        else if (n < nlcs || (n == nlcs && freq < freqlcs))
+        {
+          lcs_ = static_cast<uint8_t>(k);
+          nlcs = n;
+          freqlcs = freq;
+        }
+      }
+    }
+    // number of needles required
+    uint16_t n = nlcp > nlcs ? nlcp : nlcs;
+    // determine if a needle-based search is worthwhile, below or meeting the thresholds
+    if (n <= pinmax && freqlcp <= freqmax)
+    {
+      // bridge the gap from 9 to 16
+      if (n > 8)
+        n = 16;
+      uint16_t j = 0, k = n;
+      Pred masklcp = 1 << lcp_;
+      Pred masklcs = 1 << lcs_;
+      for (uint16_t i = 0; i < 256; ++i)
+      {
+        if ((bit_[i] & masklcp) == 0)
+          chr_[j++] = static_cast<uint8_t>(i);
+        if ((bit_[i] & masklcs) == 0)
+          chr_[k++] = static_cast<uint8_t>(i);
+      }
+      // fill up the rest of the character tables with duplicates if necessary
+      for (; j < n; ++j)
+        chr_[j] = chr_[j - 1];
+      for (; k < 2*n; ++k)
+        chr_[k] = chr_[k - 1];
+      pin_ = n;
+    }
+  }
+  else if (len_ > 1)
+  {
+    // Boyer-Moore preprocessing of the given string pattern pat of length len, generates bmd_ > 0 and bms_[] shifts
+    uint8_t n = static_cast<uint8_t>(len_); // okay to cast: actually never more than 255
+    uint16_t i;
+    for (i = 0; i < 256; ++i)
+      bms_[i] = n;
+    lcp_ = 0;
+    lcs_ = 1;
+    for (i = 0; i < n; ++i)
+    {
+      uint8_t pch = static_cast<uint8_t>(chr_[i]);
+      bms_[pch] = static_cast<uint8_t>(n - i - 1);
+      if (i > 0)
+      {
+        uint8_t freqpch = frequency(pch);
+        uint8_t lcpch = static_cast<uint8_t>(chr_[lcp_]);
+        uint8_t lcsch = static_cast<uint8_t>(chr_[lcs_]);
+        if (frequency(lcpch) > freqpch)
+        {
+          lcs_ = lcp_;
+          lcp_ = i;
+        }
+        else if (lcpch != pch && frequency(lcsch) > freqpch)
+        {
+          lcs_ = i;
+        }
+      }
+    }
+    uint16_t j;
+    for (i = n - 1, j = i; j > 0; --j)
+      if (chr_[j - 1] == chr_[i])
+        break;
+    bmd_ = i - j + 1;
+#if defined(HAVE_AVX512BW) || defined(HAVE_AVX2) || defined(HAVE_SSE2) || defined(__SSE2__) || defined(__x86_64__) || _M_IX86_FP == 2 || !defined(HAVE_NEON)
+    size_t score = 0;
+    for (i = 0; i < n; ++i)
+      score += bms_[static_cast<uint8_t>(chr_[i])];
+    score /= n;
+    uint8_t fch = frequency(static_cast<uint8_t>(chr_[lcp_]));
+#if defined(HAVE_AVX512BW) || defined(HAVE_AVX2) || defined(HAVE_SSE2)
+    if (!have_HW_SSE2() && !have_HW_AVX2() && !have_HW_AVX512BW())
+    {
+      // SSE2/AVX2 not available: if B-M scoring is high and freq is high, then use our improved Boyer-Moore
+      if (score > 1 && fch > 35 && (score > 4 || fch > 50) && fch + score > 52)
+        lcs_ = 0xffff; // use B-M
+    }
+#elif defined(__SSE2__) || defined(__x86_64__) || _M_IX86_FP == 2
+    // SSE2 is available: only if B-M scoring is high and freq is high, then use our improved Boyer-Moore
+    if (score > 1 && fch > 35 && (score > 4 || fch > 50) && fch + score > 52)
+      lcs_ = 0xffff; // use B-M
+#elif !defined(HAVE_NEON)
+    // no SIMD available: if B-M scoring is high and freq is high, then use our improved Boyer-Moore
+    if (score > 1 && fch > 35 && (score > 3 || fch > 50) && fch + score > 52)
+      lcs_ = 0xffff; // use B-M
+#endif
+#endif
+    if (lcs_ < 0xffff)
+      bmd_ = 0; // do not use B-M
+  }
 }
 
 void Pattern::init_options(const char *options)
 {
   opt_.b = false;
+  opt_.h = false;
   opt_.i = false;
   opt_.m = false;
   opt_.o = false;
@@ -287,8 +462,8 @@ void Pattern::init_options(const char *options)
           opt_.e = (*(s += (s[1] == '=') + 1) == ';' || *s == '\0' ? 256 : *s++);
           --s;
           break;
-        case 'p':
-          opt_.p = true;
+        case 'h':
+          opt_.h = true;
           break;
         case 'i':
           opt_.i = true;
@@ -298,6 +473,9 @@ void Pattern::init_options(const char *options)
           break;
         case 'o':
           opt_.o = true;
+          break;
+        case 'p':
+          opt_.p = true;
           break;
         case 'q':
           opt_.q = true;
@@ -487,7 +665,7 @@ void Pattern::parse(
           if (last_state == NULL)
             last_state = t; // t points to the tree DFA start state
           DFA::State *target_state = last_state = last_state->next = tfa_.state();
-          t->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+          t->edges[c] = DFA::State::Edge(c, target_state);
           t = target_state;
           ++eno_;
           ++vno_;
@@ -877,7 +1055,7 @@ void Pattern::parse3(
         {
           // CHECKED algorithmic options 7/30 if (!nullable)
           // CHECKED algorithmic options 7/30   lazyset.clear();
-          if (n < m && lazyset.empty())
+          if (n <= m && lazyset.empty())
             greedy(firstpos);
         }
         // CHECKED added pfirstpos to point to updated firstpos with lazy quants
@@ -1408,10 +1586,10 @@ void Pattern::compile(
           {
             Char c = t->first;
             DFA::State *target_state = last_state = last_state->next = dfa_.state(t->second.second);
-            state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+            state->edges[c] = DFA::State::Edge(c, target_state);
             if (c >= 'a' && c <= 'z')
             {
-              state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+              state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
               ++eno_;
             }
             ++eno_;
@@ -1423,7 +1601,7 @@ void Pattern::compile(
           {
             Char c = t->first;
             DFA::State *target_state = last_state = last_state->next = dfa_.state(t->second.second);
-            state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+            state->edges[c] = DFA::State::Edge(c, target_state);
             ++eno_;
           }
         }
@@ -1467,8 +1645,8 @@ void Pattern::compile(
                     {
                       pos = i->second;
                       DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edges[c].second, pos);
-                      state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
-                      state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                      state->edges[c] = DFA::State::Edge(c, target_state);
+                      state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                       eno_ += 2;
                     }
                   }
@@ -1476,7 +1654,7 @@ void Pattern::compile(
                   {
                     pos = i->second;
                     DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edges[c].second, pos);
-                    state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                    state->edges[c] = DFA::State::Edge(c, target_state);
                     ++eno_;
                   }
                 }
@@ -1490,7 +1668,7 @@ void Pattern::compile(
                 {
                   pos = i->second;
                   DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edges[c].second, pos);
-                  state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                  state->edges[c] = DFA::State::Edge(c, target_state);
                   ++eno_;
                 }
               }
@@ -1525,13 +1703,13 @@ void Pattern::compile(
                 DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edges[c].second);
                 if (std::isalpha(c))
                 {
-                  state->edges[lowercase(c)] = std::pair<Char,DFA::State*>(lowercase(c), target_state);
-                  state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                  state->edges[lowercase(c)] = DFA::State::Edge(lowercase(c), target_state);
+                  state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                   eno_ += 2;
                 }
                 else
                 {
-                  state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                  state->edges[c] = DFA::State::Edge(c, target_state);
                   ++eno_;
                 }
               }
@@ -1544,7 +1722,7 @@ void Pattern::compile(
               if (chars.contains(c))
               {
                 DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edges[c].second);
-                state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                state->edges[c] = DFA::State::Edge(c, target_state);
                 ++eno_;
               }
             }
@@ -1561,11 +1739,11 @@ void Pattern::compile(
         {
           Char c = t->first;
           DFA::State *target_state = last_state = last_state->next = dfa_.state(&t->second);
-          state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+          state->edges[c] = DFA::State::Edge(c, target_state);
           ++eno_;
           if (opt_.i && c >= 'a' && c <= 'z')
           {
-            state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+            state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
             ++eno_;
           }
         }
@@ -1609,8 +1787,8 @@ void Pattern::compile(
                     {
                       pos = i->second;
                       DFA::State *target_state = last_state = last_state->next = dfa_.state(&state->tnode->edges[c], pos);
-                      state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
-                      state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                      state->edges[c] = DFA::State::Edge(c, target_state);
+                      state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                       eno_ += 2;
                     }
                   }
@@ -1618,7 +1796,7 @@ void Pattern::compile(
                   {
                     pos = i->second;
                     DFA::State *target_state = last_state = last_state->next = dfa_.state(&state->tnode->edges[c], pos);
-                    state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                    state->edges[c] = DFA::State::Edge(c, target_state);
                     ++eno_;
                   }
                 }
@@ -1632,7 +1810,7 @@ void Pattern::compile(
                 {
                   pos = i->second;
                   DFA::State *target_state = last_state = last_state->next = dfa_.state(&state->tnode->edges[c], pos);
-                  state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                  state->edges[c] = DFA::State::Edge(c, target_state);
                   ++eno_;
                 }
               }
@@ -1665,13 +1843,13 @@ void Pattern::compile(
               DFA::State *target_state = last_state = last_state->next = dfa_.state(&state->tnode->edges[c]);
               if (opt_.i && std::isalpha(c))
               {
-                state->edges[lowercase(c)] = std::pair<Char,DFA::State*>(lowercase(c), target_state);
-                state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                state->edges[lowercase(c)] = DFA::State::Edge(lowercase(c), target_state);
+                state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                 eno_ += 2;
               }
               else
               {
-                state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                state->edges[c] = DFA::State::Edge(c, target_state);
                 ++eno_;
               }
             }
@@ -1696,13 +1874,13 @@ void Pattern::compile(
                 DFA::State *target_state = last_state = last_state->next = dfa_.state(p[j]);
                 if (opt_.i && std::isalpha(c))
                 {
-                  state->edges[lowercase(c)] = std::pair<Char,DFA::State*>(lowercase(c), target_state);
-                  state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                  state->edges[lowercase(c)] = DFA::State::Edge(lowercase(c), target_state);
+                  state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                   eno_ += 2;
                 }
                 else
                 {
-                  state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                  state->edges[c] = DFA::State::Edge(c, target_state);
                   ++eno_;
                 }
               }
@@ -1756,8 +1934,8 @@ void Pattern::compile(
                     {
                       pos = i->second;
                       DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edge[c >> 4][c & 0xf], pos);
-                      state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
-                      state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                      state->edges[c] = DFA::State::Edge(c, target_state);
+                      state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                       eno_ += 2;
                     }
                   }
@@ -1765,7 +1943,7 @@ void Pattern::compile(
                   {
                     pos = i->second;
                     DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edge[c >> 4][c & 0xf], pos);
-                    state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                    state->edges[c] = DFA::State::Edge(c, target_state);
                     ++eno_;
                   }
                 }
@@ -1779,7 +1957,7 @@ void Pattern::compile(
                 {
                   pos = i->second;
                   DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edge[c >> 4][c & 0xf], pos);
-                  state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                  state->edges[c] = DFA::State::Edge(c, target_state);
                   ++eno_;
                 }
               }
@@ -1812,13 +1990,13 @@ void Pattern::compile(
               DFA::State *target_state = last_state = last_state->next = dfa_.state(state->tnode->edge[c >> 4][c & 0xf]);
               if (opt_.i && std::isalpha(c))
               {
-                state->edges[lowercase(c)] = std::pair<Char,DFA::State*>(lowercase(c), target_state);
-                state->edges[uppercase(c)] = std::pair<Char,DFA::State*>(uppercase(c), target_state);
+                state->edges[lowercase(c)] = DFA::State::Edge(lowercase(c), target_state);
+                state->edges[uppercase(c)] = DFA::State::Edge(uppercase(c), target_state);
                 eno_ += 2;
               }
               else
               {
-                state->edges[c] = std::pair<Char,DFA::State*>(c, target_state);
+                state->edges[c] = DFA::State::Edge(c, target_state);
                 ++eno_;
               }
             }
@@ -1865,9 +2043,9 @@ void Pattern::compile(
             ++hi;
           --hi;
 #if WITH_COMPACT_DFA == -1
-          state->edges[lo] = std::pair<Char,DFA::State*>(hi, target_state);
+          state->edges[lo] = DFA::State::Edge(hi, target_state);
 #else
-          state->edges[hi] = std::pair<Char,DFA::State*>(lo, target_state);
+          state->edges[hi] = DFA::State::Edge(lo, target_state);
 #endif
           eno_ += hi - lo + 1;
           lo = hi + 1;
@@ -2528,8 +2706,11 @@ void Pattern::assemble(DFA::State *start)
   DBGLOG("BEGIN assemble()");
   timer_type t;
   timer_start(t);
-  predict_match_dfa(start);
+  if (opt_.h)
+    gen_match_hfa(start);
+  hms_ = timer_elapsed(t);
   graph_dfa(start);
+  predict_match_dfa(start);
   compact_dfa(start);
   encode_dfa(start);
   wms_ = timer_elapsed(t);
@@ -2625,7 +2806,7 @@ void Pattern::encode_dfa(DFA::State *start)
     // add final dead state (HALT opcode) only when needed, i.e. skip dead state if all chars 0-255 are already covered
     if (hi <= 0xFF)
     {
-      state->edges[hi] = std::pair<Char,DFA::State*>(0xFF, static_cast<DFA::State*>(NULL)); // cast to appease MSVC 2010
+      state->edges[hi] = DFA::State::Edge(0xFF, static_cast<DFA::State*>(NULL)); // cast to appease MSVC 2010
       ++nop_;
     }
 #else
@@ -2648,7 +2829,7 @@ void Pattern::encode_dfa(DFA::State *start)
     // add final dead state (HALT opcode) only when needed, i.e. skip dead state if all chars 0-255 are already covered
     if (!covered)
     {
-      state->edges[lo] = std::pair<Char,DFA::State*>(0x00, static_cast<DFA::State*>(NULL)); // cast to appease MSVC 2010
+      state->edges[lo] = DFA::State::Edge(0x00, static_cast<DFA::State*>(NULL)); // cast to appease MSVC 2010
       ++nop_;
     }
 #endif
@@ -3497,10 +3678,10 @@ void Pattern::export_code() const
   }
 }
 
-void Pattern::predict_match_dfa(DFA::State *start)
+void Pattern::predict_match_dfa(const DFA::State *start)
 {
   DBGLOG("BEGIN Pattern::predict_match_dfa()");
-  DFA::State *state = start;
+  const DFA::State *state = start;
   one_ = true;
   while (state->accept == 0)
   {
@@ -3512,14 +3693,12 @@ void Pattern::predict_match_dfa(DFA::State *start)
     Char lo = state->edges.begin()->first;
     if (!is_meta(lo) && lo == state->edges.begin()->second.first)
     {
-      if (lo != state->edges.begin()->second.first)
-        break;
       if (len_ >= 255)
       {
         one_ = false;
         break;
       }
-      pre_[len_++] = static_cast<uint8_t>(lo);
+      chr_[len_++] = static_cast<uint8_t>(lo);
     }
     else
     {
@@ -3580,19 +3759,17 @@ void Pattern::predict_match_dfa(DFA::State *start)
   DBGLOG("END Pattern::predict_match_dfa()");
 }
 
-void Pattern::gen_predict_match(DFA::State *state)
+void Pattern::gen_predict_match(const DFA::State *state)
 {
   min_ = 8;
-  std::map<DFA::State*,ORanges<Hash> > states[8];
-  gen_predict_match_transitions(state, states[0]);
+  std::map<const DFA::State*,ORanges<Hash> > hashes[8];
+  gen_predict_match_start(state, hashes[0]);
   for (int level = 1; level < 8; ++level)
-    for (std::map<DFA::State*,ORanges<Hash> >::iterator from = states[level - 1].begin(); from != states[level - 1].end(); ++from)
-      gen_predict_match_transitions(level, from->first, from->second, states[level]);
-  for (Char i = 0; i < 256; ++i)
-    bit_[i] &= (1 << min_) - 1;
+    for (std::map<const DFA::State*,ORanges<Hash> >::iterator from = hashes[level - 1].begin(); from != hashes[level - 1].end(); ++from)
+      gen_predict_match_transitions(level, from->first, from->second, hashes[level]);
 }
 
-void Pattern::gen_predict_match_transitions(DFA::State *state, std::map<DFA::State*,ORanges<Hash> >& states)
+void Pattern::gen_predict_match_start(const DFA::State *state, std::map<const DFA::State*,ORanges<Hash> >& hashes)
 {
   for (DFA::State::Edges::const_iterator edge = state->edges.begin(); edge != state->edges.end(); ++edge)
   {
@@ -3620,31 +3797,37 @@ void Pattern::gen_predict_match_transitions(DFA::State *state, std::map<DFA::Sta
     else if (next != NULL && next->edges.empty())
     {
       next = NULL;
+      accept = true;
     }
-    if (accept)
-      min_ = 1;
     Char hi = edge->second.first;
-    while (lo <= hi)
+    if (next != NULL)
+      hashes[next].insert(lo, hi);
+    uint8_t mask = ~(1 << 6);
+    if (accept)
     {
-      bit_[lo] &= ~1;
-      pmh_[lo] &= ~1;
-      if (accept)
-        pma_[lo] &= ~(1 << 7);
-      pma_[lo] &= ~(1 << 6);
-      if (next != NULL)
-        states[next].insert(hash(lo));
-      ++lo;
+      mask &= ~(1 << 7);
+      min_ = 1;
+    }
+    for (Char ch = lo; ch <= hi; ++ch)
+    {
+      bit_[ch] &= ~1;
+      pmh_[ch] &= ~1;
+      pma_[ch] &= mask;
     }
   }
 }
 
-void Pattern::gen_predict_match_transitions(size_t level, DFA::State *state, ORanges<Hash>& labels, std::map<DFA::State*,ORanges<Hash> >& states)
+void Pattern::gen_predict_match_transitions(size_t level, const DFA::State *state, const ORanges<Hash>& previous, std::map<const DFA::State*,ORanges<Hash> >& hashes)
 {
   for (DFA::State::Edges::const_iterator edge = state->edges.begin(); edge != state->edges.end(); ++edge)
   {
     Char lo = edge->first;
     if (is_meta(lo))
+    {
+      if (min_ > level)
+        min_ = level;
       break;
+    }
     DFA::State *next = level < 7 ? edge->second.second : NULL;
     bool accept = next == NULL || next->accept > 0;
     if (!accept)
@@ -3663,32 +3846,93 @@ void Pattern::gen_predict_match_transitions(size_t level, DFA::State *state, ORa
     else if (next != NULL && next->edges.empty())
     {
       next = NULL;
+      accept = true;
     }
+    ORanges<Hash> *next_hashes = next != NULL ? &hashes[next] : NULL;
     if (accept && min_ > level)
       min_ = level + 1;
-    if (level < 4 || level <= min_)
+    if (level < 4)
     {
+      uint8_t pmh_mask = ~(1 << level);
+      uint8_t pma_mask = ~(1 << (6 - 2 * level));
+      if (level == 3 || accept)
+        pma_mask &= ~(1 << (7 - 2 * level));
       Char hi = edge->second.first;
       if (level <= min_)
-        while (lo <= hi)
-          bit_[lo++] &= ~(1 << level);
-      for (ORanges<Hash>::const_iterator label = labels.begin(); label != labels.end(); ++label)
+        for (Char ch = lo; ch <= hi; ++ch)
+          bit_[ch] &= pmh_mask;
+      if (next_hashes != NULL)
       {
-        Hash label_hi = label->second - 1;
-        for (Hash label_lo = label->first; label_lo <= label_hi; ++label_lo)
+        for (ORanges<Hash>::const_iterator prev_range = previous.begin(); prev_range != previous.end(); ++prev_range)
         {
-          for (lo = edge->first; lo <= hi; ++lo)
+          Hash prev_lo = prev_range->first;
+          Hash prev_hi = prev_range->second;
+          for (Hash prev = prev_lo; prev < prev_hi; ++prev)
           {
-            Hash h = hash(label_lo, static_cast<uint8_t>(lo));
-            pmh_[h] &= ~(1 << level);
-            if (level < 4)
+            for (Char ch = lo; ch <= hi; ++ch)
             {
-              if (level == 3 || accept)
-                pma_[h] &= ~(1 << (7 - 2 * level));
-              pma_[h] &= ~(1 << (6 - 2 * level));
+              Hash h = hash(prev, static_cast<uint8_t>(ch));
+              pmh_[h] &= pmh_mask;
+              pma_[h] &= pma_mask;
+              next_hashes->insert(h);
             }
-            if (next != NULL)
-              states[next].insert(hash(h));
+          }
+        }
+      }
+      else
+      {
+        for (ORanges<Hash>::const_iterator prev_range = previous.begin(); prev_range != previous.end(); ++prev_range)
+        {
+          Hash prev_lo = prev_range->first;
+          Hash prev_hi = prev_range->second;
+          for (Hash prev = prev_lo; prev < prev_hi; ++prev)
+          {
+            for (Char ch = lo; ch <= hi; ++ch)
+            {
+              Hash h = hash(prev, static_cast<uint8_t>(ch));
+              pmh_[h] &= pmh_mask;
+              pma_[h] &= pma_mask;
+            }
+          }
+        }
+      }
+    }
+    else if (level <= min_)
+    {
+      uint8_t pmh_mask = ~(1 << level);
+      Char hi = edge->second.first;
+      for (Char ch = lo; ch <= hi; ++ch)
+        bit_[ch] &= pmh_mask;
+      if (next_hashes != NULL)
+      {
+        for (ORanges<Hash>::const_iterator prev_range = previous.begin(); prev_range != previous.end(); ++prev_range)
+        {
+          Hash prev_lo = prev_range->first;
+          Hash prev_hi = prev_range->second;
+          for (Hash prev = prev_lo; prev < prev_hi; ++prev)
+          {
+            for (Char ch = lo; ch <= hi; ++ch)
+            {
+              Hash h = hash(prev, static_cast<uint8_t>(ch));
+              pmh_[h] &= pmh_mask;
+              next_hashes->insert(h);
+            }
+          }
+        }
+      }
+      else
+      {
+        for (ORanges<Hash>::const_iterator prev_range = previous.begin(); prev_range != previous.end(); ++prev_range)
+        {
+          Hash prev_lo = prev_range->first;
+          Hash prev_hi = prev_range->second;
+          for (Hash prev = prev_lo; prev < prev_hi; ++prev)
+          {
+            for (Char ch = lo; ch <= hi; ++ch)
+            {
+              Hash h = hash(prev, static_cast<uint8_t>(ch));
+              pmh_[h] &= pmh_mask;
+            }
           }
         }
       }
@@ -3696,12 +3940,189 @@ void Pattern::gen_predict_match_transitions(size_t level, DFA::State *state, ORa
   }
 }
 
+
+void Pattern::gen_match_hfa(DFA::State *state)
+{
+  size_t max_level = HFA::MAX_DEPTH - 1; // max level from start state is reduced when hashes exponentially increase
+  HFA::State index = 1; // DFA states are enumarated for breadth-first matching with the state visit set in match_hfa()
+  HFA::StateHashes hashes[HFA::MAX_DEPTH]; // up to MAX_DEPTH states deep into the DFA are hashed from the start state
+  if (gen_match_hfa_start(state, index, hashes[0]))
+    for (size_t level = 1; level <= max_level; ++level)
+      for (HFA::StateHashes::iterator from = hashes[level - 1].begin(); from != hashes[level - 1].end(); ++from)
+        if (!gen_match_hfa_transitions(level, max_level, from->first, from->second, index, hashes[level]))
+          break;
+  // move the HFA to a new HFA with enumerated states for breadth-first matching with a bitset in match_hfa()
+  for (size_t level = 0; level <= max_level; ++level)
+  {
+    HFA::StateHashes::iterator hashes_end = hashes[level].end();
+    for (HFA::StateHashes::iterator next = hashes[level].begin(); next != hashes_end; ++next)
+    {
+      HFA::HashRanges& set_ranges = hfa_.hashes[level][next->first->index];
+      HFA::HashRanges& get_ranges = next->second;
+      for (size_t offset = std::max(HFA::MAX_CHAIN - 1, level) + 1 - HFA::MAX_CHAIN; offset <= level; ++offset)
+        set_ranges[offset].swap(get_ranges[offset]);
+    }
+  }
+}
+
+bool Pattern::gen_match_hfa_start(DFA::State *state, HFA::State& index, HFA::StateHashes& hashes)
+{
+  if (state->accept > 0)
+    return true;
+  state->index = index++;
+  for (DFA::State::Edges::const_iterator edge = state->edges.begin(); edge != state->edges.end(); ++edge)
+  {
+    Char lo = edge->first;
+    if (is_meta(lo))
+      break;
+    DFA::State *next = edge->second.second;
+    if (next != NULL)
+    {
+      if (next->index == 0)
+        next->index = index++; // cannot overflow max states if HFA::MAX_STATES >= 256
+      hfa_.states[state->index].insert(next->index);
+      Char hi = edge->second.first;
+      hashes[next][0].insert(lo, hi);
+    }
+  }
+  return true;
+}
+
+bool Pattern::gen_match_hfa_transitions(size_t level, size_t& max_level, DFA::State *state, const HFA::HashRanges& previous, HFA::State& index, HFA::StateHashes& hashes)
+{
+  if (state->accept > 0)
+    return true;
+  size_t ranges = 0; // total number of hash ranges at this depth level from the DFA/HFA start state
+  for (DFA::State::Edges::const_iterator edge = state->edges.begin(); edge != state->edges.end(); ++edge)
+  {
+    Char lo = edge->first;
+    if (is_meta(lo))
+      break;
+    DFA::State *next = edge->second.second;
+    if (next != NULL)
+    {
+      if (next->index == 0)
+      {
+        if (index >= HFA::MAX_STATES)
+        {
+          max_level = level; // too many HFA states, truncate HFA depth to the current level minus one
+          hfa_.states[state->index].clear(); // make this state accepting (dead)
+          DBGLOG("Too many HFA states at level %zu\n", level);
+          return false; // stop generating HFA states and hashes
+        }
+        next->index = index++; // enumerate the next state
+      }
+      hfa_.states[state->index].insert(next->index);
+      Char hi = edge->second.first;
+      for (size_t offset = std::max(HFA::MAX_CHAIN - 1, level) + 1 - HFA::MAX_CHAIN; offset < level; ++offset)
+      {
+        HFA::HashRange& next_hashes = hashes[next][offset];
+        const HFA::HashRange::const_iterator prev_range_end = previous[offset].end();
+        for (HFA::HashRange::const_iterator prev_range = previous[offset].begin(); prev_range != prev_range_end; ++prev_range)
+        {
+          Hash prev_lo = prev_range->first;
+          Hash prev_hi = prev_range->second - 1; // if prev_hi == 0 it overflowed from 65535, -1 takes care of this
+          for (uint32_t prev = prev_lo; prev <= prev_hi; ++prev)
+          {
+            // important: assume index hashing is additive, i.e. indexhash(x,b+1) = indexhash(x,b)+1 modulo 2^16
+            Hash hash_lo = indexhash(static_cast<Hash>(prev), static_cast<uint8_t>(lo));
+            Hash hash_hi = indexhash(static_cast<Hash>(prev), static_cast<uint8_t>(hi));
+            if (hash_lo <= hash_hi && hash_hi < 65535)
+            {
+              next_hashes.insert(hash_lo, hash_hi);
+            }
+            else
+            {
+              if (hash_lo < 65535)
+                next_hashes.insert(hash_lo, 65534); // 65534 max, 65535 overflows
+              if (hash_hi < 65535)
+                next_hashes.insert(0, hash_hi); // 65534 max, 65535 overflows
+              if (next_hashes.find(65535) == next_hashes.end())
+                next_hashes.insert(65535); // overflow value 65535 is unordered in ORange<Hash> 
+            }
+          }
+        }
+        ranges += next_hashes.size();
+      }
+      hashes[next][level].insert(lo, hi); // at offset == level
+      hno_ += ranges;
+    }
+  }
+  if (ranges > HFA::MAX_RANGES)
+  {
+    max_level = level; // too many hashes causing significant slow down, truncate HFA to the current level
+    hfa_.states[state->index].clear(); // make this state accepting (dead)
+    DBGLOG("too many HFA hashes at level %zu state %u ranges %zu\n", level, state->index, ranges);
+  }
+  return true;
+}
+
+bool Pattern::match_hfa(const uint8_t *indexed, size_t size) const
+{
+  if (!has_hfa())
+    return false;
+  HFA::VisitSet visit[2]; // we alternate and swap two visit bitsets, to produce a new one from the previous
+  bool accept = false; // a flag to indicate that we reached an accept (or dead) state, i.e. a possible match is found
+  for (size_t level = 0; level < HFA::MAX_DEPTH && !accept; ++level)
+    if (!match_hfa_transitions(level, hfa_.hashes[level], indexed, size, visit[level & 1], visit[~level & 1], accept))
+      return false;
+  return true;
+}
+
+bool Pattern::match_hfa_transitions(size_t level, const HFA::Hashes& hashes, const uint8_t *indexed, size_t size, HFA::VisitSet& visit, HFA::VisitSet& next_visit, bool& accept) const
+{
+  bool any = false;
+  for (HFA::Hashes::const_iterator next = hashes.begin(); next != hashes.end(); ++next)
+  {
+    if (level == 0 || visit.test(next->first))
+    {
+      bool all = true;
+      for (size_t offset = std::max(static_cast<size_t>(7), level) - 7; offset <= level; ++offset)
+      {
+        uint8_t mask = 1 << (level - offset);
+        bool flag = false;
+        const HFA::HashRange::const_iterator range_end = next->second[offset].end();
+        for (HFA::HashRange::const_iterator range = next->second[offset].begin(); range != range_end; ++range)
+        {
+          Hash lo = range->first;
+          Hash hi = range->second - 1; // if hi == 0 it overflowed from 65535, -1 takes care of this
+          uint32_t h;
+          for (h = lo; h <= hi && (indexed[h & (size - 1)] & mask) != 0; ++h)
+            continue;
+          if (h <= hi)
+          {
+            flag = true;
+            break;
+          }
+        }
+        if (flag)
+        {
+          HFA::States::const_iterator state = hfa_.states.find(next->first);
+          if (state == hfa_.states.end() || state->second.empty())
+            return accept = true; // reached an accepting (dead) state (dead means accept in HFA)
+          const HFA::StateSet::const_iterator index_end = state->second.end();
+          for (HFA::StateSet::const_iterator index = state->second.begin(); index != index_end; ++index)
+            next_visit.set(*index, true);
+        }
+        else
+        {
+          all = false;
+          break;
+        }
+      }
+      if (all)
+        any = true;
+    }
+  }
+  return any;
+}
+
 void Pattern::write_predictor(FILE *file) const
 {
   ::fprintf(file, "const reflex::Pattern::Pred reflex_pred_%s[%zu] = {", opt_.n.empty() ? "FSM" : opt_.n.c_str(), 2 + len_ + (min_ > 1 && len_ == 0) * 256 + (min_ > 0) * Const::HASH);
   ::fprintf(file, "\n  %3hhu,%3hhu,", static_cast<uint8_t>(len_), (static_cast<uint8_t>(min_ | (one_ << 4))));
   for (size_t i = 0; i < len_; ++i)
-    ::fprintf(file, "%s%3hhu,", ((i + 2) & 0xF) ? "" : "\n  ", static_cast<uint8_t>(pre_[i]));
+    ::fprintf(file, "%s%3hhu,", ((i + 2) & 0xF) ? "" : "\n  ", static_cast<uint8_t>(chr_[i]));
   if (min_ > 0)
   {
     if (min_ > 1 && len_ == 0)

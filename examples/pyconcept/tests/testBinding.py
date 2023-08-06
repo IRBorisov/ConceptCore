@@ -6,11 +6,13 @@ from zipfile import ZipFile
 
 import pyconcept as pc
 
+
 def _read_trs(file_path: str) -> str:
     '''Read JSON from TRS file'''
     with ZipFile(file_path, 'r') as archive:
         json_data = archive.read('document.json')
     return json_data
+
 
 class TestBinding(unittest.TestCase):
     '''Test class for Concept API.'''
@@ -64,6 +66,7 @@ class TestBinding(unittest.TestCase):
     def _get_default_schema(self) -> str:
         file_path = os.getcwd() + r'/tests/data/КС начальник-подчиненный.trs'
         return _read_trs(file_path)
+
 
 if __name__ == '__main__':
     unittest.main()

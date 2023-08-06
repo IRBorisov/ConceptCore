@@ -7,7 +7,11 @@
 namespace ccl::lang {
 
 class TextEnvironment final {
+private:
 	std::unique_ptr<TextProcessor> processor{ std::make_unique<TextProcessor>() };
+
+public:
+	bool skipResolving{ false };
 
 public:
 	static void SetProcessor(std::unique_ptr<TextProcessor> newProcessor) noexcept;

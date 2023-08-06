@@ -115,6 +115,9 @@
     <ClCompile Include="src\testRSFormJA.cpp">
       <Filter>s_API</Filter>
     </ClCompile>
+    <ClCompile Include="src\testOperation.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="s_OSS">

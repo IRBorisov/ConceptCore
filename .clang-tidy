@@ -32,4 +32,5 @@ Checks: "*,\
  -misc-non-private-member-variables-in-classes,\
  -misc-no-recursion,\
  -cppcoreguidelines-special-member-functions,\
+ -cppcoreguidelines-prefer-member-initializer,\
  -cppcoreguidelines-non-private-member-variables-in-classes"
