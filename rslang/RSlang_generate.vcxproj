@@ -46,7 +46,57 @@
     <ClCompile Include="unity\reflex_unity2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\RSParserImpl.y"/>
+    <Bison Include="src\RSParserImpl.y">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</OutputFile>
+      <DefinesFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </DefinesFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</OutputFile>
+      <DefinesFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </DefinesFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp</OutputFile>
+      <DefinesFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </DefinesFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cpp</OutputFile>
+      <DefinesFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </DefinesFile>
+      <Verbose Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</Verbose>
+      <Warnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">all</Warnings>
+      <Report Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">all</Report>
+      <ReportFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ReportFile>
+      <Verbose Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</Verbose>
+      <Warnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">all</Warnings>
+      <Report Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">all</Report>
+      <ReportFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ReportFile>
+      <Verbose Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</Verbose>
+      <Warnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">all</Warnings>
+      <Report Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">all</Report>
+      <ReportFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ReportFile>
+      <Verbose Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</Verbose>
+      <Warnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">all</Warnings>
+      <Report Condition="'$(Configuration)|$(Platform)'=='Release|x64'">all</Report>
+      <ReportFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ReportFile>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <Debug Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Debug>
+      <Debug Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Debug>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</NoLines>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</NoLines>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</NoLines>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</NoLines>
+      <GraphFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).gv</GraphFile>
+      <GraphFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).gv</GraphFile>
+      <GraphFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).gv</GraphFile>
+      <GraphFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).gv</GraphFile>
+    </Bison>
     <None Include="script\build_lexers.bat" />
     <None Include="src\AsciiLexerImpl.l" />
     <None Include="src\MathLexerImpl.l" />
@@ -122,6 +172,9 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="C:\GnuWin32\win_flex_bison3\custom_build_rules\win_bison_only\win_bison_custom_build.props" />
+  </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
@@ -292,10 +345,27 @@ xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>
+      </Inputs>
+      <Message>
+      </Message>
+    </CustomBuildStep>
     <PostBuildEvent>
       <Command>xcopy /y /s /q /i include ..\output\include
 xcopy /y /s /q /i ..\cclCommons\include ..\output\include</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="C:\GnuWin32\win_flex_bison3\custom_build_rules\win_bison_only\win_bison_custom_build.targets" />
+  </ImportGroup>
 </Project>

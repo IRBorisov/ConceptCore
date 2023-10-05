@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConceptCoreLibrary", "core\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RSlang", "rslang\RSlang.vcxproj", "{A8529C63-42F5-43E6-97B8-2EC83F23E1F9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RSLangTest", "rslang\test\rslTest.vcxproj", "{32469CE1-303B-4DB4-8E03-B7EBED5851EB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RSlangTest", "rslang\test\rslTest.vcxproj", "{32469CE1-303B-4DB4-8E03-B7EBED5851EB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cclGraph", "cclGraph\cclGraph.vcxproj", "{7E1D5338-F819-4C96-B461-9EAAB8D02E1D}"
 EndProject
@@ -130,9 +130,7 @@ Global
 		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Debug|x86.ActiveCfg = Debug|Win32
 		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Debug|x86.Build.0 = Debug|Win32
 		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Release|x64.ActiveCfg = Release|x64
-		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Release|x64.Build.0 = Release|x64
 		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Release|x86.ActiveCfg = Release|Win32
-		{692F2E27-1749-4A3C-9543-C4101E7B8E49}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,12 @@ Use VS Solution for Windows development.
 
 Windows development requires Bison installed and Visual Studio 2022+
 
+If you want to only build pyconcept:
+- Build CCL-Full.sln in Release mode.
+- Make sure you have Python installed and executable path is present in environment variables.
+- Run pyconcept\script\Build.ps1. Answer 'A' if execution policy prompts for input
+- pyconcept wheel will be deposited in output\py folder
+
 
 # This project was made possible because of these incredible projects and tools
 This project is based on multiple projects and works listed below. If you notice any problems with licensing or missing acknowledgements please inform repository maintainer.
