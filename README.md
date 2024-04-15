@@ -10,19 +10,13 @@ C++ library for manipulating concepts in formal language of advanced set theory
 
 ## 📦 Project build
 
-Use Dockerfile to setup Clang / GCC build for Ubuntu development.
-Use VS Solution for Windows development.
-Use ccl/CMakeLists.txt for other platforms.
+- ccl + coredll + pyconcept - Dockerfile to setup Clang / GCC build for Ubuntu development.
+- ccl + coredlll local dev - VS Solution for Windows development.
+- ccl - VS Code and ccl/CMakeLists.txt for other platforms.
+- pyconcept - python setup.py
 
 Windows development requires Bison installed and Visual Studio 2022+.
 After changing grammar / syntax you can rebuild lexers and parser using scripts in 'scripts' folder.
-
-If you want to only build pyconcept:
-
-- Build CCL-Full.sln in Release mode.
-- Make sure you have Python installed and executable path is present in environment variables.
-- Run pyconcept\script\Build.ps1. Answer 'A' if execution policy prompts for input
-- pyconcept wheel will be deposited in output\py folder
 
 ## 💝 Acknowledgements
 
