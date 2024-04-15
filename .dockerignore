@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+.github
+
+# Windows specific
+*.ps1
+
+
+# Local build/utility folders
+.vscode
+.vs
+*.vcxproj.user
+*.pyc
+*.pyd
+
+**/CMakeUserPresets.json
+output
+packages
+**/build
+**/venv
+**/pyconcept/import
+**/egg-info
+
+
+# Specific items
+docker-compose.yml
+rslang/src/RSParserImpl.output
+rslang/src/RSParserImpl.gv

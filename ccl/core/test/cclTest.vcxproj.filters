@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Utils\RSLHelper.hpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testCstNameGenerator.cpp">
+      <Filter>s_Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testEntityGenerator.cpp">
+      <Filter>s_Concept</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testGenerator.cpp">
+      <Filter>s_Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSS.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSSComplex.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSAggregator.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSCalculationFacet.cpp">
+      <Filter>s_Concept\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSModel.cpp">
+      <Filter>s_Concept\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSValuesFacet.cpp">
+      <Filter>s_Concept\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRelativation.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSSSourceFacet.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSSOpsFacet.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSSGridFacet.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOSSGraphFacet.cpp">
+      <Filter>s_OSS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testEnvironment.cpp">
+      <Filter>s_Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testEquationOpts.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testEquationProcessor.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testSynthes.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testMaxPart.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testExtractBasis.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testSourceManager.cpp">
+      <Filter>s_Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testInterpretationStorage.cpp">
+      <Filter>s_Concept</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSModsFacet.cpp">
+      <Filter>s_Concept\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSOperationsFacet.cpp">
+      <Filter>s_Concept\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSForm.cpp">
+      <Filter>s_Concept\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testJSON.cpp">
+      <Filter>s_Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testTextData.cpp">
+      <Filter>s_Concept\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSCore.cpp">
+      <Filter>s_Concept\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testCstList.cpp">
+      <Filter>s_Concept\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testConceptRecord.cpp">
+      <Filter>s_Concept\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSConcept.cpp">
+      <Filter>s_Concept\01 Schema</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testTextConcept.cpp">
+      <Filter>s_Concept\02 Thesaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testSchema.cpp">
+      <Filter>s_Concept\01 Schema</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testThesaurus.cpp">
+      <Filter>s_Concept\02 Thesaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testCstType.cpp">
+      <Filter>s_Concept\01 Schema</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testIdentityManager.cpp">
+      <Filter>s_Concept\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testRSFormJA.cpp">
+      <Filter>s_API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testOperation.cpp">
+      <Filter>s_Concept\06 OPS</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="s_OSS">
+      <UniqueIdentifier>{3d1f768b-8b74-4c1e-bec7-9ddfa6dcca85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Utils">
+      <UniqueIdentifier>{bbd33ef5-8bbc-43d5-a519-ba7a12ee15cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept">
+      <UniqueIdentifier>{09a77fa0-d489-4c1d-9284-c6009d68e939}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{e6fd147c-7c00-4af7-bf74-540ea6d56960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\03 RSCore">
+      <UniqueIdentifier>{01829dd9-3974-4b45-b711-dbe85c0704db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\04 RSForm">
+      <UniqueIdentifier>{2902e363-ddef-4a16-b0b0-b4b6595bbba0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\05 RSModel">
+      <UniqueIdentifier>{8f22573a-20f3-4ec7-adf0-8a80de704fe4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\06 OPS">
+      <UniqueIdentifier>{b4d8699f-7abb-41ab-8974-46e54e24703e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\01 Schema">
+      <UniqueIdentifier>{a4fd3e10-4928-4159-84e8-aaf8cf45ca1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_Concept\02 Thesaurus">
+      <UniqueIdentifier>{b2885581-28a0-4bef-9a27-15bf0d342061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="s_API">
+      <UniqueIdentifier>{434c8a3a-5655-47ea-af49-f366af973d73}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Utils\RandomGenerator.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\FakeObserver.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\FakeSourceManager.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\FakeTermContext.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\FakeTextProcessor.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="!Testing aspects.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

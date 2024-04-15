@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="11 parse">
+      <UniqueIdentifier>{5ee5e8d8-120c-4065-84e8-5af57d719966}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="11 parse\parser">
+      <UniqueIdentifier>{82fd2098-de5f-447c-90e2-89908eeccb6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="13 modify">
+      <UniqueIdentifier>{8b7f2ef5-62ff-4880-84f4-0ab1f52b1f71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01 common">
+      <UniqueIdentifier>{3c85ab44-bb88-4509-be90-8f248199ac3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="14 interpret">
+      <UniqueIdentifier>{54975980-25b6-4f89-92c7-1a81c0b8c7d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="12 semantic">
+      <UniqueIdentifier>{e37b3489-ce0f-4550-970e-5031e29ccd5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="11 parse\lexer">
+      <UniqueIdentifier>{a44817b3-fe7e-486a-9c63-d177f1d421b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02 API">
+      <UniqueIdentifier>{7537550f-1d34-40b9-b5ae-672f144f2c36}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\RSExpr.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ASTNormalizer.cpp">
+      <Filter>13 modify</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RSParserImpl.cpp">
+      <Filter>11 parse\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RSParser.cpp">
+      <Filter>11 parse\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RSGenerator.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GeneratorImplAST.cpp">
+      <Filter>13 modify</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SDImplementation.cpp">
+      <Filter>14 interpret</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SDataCompact.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ASTInterpreter.cpp">
+      <Filter>14 interpret</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ErrorLogger.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RSToken.cpp">
+      <Filter>11 parse</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StructuredData.cpp">
+      <Filter>14 interpret</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SyntaxTree.cpp">
+      <Filter>11 parse</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Typification.cpp">
+      <Filter>12 semantic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MathLexer.cpp">
+      <Filter>11 parse\lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AsciiLexer.cpp">
+      <Filter>11 parse\lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="unity\reflex_unity1.cpp" />
+    <ClCompile Include="unity\reflex_unity2.cpp" />
+    <ClCompile Include="src\NameCollector.cpp">
+      <Filter>14 interpret</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TypeAuditor.cpp">
+      <Filter>12 semantic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ValueAuditor.cpp">
+      <Filter>12 semantic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Literals.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Auditor.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Parser.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interpreter.cpp">
+      <Filter>02 API</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ccl\rslang\RSErrorCodes.hpp">
+      <Filter>01 common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\RSParser.h">
+      <Filter>11 parse\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\RSGenerator.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\RSExpr.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="header\SDImplementation.h">
+      <Filter>14 interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Structure.hpp">
+      <Filter>01 common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\SDataCompact.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="header\GeneratorImplAST.h">
+      <Filter>13 modify</Filter>
+    </ClInclude>
+    <ClInclude Include="header\ASTNormalizer.h">
+      <Filter>13 modify</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\ParserState.hpp">
+      <Filter>11 parse\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="header\RSParserImpl.h">
+      <Filter>11 parse\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\ErrorLogger.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Error.hpp">
+      <Filter>11 parse</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\RSToken.h">
+      <Filter>11 parse</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\StructuredData.h">
+      <Filter>14 interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\SyntaxTree.h">
+      <Filter>11 parse</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Typification.h">
+      <Filter>12 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\DataContext.hpp">
+      <Filter>14 interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Auditor.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\ASTInterpreter.h">
+      <Filter>14 interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Interpreter.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\AsciiLexer.h">
+      <Filter>11 parse\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\MathLexer.h">
+      <Filter>11 parse\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="header\AsciiLexerImpl.hpp">
+      <Filter>11 parse\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="header\NameCollector.h">
+      <Filter>14 interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="header\MathLexerImpl.hpp">
+      <Filter>11 parse\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\LexerBase.hpp">
+      <Filter>11 parse\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\TypeAuditor.h">
+      <Filter>12 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\ValueAuditor.h">
+      <Filter>12 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\ValueClass.hpp">
+      <Filter>12 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\TypeContext.hpp">
+      <Filter>12 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Literals.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\rslang\Parser.h">
+      <Filter>02 API</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\AsciiLexerImpl.l">
+      <Filter>11 parse\lexer</Filter>
+    </None>
+    <None Include="src\MathLexerImpl.l">
+      <Filter>11 parse\lexer</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Bison Include="src\RSParserImpl.y">
+      <Filter>11 parse\parser</Filter>
+    </Bison>
+  </ItemGroup>
+</Project>

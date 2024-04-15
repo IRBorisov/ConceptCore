@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AsciiLexer.cpp" />
+    <ClCompile Include="src\ASTInterpreter.cpp" />
+    <ClCompile Include="src\ASTNormalizer.cpp" />
+    <ClCompile Include="src\Auditor.cpp" />
+    <ClCompile Include="src\ErrorLogger.cpp" />
+    <ClCompile Include="src\GeneratorImplAST.cpp" />
+    <ClCompile Include="src\Interpreter.cpp" />
+    <ClCompile Include="src\Literals.cpp" />
+    <ClCompile Include="src\NameCollector.cpp" />
+    <ClCompile Include="src\Parser.cpp" />
+    <ClCompile Include="src\RSExpr.cpp" />
+    <ClCompile Include="src\RSGenerator.cpp" />
+    <ClCompile Include="src\MathLexer.cpp" />
+    <ClCompile Include="src\RSParser.cpp" />
+    <ClCompile Include="src\RSParserImpl.cpp" />
+    <ClCompile Include="src\RSToken.cpp" />
+    <ClCompile Include="src\SDataCompact.cpp" />
+    <ClCompile Include="src\SDImplementation.cpp" />
+    <ClCompile Include="src\StructuredData.cpp" />
+    <ClCompile Include="src\SyntaxTree.cpp" />
+    <ClCompile Include="src\TypeAuditor.cpp" />
+    <ClCompile Include="src\Typification.cpp" />
+    <ClCompile Include="src\ValueAuditor.cpp" />
+    <ClCompile Include="unity\reflex_unity1.cpp" />
+    <ClCompile Include="unity\reflex_unity2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\RSParserImpl.y"/>
+    <None Include="src\AsciiLexerImpl.l" />
+    <None Include="src\MathLexerImpl.l" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="header\AsciiLexerImpl.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="header\ASTNormalizer.h" />
+    <ClInclude Include="header\GeneratorImplAST.h" />
+    <ClInclude Include="header\NameCollector.h" />
+    <ClInclude Include="header\MathLexerImpl.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="header\RSParserImpl.h" />
+    <ClInclude Include="header\SDImplementation.h" />
+    <ClInclude Include="include\ccl\rslang\AsciiLexer.h" />
+    <ClInclude Include="include\ccl\rslang\ASTInterpreter.h" />
+    <ClInclude Include="include\ccl\rslang\Auditor.h" />
+    <ClInclude Include="include\ccl\rslang\DataContext.hpp" />
+    <ClInclude Include="include\ccl\rslang\Error.hpp" />
+    <ClInclude Include="include\ccl\rslang\ErrorLogger.h" />
+    <ClInclude Include="include\ccl\rslang\Interpreter.h" />
+    <ClInclude Include="include\ccl\rslang\LexerBase.hpp" />
+    <ClInclude Include="include\ccl\rslang\Literals.h" />
+    <ClInclude Include="include\ccl\rslang\Parser.h" />
+    <ClInclude Include="include\ccl\rslang\ParserState.hpp" />
+    <ClInclude Include="include\ccl\rslang\RSErrorCodes.hpp" />
+    <ClInclude Include="include\ccl\rslang\RSExpr.h" />
+    <ClInclude Include="include\ccl\rslang\RSGenerator.h" />
+    <ClInclude Include="include\ccl\rslang\MathLexer.h" />
+    <ClInclude Include="include\ccl\rslang\RSParser.h" />
+    <ClInclude Include="include\ccl\rslang\RSToken.h" />
+    <ClInclude Include="include\ccl\rslang\SDataCompact.h" />
+    <ClInclude Include="include\ccl\rslang\Structure.hpp" />
+    <ClInclude Include="include\ccl\rslang\StructuredData.h" />
+    <ClInclude Include="include\ccl\rslang\SyntaxTree.h" />
+    <ClInclude Include="include\ccl\rslang\TypeAuditor.h" />
+    <ClInclude Include="include\ccl\rslang\TypeContext.hpp" />
+    <ClInclude Include="include\ccl\rslang\Typification.h" />
+    <ClInclude Include="include\ccl\rslang\ValueAuditor.h" />
+    <ClInclude Include="include\ccl\rslang\ValueClass.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{A8529C63-42F5-43E6-97B8-2EC83F23E1F9}</ProjectGuid>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>RSlang</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>..\..\output\lib\x86\</OutDir>
+    <IntDir>build\x86\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>BisonTarget</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>..\..\output\lib\x64\</OutDir>
+    <IntDir>build\x64\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>BisonTarget</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\output\lib\x86\</OutDir>
+    <IntDir>build\x86\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\output\lib\x64\</OutDir>
+    <IntDir>build\x64\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <AdditionalIncludeDirectories>include;header;..\cclCommons\include;import\reflex\include</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName)d.pdb</ProgramDataBaseFileName>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /s /q /i include ..\..\output\include
+xcopy /y /s /q /i ..\cclCommons\include ..\..\output\include</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <AdditionalIncludeDirectories>include;header;..\cclCommons\include;import\reflex\include</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName)d.pdb</ProgramDataBaseFileName>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <OmitFramePointers>false</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /s /q /i include ..\..\output\include
+xcopy /y /s /q /i ..\cclCommons\include ..\..\output\include</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_LIB;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <AdditionalIncludeDirectories>include;header;..\cclCommons\include;import\reflex\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /s /q /i include ..\..\output\include
+xcopy /y /s /q /i ..\cclCommons\include ..\..\output\include</Command>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>
+      </Inputs>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <AdditionalIncludeDirectories>include;header;..\cclCommons\include;import\reflex\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /s /q /i include ..\..\output\include
+xcopy /y /s /q /i ..\cclCommons\include ..\..\output\include</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

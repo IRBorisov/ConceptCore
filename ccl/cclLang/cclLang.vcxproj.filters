@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="lang">
+      <UniqueIdentifier>{3c85ab44-bb88-4509-be90-8f248199ac3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="env">
+      <UniqueIdentifier>{5ea8ccaf-0a49-441e-8a3a-bb300790ffa4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ccl\lang\Reference.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\RefsManager.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\EntityTermContext.hpp">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\LexicalTerm.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\ManagedText.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\TextProcessor.h">
+      <Filter>env</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\TextEnvironment.h">
+      <Filter>env</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\Morphology.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\lang\Literals.h">
+      <Filter>lang</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Reference.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RefsManager.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LexicalTerm.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ManagedText.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextProcessor.cpp">
+      <Filter>env</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextEnvironment.cpp">
+      <Filter>env</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Morphology.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Literals.cpp">
+      <Filter>lang</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

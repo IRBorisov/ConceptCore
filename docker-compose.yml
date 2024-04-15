@@ -1,0 +1,14 @@
+name: concept-core
+
+volumes:
+  concept_volume:
+    name: "concept-libs"
+
+services:
+  builder:
+    restart: no
+    build:
+      context: ./
+    volumes:
+      - concept_volume:/home/output
+    command: sh /home/entrypoint.sh

@@ -1,0 +1,6 @@
+[flake8]
+# E303 - too many blank lines
+# E203 - whitespace before semicolon
+ignore = E303, E203
+exclude = __init__.py
+max-line-length = 120

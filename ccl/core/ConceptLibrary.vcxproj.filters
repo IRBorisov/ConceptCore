@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="02 env">
+      <UniqueIdentifier>{86d3c4ce-8b73-446b-ae23-3c51e5321065}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01 tools">
+      <UniqueIdentifier>{bb109e85-4730-40c3-8cf6-4cf4a3c7111d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic">
+      <UniqueIdentifier>{afefed49-4a72-4a1d-87f0-26c3b8f3f1e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04 ops">
+      <UniqueIdentifier>{5c6e9f8c-3112-47da-9118-ecfbaa836009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05 oss">
+      <UniqueIdentifier>{dafdb290-2760-4574-bf2e-86b94008efe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic\03 RSCore">
+      <UniqueIdentifier>{1d5f943e-0673-47a8-b4ab-ef179e4c3dd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic\04 RSForm">
+      <UniqueIdentifier>{2bd129f8-604d-4b83-affd-8f322bbff657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic\05 RSModel">
+      <UniqueIdentifier>{5de97bf2-566e-46c1-9b21-9ceacac19749}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic\01 Schema">
+      <UniqueIdentifier>{0a673bb0-fb75-4cc4-8fd7-1b1d033a699a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03 semantic\02 Thesaurus">
+      <UniqueIdentifier>{166b33ed-84a5-4040-8398-983a541cc3db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04 ops\01 RSOps">
+      <UniqueIdentifier>{3b955deb-294b-4000-bb01-4a043fdfbf38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="06 API">
+      <UniqueIdentifier>{b2207c2a-30f0-424c-bfe2-f81eeca2949d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\env\cclEnvironment.cpp">
+      <Filter>02 env</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\EntityGenerator.cpp">
+      <Filter>01 tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\CstNameGenerator.cpp">
+      <Filter>01 tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ops\RSAggregator.cpp">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ops\RSOperations.cpp">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\ossGraphFacet.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\ossGridFacet.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\ossOperationsFacet.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\ossSourceFacet.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\RSSynthesProcessor.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oss\OSSchema.cpp">
+      <Filter>05 oss</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ops\EquationOptions.cpp">
+      <Filter>04 ops</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ops\RSEquationProcessor.cpp">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\JSON.cpp">
+      <Filter>01 tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsform\RSForm.cpp">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsform\rsModificationFacet.cpp">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsmodel\InterpretationStorage.cpp">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsmodel\rsCalculationFacet.cpp">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsmodel\RSModel.cpp">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsmodel\rsValuesFacet.cpp">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rsform\rsOperationFacet.cpp">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rscore\RSCore.cpp">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rscore\ConceptRecord.cpp">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rscore\CstList.cpp">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\schema\RSConcept.cpp">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\schema\Schema.cpp">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\thesaurus\TextConcept.cpp">
+      <Filter>03 semantic\02 Thesaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\thesaurus\Thesaurus.cpp">
+      <Filter>03 semantic\02 Thesaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="src\semantic\rscore\IdentityManager.cpp">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\api\RSFormJA.cpp">
+      <Filter>06 API</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ccl\env\SourceManager.hpp">
+      <Filter>02 env</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\env\cclEnvironment.h">
+      <Filter>02 env</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\tools\EntityGenerator.h">
+      <Filter>01 tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\tools\CstNameGenerator.h">
+      <Filter>01 tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\ops\RSAggregator.h">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\ops\RSOperations.h">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\OSSchema.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\ossGraphFacet.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\ossGridFacet.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\ossOperationsFacet.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\ossSourceFacet.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\Pict.hpp">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\OperationProcessor.hpp">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\oss\RSSynthesProcessor.h">
+      <Filter>05 oss</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\ops\EquationOptions.h">
+      <Filter>04 ops</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\tools\JSON.h">
+      <Filter>01 tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\tools\EnumJSON.hpp">
+      <Filter>01 tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\Operation.hpp">
+      <Filter>03 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\Source.hpp">
+      <Filter>03 semantic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\RSForm.h">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\rsModificationFacet.h">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\rsOperationFacet.h">
+      <Filter>03 semantic\04 RSForm</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\InterpretationStorage.h">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\rsCalculationFacet.h">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\RSModel.h">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\rsValuesFacet.h">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\TextData.hpp">
+      <Filter>03 semantic\05 RSModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\RSCore.h">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\TextConcept.h">
+      <Filter>03 semantic\02 Thesaurus</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\RSConcept.h">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\Schema.h">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\Thesaurus.h">
+      <Filter>03 semantic\02 Thesaurus</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\CstList.h">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\CstFilters.hpp">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\ConceptRecord.h">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\CstType.hpp">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\IdentityManager.h">
+      <Filter>03 semantic\03 RSCore</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\ops\RSEquationProcessor.h">
+      <Filter>04 ops\01 RSOps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\api\RSFormJA.h">
+      <Filter>06 API</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
