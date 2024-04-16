@@ -11,7 +11,7 @@ C++ library for manipulating concepts in formal language of advanced set theory
 ## 📦 Project build
 
 - ccl + coredll + pyconcept - Dockerfile to setup Clang / GCC build for Ubuntu development.
-- ccl + coredlll local dev - VS Solution for Windows development.
+- ccl + coredll local dev - VS Solution for Windows development.
 - ccl - VS Code and ccl/CMakeLists.txt for other platforms.
 - pyconcept - python setup.py
 
