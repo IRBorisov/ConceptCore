@@ -21,11 +21,6 @@ target_link_libraries(ccl_Tests
     GTest::gtest
     GTest::gtest_main
 )
-# TODO: use top level project output directory instead
-target_link_directories(ccl_Tests
-  PRIVATE
-    ../../../output/lib
-)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(ccl_Tests

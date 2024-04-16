@@ -34,6 +34,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_sources(${PROJECT_NAME}
   PRIVATE
     core/unity/CCL.cpp
+    cclGraph/src/CGraph.cpp
+    rslang/unity/reflex_unity1.cpp
+    rslang/unity/reflex_unity2.cpp
+    rslang/unity/RSlang.cpp
+    rslang/unity/RSlang2.cpp
+    cclLang/unity/cclLang.cpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC
@@ -45,12 +51,15 @@ target_include_directories(${PROJECT_NAME}
   PRIVATE
     core/import/include
     core/header
+    cclGraph/header
+    cclGraph/import/include
+    rslang/header
+    rslang/import/include
+    rslang/import/reflex/include
+    cclLang/header
+    cclLang/import/include
 )
 target_link_libraries(${PROJECT_NAME}
-  INTERFACE
-    RSLang
-    cclLang
-    cclGraph
   PRIVATE
     ccl_CXXwarnings
     ccl_CXXoptions

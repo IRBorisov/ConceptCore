@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "coredll",
     "DCMAKE",
     "debool",
     "Decartian",
@@ -13,5 +14,12 @@
     "pyconcept",
     "rslang",
     "symmdiff"
-  ]
+  ],
+  "cmake.configureOnEdit": false,
+  "cmake.configureOnOpen": false,
+  "cmake.sourceDirectory": "${workspaceFolder}/ccl",
+  "cmake.configureArgs": ["--preset=conan-default"],
+  "cmake.buildArgs": ["--preset=conan-release"],
+  "cmake.ctestArgs": ["--test-dir build", "--output-on-failure"],
+  "cmake.installPrefix": "output"
 }
