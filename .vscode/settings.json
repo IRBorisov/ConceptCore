@@ -1,4 +1,20 @@
 {
+  "search.exclude": {
+    ".mypy_cache/": true,
+    ".pytest_cache/": true
+  },
+  "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "t_*.py"],
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true,
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.ignore": ["**/tests/**", "**/venv/**"],
+  "cmake.configureOnEdit": false,
+  "cmake.configureOnOpen": false,
+  "cmake.sourceDirectory": "${workspaceFolder}/ccl",
+  "cmake.configureArgs": ["--preset=conan-default"],
+  "cmake.buildArgs": ["--preset=conan-release"],
+  "cmake.ctestArgs": ["--test-dir build", "--output-on-failure"],
+  "cmake.installPrefix": "output",
   "cSpell.words": [
     "coredll",
     "DCMAKE",
@@ -14,12 +30,5 @@
     "pyconcept",
     "rslang",
     "symmdiff"
-  ],
-  "cmake.configureOnEdit": false,
-  "cmake.configureOnOpen": false,
-  "cmake.sourceDirectory": "${workspaceFolder}/ccl",
-  "cmake.configureArgs": ["--preset=conan-default"],
-  "cmake.buildArgs": ["--preset=conan-release"],
-  "cmake.ctestArgs": ["--test-dir build", "--output-on-failure"],
-  "cmake.installPrefix": "output"
+  ]
 }

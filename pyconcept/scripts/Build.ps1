@@ -1,15 +1,20 @@
 Set-Location $PSScriptRoot\..
 
 $packageName = 'pyconcept'
-$output = "${PSScriptRoot}\..\..\..\output\py\x64\${packageName}"
+$output = "${PSScriptRoot}\..\..\output\py\${packageName}"
 $python = '.\venv\Scripts\python.exe'
-$conan = 'conan'
+$conan = '.\venv\Scripts\conan.exe'
+
+$ccl_source = "${PSScriptRoot}\..\..\ccl"
+$ccl_destination = "${PSScriptRoot}\..\ccl"
+$ccl_exclude = @('*.vcxproj*','*packages.config','CMakeUserPresets.json')
 
 function Build {
-    PrepareEnv
+    # PrepareEnv
     PrepareImports
     PrepareOutput
-    $wheel = BuildWheel
+    BuildProject
+    $wheel = Get-Childitem -Path "${output}\*.whl" -Name
     if (-not (${wheel}) -or $LASTEXITCODE -ne 0) {
         Write-Error "No wheel generated for ${packageName}"
         Exit 1
@@ -19,7 +24,7 @@ function Build {
 }
 
 function PrepareEnv {
-    Write-Host "Setting up environment for ${python}" -ForegroundColor DarkGreen
+    Write-Host "Set up environment for ${python}" -ForegroundColor DarkGreen
     if (-not (Test-Path -Path ${python} -PathType Leaf)) {
         & 'python' -m venv .\venv
         & $python -m pip install --upgrade pip
@@ -29,25 +34,30 @@ function PrepareEnv {
 
 function PrepareImports {
     Write-Host 'Copy imports' -ForegroundColor DarkGreen
-    if (Test-Path -Path 'import') {
-        Remove-Item 'import' -Recurse -Force
+    if (Test-Path -Path ${ccl_destination}) {
+        Remove-Item ${ccl_destination} -Recurse -Force
     }
-    Copy-Item -Path "..\..\output\include" -Destination "import\include" -Recurse
-    Copy-Item -Path "..\..\output\lib\x64" -Destination "import\lib" -Recurse
+    New-Item -Path ${ccl_destination} -ItemType Directory | Out-Null
+    $source = Resolve-Path(${ccl_source})
+    $destination = Resolve-Path(${ccl_destination})
+    Get-ChildItem ${source} -Recurse -Exclude ${ccl_exclude} `
+        | Where-Object -Property 'FullName' -CNotLike '*build*' `
+        | Copy-Item -Destination {Join-Path ${destination}.Path $_.FullName.Substring(${source}.Path.length)}
 }
 
 function PrepareOutput {
+    Write-Host "Clear output at ${output}" -ForegroundColor DarkGreen
     if (Test-Path -Path ${output}) {
         Remove-Item ${output} -Recurse -Force
     }
 }
 
-function BuildWheel {
-    Write-Host 'Building project...' -ForegroundColor DarkGreen
+function BuildProject {
+    Write-Host 'Configuring Conan...' -ForegroundColor DarkGreen
     & ${conan} profile detect --force
     & ${conan} install .
-    & $python -m build --no-isolation --wheel --outdir="${output}"
-    return Get-Childitem -Path "${output}\*.whl" -Name
+    Write-Host 'Building project...' -ForegroundColor DarkGreen
+    & $python -m build --wheel --no-isolation --outdir="${output}"
 }
 
 function TestWheel([string] $wheelPath) {

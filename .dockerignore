@@ -19,7 +19,7 @@ output
 packages
 **/build
 **/venv
-**/pyconcept/import
+**/pyconcept/ccl
 **/egg-info
 
 

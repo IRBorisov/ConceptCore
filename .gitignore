@@ -11,7 +11,7 @@ build
 output
 venv/
 CMakeUserPresets.json
-pyconcept/import/
+pyconcept/ccl/
 *egg-info
 
 ccl/rslang/src/RSParserImpl.output

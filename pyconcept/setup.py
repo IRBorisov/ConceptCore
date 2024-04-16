@@ -32,11 +32,11 @@ class CMakeBuild(build_ext):
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         output_folder = ext_fullpath.parent.resolve()
 
-        debug = int(os.environ.get('DEBUG', 0)) if self.debug is None else self.debug
-        build_type = 'Debug' if debug else 'Release'
+        debug_flag = int(os.environ.get('DEBUG', 0)) if self.debug is None else self.debug
+        build_type = 'Debug' if debug_flag else 'Release'
         cmake_generator = os.environ.get('CMAKE_GENERATOR', '')
         cmake_args = [
-            '--preset conan-release',
+            '--preset conan-default',
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={output_folder}{os.sep}",
             f"-DCMAKE_BUILD_TYPE={build_type}"
         ]
@@ -44,7 +44,7 @@ class CMakeBuild(build_ext):
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [item for item in os.environ['CMAKE_ARGS'].split(' ') if item]
 
-        build_args = ['--preset conan-release']
+        build_args = ['--preset conan-debug' if debug_flag else '--preset conan-release']
         if self.compiler.compiler_type != 'msvc':
             if not cmake_generator or cmake_generator == 'Ninja':
                 try:
@@ -80,15 +80,13 @@ class CMakeBuild(build_ext):
             if hasattr(self, 'parallel') and self.parallel:
                 build_args += [f"-j{self.parallel}"]
 
-        build_temp = Path(self.build_temp) / ext.name
-        if not build_temp.exists():
-            build_temp.mkdir(parents=True)
-
         subprocess.run(
-            ['cmake', ext.sourcedir, *cmake_args], cwd=build_temp, check=True
+            ['cmake', ext.sourcedir, *cmake_args],
+            check=True
         )
         subprocess.run(
-            ['cmake', '--build', '.', *build_args], cwd=build_temp, check=True
+            ['cmake', '--build', '.', *build_args],
+            check=True
         )
 
 

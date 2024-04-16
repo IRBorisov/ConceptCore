@@ -10,12 +10,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 ## Project options
 ##
 option(CC_UseSanitizers "Use sanitizers" FALSE)
+option(CC_BuildTests "Include tests executable" FALSE)
 
 # Compiler options
 include(cmake/CXXTargets.cmake)
 
-# Libraries folder
-link_directories(import/lib)
+## Import internal targets
+add_subdirectory(ccl)
 
 # Add pybind11
 set(PYBIND11_FINDPYTHON ON)
@@ -49,9 +50,6 @@ target_include_directories(pyconcept
 target_link_libraries(pyconcept
   PUBLIC
     ConceptCoreLibrary
-    RSlang
-    cclLang
-    cclGraph
   PRIVATE
     pybind11_all_do_not_use
     ccl_CXXwarnings
