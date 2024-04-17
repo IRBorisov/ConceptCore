@@ -6,17 +6,19 @@ C++ library for manipulating concepts in formal language of advanced set theory
 
 - ccl - ConceptCoreLibrary static C++ library
 - coredll - ConceptCoreDLL binary for Windows embedding
-- pyconcept - Python wrapper for some core RSLanguage and parsing functions
+- pyconcept - PyPi packaged Python wrapper for some core RSLanguage and parsing functions
 
 ## 📦 Project build
 
 - ccl + coredll + pyconcept - Dockerfile to setup Clang / GCC build for Ubuntu development.
-- ccl + coredll local dev - VS Solution for Windows development.
+- ccl + coredll local dev - Visual Studio Solution for Windows development - 'CCL_full.sln'.
 - ccl - VS Code and ccl/CMakeLists.txt for other platforms.
-- pyconcept - python setup.py
+- pyconcept - python setup.py OR pyconcept/scripts
 
-Windows development requires Bison installed and Visual Studio 2022+.
-After changing grammar / syntax you can rebuild lexers and parser using scripts in 'scripts' folder.
+After changing grammar / syntax you can rebuild lexers and parser using 'scripts' folder.
+
+- parser requires [Bison](https://www.gnu.org/software/bison/) installed
+- lexer requires [Re-flex](https://github.com/Genivia/RE-flex)
 
 ## 💝 Acknowledgements
 
