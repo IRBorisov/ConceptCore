@@ -1,5 +1,7 @@
 # 🏛️ ConceptCore
 
+[![PyPI pyconcept](https://badge.fury.io/py/pyconcept.svg)](https://badge.fury.io/py/pyconcept)
+
 C++ library for manipulating concepts in formal language of advanced set theory
 
 ## 🌲 Structure

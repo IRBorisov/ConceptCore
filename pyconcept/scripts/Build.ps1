@@ -19,6 +19,11 @@ function Build {
         Exit 1
     }
     TestWheel("${output}\${wheel}")
+
+    # Remove-Item venv -Recurse -Force
+    Remove-Item build -Recurse -Force
+    Remove-Item ${ccl_destination} -Recurse -Force
+
     Exit $LASTEXITCODE
 }
 
