@@ -16,6 +16,7 @@
   "cmake.ctestArgs": ["--test-dir build", "--output-on-failure"],
   "cmake.installPrefix": "output",
   "cSpell.words": [
+    "conanfile",
     "coredll",
     "DCMAKE",
     "debool",

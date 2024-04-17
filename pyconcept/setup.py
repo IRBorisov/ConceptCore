@@ -22,15 +22,15 @@ class CMakeExtension(Extension):
     '''
     def __init__(self, name: str, source: str = '') -> None:
         super().__init__(name, sources=[])
-        self.sourcedir = os.fspath(Path(source).resolve())
+        self.source_dir = os.fspath(Path(source).resolve())
 
 
 class CMakeBuild(build_ext):
     '''CMake builder extension.'''
 
-    def build_extension(self, ext: CMakeExtension) -> None:
-        ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
-        output_folder = ext_fullpath.parent.resolve()
+    def build_extension(self, target: CMakeExtension) -> None:
+        target_fullpath = Path.cwd() / self.get_ext_fullpath(target.name)
+        output_folder = target_fullpath.parent.resolve()
 
         debug_flag = int(os.environ.get('DEBUG', 0)) if self.debug is None else self.debug
         build_type = 'Debug' if debug_flag else 'Release'
@@ -58,7 +58,7 @@ class CMakeBuild(build_ext):
                     pass
         else:
             # Single config generators are handled "normally"
-            single_config = any(x in cmake_generator for x in ['NMake', 'Ninja'])
+            single_config = any(x in cmake_generator for x in ['N~Make', 'Ninja'])
 
             # CMake allows an arch-in-generator style for backward compatibility
             contains_arch = any(x in cmake_generator for x in ['ARM', 'Win64'])
@@ -80,14 +80,10 @@ class CMakeBuild(build_ext):
             if hasattr(self, 'parallel') and self.parallel:
                 build_args += [f"-j{self.parallel}"]
 
-        subprocess.run(
-            ['cmake', ext.sourcedir, *cmake_args],
-            check=True
-        )
-        subprocess.run(
-            ['cmake', '--build', '.', *build_args],
-            check=True
-        )
+        subprocess.run(['conan', 'profile', 'detect', '--force'], check=True)
+        subprocess.run(['conan', 'install', '.'], check=True)
+        subprocess.run(['cmake', target.source_dir, *cmake_args], check=True)
+        subprocess.run(['cmake', '--build', '.', *build_args], check=True)
 
 
 setup(

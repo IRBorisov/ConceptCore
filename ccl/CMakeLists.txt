@@ -15,12 +15,6 @@ option(CC_UseSanitizers "Use sanitizers" FALSE)
 ## Compiler options
 include(cmake/CXXTargets.cmake)
 
-## Import internal targets
-add_subdirectory(cclCommons)
-add_subdirectory(cclGraph)
-add_subdirectory(cclLang)
-add_subdirectory(rslang)
-
 ##
 ## Project Setup
 ##
@@ -92,6 +86,11 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY core/include/ DESTINATION include)
 
 if(CC_BuildTests)
+  add_subdirectory(cclCommons)
+  add_subdirectory(cclGraph)
+  add_subdirectory(cclLang)
+  add_subdirectory(rslang)
+
   enable_testing()
   add_subdirectory("core/test")
 endif()

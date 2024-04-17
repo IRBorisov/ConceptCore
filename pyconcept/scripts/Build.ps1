@@ -3,14 +3,13 @@ Set-Location $PSScriptRoot\..
 $packageName = 'pyconcept'
 $output = "${PSScriptRoot}\..\..\output\py\${packageName}"
 $python = '.\venv\Scripts\python.exe'
-$conan = '.\venv\Scripts\conan.exe'
 
 $ccl_source = "${PSScriptRoot}\..\..\ccl"
 $ccl_destination = "${PSScriptRoot}\..\ccl"
-$ccl_exclude = @('*.vcxproj*','*packages.config','CMakeUserPresets.json')
+$ccl_include = ('*.cpp','*.hpp','*.h')
 
 function Build {
-    # PrepareEnv
+    PrepareEnv
     PrepareImports
     PrepareOutput
     BuildProject
@@ -28,7 +27,7 @@ function PrepareEnv {
     if (-not (Test-Path -Path ${python} -PathType Leaf)) {
         & 'python' -m venv .\venv
         & $python -m pip install --upgrade pip
-        & $python -m pip install -r requirements-build.txt
+        & $python -m pip install -r requirements-dev.txt
     }
 }
 
@@ -40,9 +39,20 @@ function PrepareImports {
     New-Item -Path ${ccl_destination} -ItemType Directory | Out-Null
     $source = Resolve-Path(${ccl_source})
     $destination = Resolve-Path(${ccl_destination})
-    Get-ChildItem ${source} -Recurse -Exclude ${ccl_exclude} `
-        | Where-Object -Property 'FullName' -CNotLike '*build*' `
-        | Copy-Item -Destination {Join-Path ${destination}.Path $_.FullName.Substring(${source}.Path.length)}
+    Get-ChildItem ${source} -Recurse -Include ${ccl_include} `
+        | Where-Object { `
+            $_.FullName -CNotLike '*build*' -And `
+            $_.FullName -CNotLike '*test*' `
+        } `
+        | ForEach-Object -Begin{} -End{} -Process{
+            $destinationFile = Join-Path ${destination}.Path $_.FullName.Substring(${source}.Path.length)
+            New-Item -ItemType File -Path ${destinationFile} -Force | Out-Null
+            Copy-Item -Path $_.FullName -Destination ${destinationFile} -Force
+        }
+
+    Copy-Item -Path "${source}/CMakeLists.txt" -Destination ${destination}
+    Copy-Item -Path "${source}/conanfile.txt" -Destination ${destination}
+    Copy-Item -Path "${source}/cmake" -Destination ${destination} -Recurse
 }
 
 function PrepareOutput {
@@ -53,11 +63,9 @@ function PrepareOutput {
 }
 
 function BuildProject {
-    Write-Host 'Configuring Conan...' -ForegroundColor DarkGreen
-    & ${conan} profile detect --force
-    & ${conan} install .
     Write-Host 'Building project...' -ForegroundColor DarkGreen
     & $python -m build --wheel --no-isolation --outdir="${output}"
+    & $python -m build --sdist --no-isolation --outdir="${output}"
 }
 
 function TestWheel([string] $wheelPath) {

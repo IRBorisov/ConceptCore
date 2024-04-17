@@ -5,4 +5,5 @@ graft tests
 graft cmake
 
 include CMakeLists.txt
+include conanfile.txt
 recursive-include ccl *
