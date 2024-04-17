@@ -26,18 +26,6 @@ find_package(pybind11 REQUIRED)
 ## Project Setup
 ##
 pybind11_add_module(pyconcept MODULE src/pyconcept.cpp)
-# add_library(pyconcept)
-
-# set_target_properties(pyconcept PROPERTIES 
-#   OUTPUT_NAME pyconcept
-#   DEBUG_POSTFIX d
-#   POSITION_INDEPENDENT_CODE ON
-# )
-
-# target_sources(pyconcept
-#   PRIVATE
-#     src/pyconcept.cpp
-# )
 
 target_include_directories(pyconcept
   PUBLIC

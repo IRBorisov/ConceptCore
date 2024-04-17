@@ -4,26 +4,35 @@
 .github
 
 # Windows specific
-*.ps1
+.vs
+**/*.ps1
+**/*.vcxproj*
+**/*.sln
+**/packages.config
 
 
 # Local build/utility folders
 .vscode
-.vs
-*.vcxproj.user
-*.pyc
-*.pyd
+**/*.pyc
+**/*.pyd
 
 **/CMakeUserPresets.json
 output
 packages
-**/build
-**/venv
+**/build/
+**/secrets/
+**/venv/
 **/pyconcept/ccl
-**/egg-info
+**/*egg-info
+
+
+# Docker
+Dockerfile
 
 
 # Specific items
 docker-compose.yml
 rslang/src/RSParserImpl.output
 rslang/src/RSParserImpl.gv
+**/*.y
+**/*.l

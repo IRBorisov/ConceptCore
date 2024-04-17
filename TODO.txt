@@ -1,0 +1,2 @@
+- wrap ConceptCoreLibrary in conan package for pyconcept consumption
+- setup github actions to build and (maybe) publish pyconcept package

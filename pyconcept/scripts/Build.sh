@@ -1,25 +1,31 @@
-# Build script for linux distro
-set -e 
+# Build script for Linux
+set -e
 
 packageName='pyconcept'
-output='../../output/py'
+output='../output/py'
 pythonEnv='venv/bin/python3'
 
+# Setup python env
 python3.12 -m venv venv
-$pythonEnv -m pip install -r requirements-build.txt
+${pythonEnv} -m pip install -r requirements-build.txt
 
-mkdir -p import
-cp -r ../../output/include import/
-cp -r ../../output/lib import/
+# Import sources from ccl
+mkdir -p ccl
+cd ../ccl
+cp -r `ls -A | grep -v 'build'` "../pyconcept/ccl"
+cd ../pyconcept
 
-$pythonEnv -m build --no-isolation --wheel --outdir=$output/$packageName
+# Build pyconcept
+${pythonEnv} -m build --no-isolation --wheel --outdir=${output}/${packageName}
 
-wheel=$(find $output/$packageName -name '*.whl')
+wheel=$(find ${output}/${packageName} -name '*.whl')
 
-$pythonEnv -m pip uninstall -y $packageName
-$pythonEnv -m pip install $wheel
-$pythonEnv -m unittest
+# Test pyconcept
+${pythonEnv} -m pip uninstall -y ${packageName}
+${pythonEnv} -m pip install ${wheel}
+${pythonEnv} -m unittest
 
-rm -rf venv
+# rm -rf venv
+# rm -rf build
 
 exit 0

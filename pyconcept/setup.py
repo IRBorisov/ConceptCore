@@ -36,7 +36,7 @@ class CMakeBuild(build_ext):
         build_type = 'Debug' if debug_flag else 'Release'
         cmake_generator = os.environ.get('CMAKE_GENERATOR', '')
         cmake_args = [
-            '--preset conan-default',
+            '--preset conan-release' if self.compiler.compiler_type != 'msvc' else '--preset conan-default',
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={output_folder}{os.sep}",
             f"-DCMAKE_BUILD_TYPE={build_type}"
         ]
@@ -81,7 +81,7 @@ class CMakeBuild(build_ext):
                 build_args += [f"-j{self.parallel}"]
 
         subprocess.run(['conan', 'profile', 'detect', '--force'], check=True)
-        subprocess.run(['conan', 'install', '.'], check=True)
+        subprocess.run(['conan', 'install', '.', '--build=missing'], check=True)
         subprocess.run(['cmake', target.source_dir, *cmake_args], check=True)
         subprocess.run(['cmake', '--build', '.', *build_args], check=True)
 

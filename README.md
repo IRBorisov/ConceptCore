@@ -10,7 +10,7 @@ C++ library for manipulating concepts in formal language of advanced set theory
 
 ## 📦 Project build
 
-- ccl + coredll + pyconcept - Dockerfile to setup Clang / GCC build for Ubuntu development.
+- ccl + coredll + pyconcept - Dockerfile to setup Clang / GCC build for Ubuntu development (see BuildAll.sh).
 - ccl + coredll local dev - Visual Studio Solution for Windows development - 'CCL_full.sln'.
 - ccl - VS Code and ccl/CMakeLists.txt for other platforms.
 - pyconcept - python setup.py OR pyconcept/scripts
@@ -19,6 +19,13 @@ After changing grammar / syntax you can rebuild lexers and parser using 'scripts
 
 - parser requires [Bison](https://www.gnu.org/software/bison/) installed
 - lexer requires [Re-flex](https://github.com/Genivia/RE-flex)
+
+To run terminal after building docker container use command
+
+```
+docker run --rm -it --entrypoint /bin/bash concept-core-builder
+
+```
 
 ## 💝 Acknowledgements
 

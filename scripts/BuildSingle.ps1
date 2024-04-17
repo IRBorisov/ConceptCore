@@ -3,7 +3,7 @@
 Set-Location $PSScriptRoot
 
 & conan profile detect --force
-& conan install .
+& conan install . --build=missing
 
 & cmake --preset conan-default
 # & cmake --preset conan-default -DCC_BuildTests=False

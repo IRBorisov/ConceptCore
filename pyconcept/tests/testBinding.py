@@ -64,7 +64,7 @@ class TestBinding(unittest.TestCase):
         self.assertEqual(fixedSchema['items'][1]['alias'], 'S1')
 
     def _get_default_schema(self) -> str:
-        file_path = os.getcwd() + r'/tests/data/КС начальник-подчиненный.trs'
+        file_path = os.getcwd() + r'/tests/data/Schema1.trs'
         return _read_trs(file_path)
 
 

@@ -89,15 +89,10 @@ RUN apt-get autoclean -y && \
 # ====================== END OF CPP-Python environment ==================
 
 FROM cpp-builder as CCL
-ARG CMAKE_BUILD_TYPE="Release"
 
-# Choose between clang/clang++ or gcc/g++
-ENV CC="gcc"
-ENV CXX="g++"
-
-ENV BUILD_HOME=/home
-WORKDIR $BUILD_HOME
+WORKDIR /home
 
 COPY . /home
 
-ENTRYPOINT ["sh", "/home/entrypoint.sh"]
+RUN sed -i 's/\r$//g' /home/BuildAll.sh && \
+    chmod +x /home/BuildAll.sh

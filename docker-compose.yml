@@ -11,4 +11,4 @@ services:
       context: ./
     volumes:
       - concept_volume:/home/output
-    command: sh /home/entrypoint.sh
+    command: /bin/sh BuildAll.sh
