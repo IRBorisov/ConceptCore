@@ -1,4 +1,4 @@
-include VERSION LICENSE
+include VERSION LICENSE CHANGELOG.md
 graft src
 graft include
 graft tests

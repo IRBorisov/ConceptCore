@@ -6,7 +6,7 @@ LABEL description="Linux build environment"
 
 ARG LINUX_FLAVOR=ubuntu
 ARG LINUX_DISTR=jammy
-ARG  DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install standard packages
 RUN apt-get update -qq && \

@@ -16,6 +16,7 @@ cp -r `ls -A | grep -v 'build'` "../pyconcept/ccl"
 cd ../pyconcept
 
 # Build pyconcept
+rm -rf ${output}/${packageName}
 ${pythonEnv} -m build --no-isolation --wheel --outdir=${output}/${packageName}
 
 wheel=$(find ${output}/${packageName} -name '*.whl')
