@@ -6,10 +6,6 @@ set -u # Treat unset variables as an error when substituting.
 
 export CMAKE_BUILD_TYPE="Release" 
 
-# Choose between clang/clang++ or gcc/g++
-export CC="gcc"
-export CXX="g++"
-
 # Build CCL
 cd /home/ccl
 conan profile detect --force
