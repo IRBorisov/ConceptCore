@@ -1,6 +1,6 @@
 # Generate lexers for RSlang
 
-$bison = 'C:\GnuWin32\win_flex_bison3\win_bison.exe'
+$bison = 'C:\ProgramData\chocolatey\bin\win_bison.exe'
 $workDir = Resolve-Path -Path "${PSScriptRoot}\..\ccl\rslang\src"
 $grammar = 'RSParserImpl.y'
 

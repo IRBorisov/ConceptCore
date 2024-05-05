@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.3.2.
+// A Bison parser, made by GNU Bison 3.7.4.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,15 +30,16 @@
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
 
-// Undocumented macros, especially those whose name start with YY_,
-// are private implementation details.  Do not rely on them.
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
 
-// //                    "%code top" blocks.
-#line 16 "RSParserImpl.y" // lalr1.cc:423
+// "%code top" blocks.
+#line 24 "RSParserImpl.y"
 
 #ifdef _MSC_VER
   #pragma warning( push )
-  #pragma warning( disable : 26434 26438 26440 26446 26447 26448 26456 )
+  #pragma warning( disable : 4244 26434 26438 26440 26446 26447 26448 26456 )
   #pragma warning( disable : 26460 26477 26481 26482 26493 26494 26495 26496 )
 #endif
 
@@ -54,7 +55,7 @@
 #endif
 
 
-#line 58 "RSParserImpl.cpp" // lalr1.cc:423
+#line 59 "RSParserImpl.cpp"
 
 
 
@@ -76,6 +77,7 @@
 # endif
 #endif
 
+
 // Whether we are compiled with exception support.
 #ifndef YY_EXCEPTIONS
 # if defined __GNUC__ && !defined __EXCEPTIONS
@@ -86,9 +88,6 @@
 #endif
 
 
-
-// Suppress unused-variable warnings by "using" E.
-#define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
 #if YYDEBUG
@@ -115,7 +114,7 @@
 # define YY_STACK_PRINT()               \
   do {                                  \
     if (yydebug_)                       \
-      yystack_print_ ();                \
+      yy_stack_print_ ();                \
   } while (false)
 
 #else // !YYDEBUG
@@ -135,57 +134,17 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 11 "RSParserImpl.y" // lalr1.cc:510
+#line 15 "RSParserImpl.y"
 namespace ccl { namespace rslang { namespace detail {
-#line 141 "RSParserImpl.cpp" // lalr1.cc:510
-
-  /* Return YYSTR after stripping away unnecessary quotes and
-     backslashes, so that it's suitable for yyerror.  The heuristic is
-     that double-quoting is unnecessary unless the string contains an
-     apostrophe, a comma, or backslash (other than backslash-backslash).
-     YYSTR is taken from yytname.  */
-  std::string
-  RSParserImpl::yytnamerr_ (const char *yystr)
-  {
-    if (*yystr == '"')
-      {
-        std::string yyr;
-        char const *yyp = yystr;
-
-        for (;;)
-          switch (*++yyp)
-            {
-            case '\'':
-            case ',':
-              goto do_not_strip_quotes;
-
-            case '\\':
-              if (*++yyp != '\\')
-                goto do_not_strip_quotes;
-              else
-                goto append;
-
-            append:
-            default:
-              yyr += *yyp;
-              break;
-
-            case '"':
-              return yyr;
-            }
-      do_not_strip_quotes: ;
-      }
-
-    return yystr;
-  }
-
+#line 140 "RSParserImpl.cpp"
 
   /// Build a parser object.
   RSParserImpl::RSParserImpl (ParserState* state_yyarg)
-    :
 #if YYDEBUG
-      yydebug_ (false),
+    : yydebug_ (false),
       yycdebug_ (&std::cerr),
+#else
+    :
 #endif
       state (state_yyarg)
   {}
@@ -197,18 +156,10 @@ namespace ccl { namespace rslang { namespace detail {
   {}
 
   /*---------------.
-  | Symbol types.  |
+  | symbol kinds.  |
   `---------------*/
 
   // basic_symbol.
-#if 201103L <= YY_CPLUSPLUS
-  template <typename Base>
-  RSParserImpl::basic_symbol<Base>::basic_symbol (basic_symbol&& that)
-    : Base (std::move (that))
-    , value (std::move (that.value))
-  {}
-#endif
-
   template <typename Base>
   RSParserImpl::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
     : Base (that)
@@ -230,10 +181,17 @@ namespace ccl { namespace rslang { namespace detail {
   {}
 
   template <typename Base>
+  RSParserImpl::symbol_kind_type
+  RSParserImpl::basic_symbol<Base>::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
+  }
+
+  template <typename Base>
   bool
   RSParserImpl::basic_symbol<Base>::empty () const YY_NOEXCEPT
   {
-    return Base::type_get () == empty_symbol;
+    return this->kind () == symbol_kind::S_YYEMPTY;
   }
 
   template <typename Base>
@@ -244,44 +202,50 @@ namespace ccl { namespace rslang { namespace detail {
     value = YY_MOVE (s.value);
   }
 
-  // by_type.
-  RSParserImpl::by_type::by_type ()
-    : type (empty_symbol)
+  // by_kind.
+  RSParserImpl::by_kind::by_kind ()
+    : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
 #if 201103L <= YY_CPLUSPLUS
-  RSParserImpl::by_type::by_type (by_type&& that)
-    : type (that.type)
+  RSParserImpl::by_kind::by_kind (by_kind&& that)
+    : kind_ (that.kind_)
   {
     that.clear ();
   }
 #endif
 
-  RSParserImpl::by_type::by_type (const by_type& that)
-    : type (that.type)
+  RSParserImpl::by_kind::by_kind (const by_kind& that)
+    : kind_ (that.kind_)
   {}
 
-  RSParserImpl::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
+  RSParserImpl::by_kind::by_kind (token_kind_type t)
+    : kind_ (yytranslate_ (t))
   {}
 
   void
-  RSParserImpl::by_type::clear ()
+  RSParserImpl::by_kind::clear ()
   {
-    type = empty_symbol;
+    kind_ = symbol_kind::S_YYEMPTY;
   }
 
   void
-  RSParserImpl::by_type::move (by_type& that)
+  RSParserImpl::by_kind::move (by_kind& that)
   {
-    type = that.type;
+    kind_ = that.kind_;
     that.clear ();
   }
 
-  int
-  RSParserImpl::by_type::type_get () const YY_NOEXCEPT
+  RSParserImpl::symbol_kind_type
+  RSParserImpl::by_kind::kind () const YY_NOEXCEPT
   {
-    return type;
+    return kind_;
+  }
+
+  RSParserImpl::symbol_kind_type
+  RSParserImpl::by_kind::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
   }
 
 
@@ -311,13 +275,13 @@ namespace ccl { namespace rslang { namespace detail {
     : state (s)
   {}
 
-  RSParserImpl::symbol_number_type
-  RSParserImpl::by_state::type_get () const YY_NOEXCEPT
+  RSParserImpl::symbol_kind_type
+  RSParserImpl::by_state::kind () const YY_NOEXCEPT
   {
     if (state == empty_state)
-      return empty_symbol;
+      return symbol_kind::S_YYEMPTY;
     else
-      return yystos_[state];
+      return YY_CAST (symbol_kind_type, yystos_[+state]);
   }
 
   RSParserImpl::stack_symbol_type::stack_symbol_type ()
@@ -336,10 +300,18 @@ namespace ccl { namespace rslang { namespace detail {
     : super_type (s, YY_MOVE (that.value))
   {
     // that is emptied.
-    that.type = empty_symbol;
+    that.kind_ = symbol_kind::S_YYEMPTY;
   }
 
 #if YY_CPLUSPLUS < 201103L
+  RSParserImpl::stack_symbol_type&
+  RSParserImpl::stack_symbol_type::operator= (const stack_symbol_type& that)
+  {
+    state = that.state;
+    value = that.value;
+    return *this;
+  }
+
   RSParserImpl::stack_symbol_type&
   RSParserImpl::stack_symbol_type::operator= (stack_symbol_type& that)
   {
@@ -359,28 +331,26 @@ namespace ccl { namespace rslang { namespace detail {
       YY_SYMBOL_PRINT (yymsg, yysym);
 
     // User destructor.
-    YYUSE (yysym.type_get ());
+    YYUSE (yysym.kind ());
   }
 
 #if YYDEBUG
   template <typename Base>
   void
-  RSParserImpl::yy_print_ (std::ostream& yyo,
-                                     const basic_symbol<Base>& yysym) const
+  RSParserImpl::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
     YYUSE (yyoutput);
-    symbol_number_type yytype = yysym.type_get ();
-#if defined __GNUC__ && ! defined __clang__ && ! defined __ICC && __GNUC__ * 100 + __GNUC_MINOR__ <= 408
-    // Avoid a (spurious) G++ 4.8 warning about "array subscript is
-    // below array bounds".
     if (yysym.empty ())
-      std::abort ();
-#endif
-    yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " (";
-    YYUSE (yytype);
-    yyo << ')';
+      yyo << "empty symbol";
+    else
+      {
+        symbol_kind_type yykind = yysym.kind ();
+        yyo << (yykind < YYNTOKENS ? "token" : "nterm")
+            << ' ' << yysym.name () << " (";
+        YYUSE (yykind);
+        yyo << ')';
+      }
   }
 #endif
 
@@ -439,11 +409,11 @@ namespace ccl { namespace rslang { namespace detail {
   RSParserImpl::state_type
   RSParserImpl::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
-    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
+    int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
       return yytable_[yyr];
     else
-      return yydefgoto_[yysym - yyntokens_];
+      return yydefgoto_[yysym - YYNTOKENS];
   }
 
   bool
@@ -467,7 +437,6 @@ namespace ccl { namespace rslang { namespace detail {
   int
   RSParserImpl::parse ()
   {
-    // State.
     int yyn;
     /// Length of the RHS of the rule being reduced.
     int yylen = 0;
@@ -500,7 +469,8 @@ namespace ccl { namespace rslang { namespace detail {
   | yynewstate -- push a new symbol on the stack.  |
   `-----------------------------------------------*/
   yynewstate:
-    YYCDEBUG << "Entering state " << yystack_[0].state << '\n';
+    YYCDEBUG << "Entering state " << int (yystack_[0].state) << '\n';
+    YY_STACK_PRINT ();
 
     // Accept?
     if (yystack_[0].state == yyfinal_)
@@ -514,19 +484,19 @@ namespace ccl { namespace rslang { namespace detail {
   `-----------*/
   yybackup:
     // Try to take a decision without lookahead.
-    yyn = yypact_[yystack_[0].state];
+    yyn = yypact_[+yystack_[0].state];
     if (yy_pact_value_is_default_ (yyn))
       goto yydefault;
 
     // Read a lookahead token.
     if (yyla.empty ())
       {
-        YYCDEBUG << "Reading a token: ";
+        YYCDEBUG << "Reading a token\n";
 #if YY_EXCEPTIONS
         try
 #endif // YY_EXCEPTIONS
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, state));
+            yyla.kind_ = yytranslate_ (yylex (&yyla.value, state));
           }
 #if YY_EXCEPTIONS
         catch (const syntax_error& yyexc)
@@ -539,11 +509,23 @@ namespace ccl { namespace rslang { namespace detail {
       }
     YY_SYMBOL_PRINT ("Next token is", yyla);
 
+    if (yyla.kind () == symbol_kind::S_YYerror)
+    {
+      // The scanner already issued an error message, process directly
+      // to error recovery.  But do not keep the error token as
+      // lookahead, it is too special and may lead us to an endless
+      // loop in error recovery. */
+      yyla.kind_ = symbol_kind::S_YYUNDEF;
+      goto yyerrlab1;
+    }
+
     /* If the proper action on seeing token YYLA.TYPE is to reduce or
        to detect an error, take that action.  */
-    yyn += yyla.type_get ();
-    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.type_get ())
-      goto yydefault;
+    yyn += yyla.kind ();
+    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.kind ())
+      {
+        goto yydefault;
+      }
 
     // Reduce or error.
     yyn = yytable_[yyn];
@@ -560,7 +542,7 @@ namespace ccl { namespace rslang { namespace detail {
       --yyerrstatus_;
 
     // Shift the lookahead token.
-    yypush_ ("Shifting", yyn, YY_MOVE (yyla));
+    yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
     goto yynewstate;
 
 
@@ -568,7 +550,7 @@ namespace ccl { namespace rslang { namespace detail {
   | yydefault -- do the default action for the current state.  |
   `-----------------------------------------------------------*/
   yydefault:
-    yyn = yydefact_[yystack_[0].state];
+    yyn = yydefact_[+yystack_[0].state];
     if (yyn == 0)
       goto yyerrlab;
     goto yyreduce;
@@ -602,368 +584,369 @@ namespace ccl { namespace rslang { namespace detail {
         {
           switch (yyn)
             {
-  case 3:
-#line 151 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeExpression(yystack_[0].value); }
-#line 609 "RSParserImpl.cpp" // lalr1.cc:919
+  case 3: // expression: logic_or_setexpr
+#line 263 "RSParserImpl.y"
+                                            { state->FinalizeExpression(yystack_[0].value); }
+#line 591 "RSParserImpl.cpp"
     break;
 
-  case 4:
-#line 152 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeExpression(yystack_[0].value); }
-#line 615 "RSParserImpl.cpp" // lalr1.cc:919
+  case 4: // expression: function_decl
+#line 264 "RSParserImpl.y"
+                                            { state->FinalizeExpression(yystack_[0].value); }
+#line 597 "RSParserImpl.cpp"
     break;
 
-  case 7:
-#line 159 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = FunctionDeclaration(yystack_[3].value, yystack_[2].value, yystack_[0].value); }
-#line 621 "RSParserImpl.cpp" // lalr1.cc:919
+  case 5: // global_declaration: GLOBAL DEFINE
+#line 268 "RSParserImpl.y"
+                                            { state->FinalizeCstEmpty(yystack_[1].value, yystack_[0].value); }
+#line 603 "RSParserImpl.cpp"
     break;
 
-  case 8:
-#line 160 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
-#line 627 "RSParserImpl.cpp" // lalr1.cc:919
+  case 6: // global_declaration: GLOBAL STRUCT setexpr
+#line 269 "RSParserImpl.y"
+                                            { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 609 "RSParserImpl.cpp"
     break;
 
-  case 9:
-#line 163 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::NT_ARGUMENTS, yystack_[0].value); }
-#line 633 "RSParserImpl.cpp" // lalr1.cc:919
+  case 7: // global_declaration: GLOBAL DEFINE logic_or_setexpr
+#line 270 "RSParserImpl.y"
+                                            { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 615 "RSParserImpl.cpp"
     break;
 
-  case 10:
-#line 164 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Enumeration(TokenID::NT_ARGUMENTS, yystack_[2].value, yystack_[0].value); }
-#line 639 "RSParserImpl.cpp" // lalr1.cc:919
+  case 8: // global_declaration: function_name DEFINE function_decl
+#line 271 "RSParserImpl.y"
+                                            { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 621 "RSParserImpl.cpp"
     break;
 
-  case 11:
-#line 165 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::expectedLocal); YYABORT; }
-#line 645 "RSParserImpl.cpp" // lalr1.cc:919
+  case 13: // function_decl: LS arguments RS logic_or_setexpr
+#line 284 "RSParserImpl.y"
+                                            { yylhs.value = FunctionDeclaration(yystack_[3].value, yystack_[2].value, yystack_[0].value); }
+#line 627 "RSParserImpl.cpp"
     break;
 
-  case 12:
-#line 167 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::NT_ARG_DECL, yystack_[2].value, yystack_[0].value); }
-#line 651 "RSParserImpl.cpp" // lalr1.cc:919
+  case 14: // function_decl: LS error
+#line 285 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+#line 633 "RSParserImpl.cpp"
     break;
 
-  case 13:
-#line 168 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
-#line 657 "RSParserImpl.cpp" // lalr1.cc:919
+  case 15: // arguments: declaration
+#line 290 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_ARGUMENTS, yystack_[0].value); }
+#line 639 "RSParserImpl.cpp"
     break;
 
-  case 14:
-#line 172 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeCstEmpty(yystack_[1].value, yystack_[0].value); }
-#line 663 "RSParserImpl.cpp" // lalr1.cc:919
+  case 16: // arguments: arguments COMMA declaration
+#line 291 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::NT_ARGUMENTS, yystack_[2].value, yystack_[0].value); }
+#line 645 "RSParserImpl.cpp"
     break;
 
-  case 15:
-#line 173 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 669 "RSParserImpl.cpp" // lalr1.cc:919
+  case 17: // arguments: arguments COMMA error
+#line 292 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+#line 651 "RSParserImpl.cpp"
     break;
 
-  case 16:
-#line 174 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 675 "RSParserImpl.cpp" // lalr1.cc:919
+  case 18: // declaration: LOCAL IN setexpr
+#line 295 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_ARG_DECL, yystack_[2].value, yystack_[0].value); }
+#line 657 "RSParserImpl.cpp"
     break;
 
-  case 17:
-#line 175 "RSParserImpl.y" // lalr1.cc:919
-    { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 681 "RSParserImpl.cpp" // lalr1.cc:919
+  case 19: // declaration: LOCAL error
+#line 296 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+#line 663 "RSParserImpl.cpp"
     break;
 
-  case 26:
-#line 190 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 687 "RSParserImpl.cpp" // lalr1.cc:919
+  case 21: // variable: LP var_enum RPE
+#line 301 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE_DECL, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 669 "RSParserImpl.cpp"
     break;
 
-  case 27:
-#line 191 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 693 "RSParserImpl.cpp" // lalr1.cc:919
+  case 22: // var_enum: var_all COMMA var_all
+#line 304 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+#line 675 "RSParserImpl.cpp"
     break;
 
-  case 28:
-#line 193 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value);}
-#line 699 "RSParserImpl.cpp" // lalr1.cc:919
+  case 23: // var_enum: var_all COMMA error
+#line 305 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+#line 681 "RSParserImpl.cpp"
     break;
 
-  case 29:
-#line 195 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Quantifier(yystack_[4].value, yystack_[3].value, yystack_[1].value, yystack_[0].value);}
-#line 705 "RSParserImpl.cpp" // lalr1.cc:919
+  case 31: // logic_par: LP logic_binary RPE
+#line 323 "RSParserImpl.y"
+                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 687 "RSParserImpl.cpp"
     break;
 
-  case 30:
-#line 196 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
-#line 711 "RSParserImpl.cpp" // lalr1.cc:919
+  case 32: // logic_par: LP logic_predicates RPE
+#line 324 "RSParserImpl.y"
+                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 693 "RSParserImpl.cpp"
     break;
 
-  case 31:
-#line 197 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 717 "RSParserImpl.cpp" // lalr1.cc:919
+  case 33: // logic_predicates: setexpr binary_predicate setexpr
+#line 328 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 699 "RSParserImpl.cpp"
     break;
 
-  case 32:
-#line 199 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 723 "RSParserImpl.cpp" // lalr1.cc:919
+  case 45: // logic_unary: NOT logic_no_binary
+#line 345 "RSParserImpl.y"
+                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value);}
+#line 705 "RSParserImpl.cpp"
     break;
 
-  case 33:
-#line 201 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 729 "RSParserImpl.cpp" // lalr1.cc:919
+  case 46: // logic_unary: quantifier quant_var IN setexpr logic_no_binary
+#line 346 "RSParserImpl.y"
+                                                      { yylhs.value = Quantifier(yystack_[4].value, yystack_[3].value, yystack_[1].value, yystack_[0].value);}
+#line 711 "RSParserImpl.cpp"
     break;
 
-  case 34:
-#line 202 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 735 "RSParserImpl.cpp" // lalr1.cc:919
+  case 47: // logic_unary: quantifier error
+#line 347 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
+#line 717 "RSParserImpl.cpp"
     break;
 
-  case 35:
-#line 203 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 741 "RSParserImpl.cpp" // lalr1.cc:919
+  case 48: // logic_unary: PREDICATE LS setexpr_enum RS
+#line 348 "RSParserImpl.y"
+                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 723 "RSParserImpl.cpp"
     break;
 
-  case 36:
-#line 204 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 747 "RSParserImpl.cpp" // lalr1.cc:919
+  case 56: // quant_var: LP error
+#line 362 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
+#line 729 "RSParserImpl.cpp"
     break;
 
-  case 39:
-#line 209 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
-#line 753 "RSParserImpl.cpp" // lalr1.cc:919
+  case 57: // quant_var_enum: quant_var COMMA quant_var
+#line 365 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::NT_ENUM_DECL, yystack_[2].value, yystack_[0].value); }
+#line 735 "RSParserImpl.cpp"
     break;
 
-  case 40:
-#line 211 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Enumeration(TokenID::NT_ENUM_DECL, yystack_[2].value, yystack_[0].value); }
-#line 759 "RSParserImpl.cpp" // lalr1.cc:919
+  case 58: // quant_var_enum: quant_var COMMA error
+#line 366 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+#line 741 "RSParserImpl.cpp"
     break;
 
-  case 41:
-#line 212 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::expectedLocal); YYABORT; }
-#line 765 "RSParserImpl.cpp" // lalr1.cc:919
+  case 59: // logic_binary: logic_all EQUIVALENT logic_all
+#line 370 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 747 "RSParserImpl.cpp"
     break;
 
-  case 46:
-#line 220 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 771 "RSParserImpl.cpp" // lalr1.cc:919
+  case 60: // logic_binary: logic_all IMPLICATION logic_all
+#line 371 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 753 "RSParserImpl.cpp"
     break;
 
-  case 47:
-#line 221 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 777 "RSParserImpl.cpp" // lalr1.cc:919
+  case 61: // logic_binary: logic_all OR logic_all
+#line 372 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 759 "RSParserImpl.cpp"
     break;
 
-  case 48:
-#line 224 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 783 "RSParserImpl.cpp" // lalr1.cc:919
+  case 62: // logic_binary: logic_all AND logic_all
+#line 373 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 765 "RSParserImpl.cpp"
     break;
 
-  case 49:
-#line 225 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 789 "RSParserImpl.cpp" // lalr1.cc:919
+  case 67: // setexpr: FUNCTION LS setexpr_enum RS
+#line 383 "RSParserImpl.y"
+                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 771 "RSParserImpl.cpp"
     break;
 
-  case 50:
-#line 226 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 795 "RSParserImpl.cpp" // lalr1.cc:919
+  case 68: // setexpr: operation_name LP setexpr RPE
+#line 384 "RSParserImpl.y"
+                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 777 "RSParserImpl.cpp"
     break;
 
-  case 51:
-#line 227 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 801 "RSParserImpl.cpp" // lalr1.cc:919
+  case 75: // setexpr_enum: setexpr
+#line 395 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
+#line 783 "RSParserImpl.cpp"
     break;
 
-  case 52:
-#line 228 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 807 "RSParserImpl.cpp" // lalr1.cc:919
+  case 77: // setexpr_enum_min2: setexpr_enum COMMA setexpr
+#line 399 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+#line 789 "RSParserImpl.cpp"
     break;
 
-  case 53:
-#line 229 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 813 "RSParserImpl.cpp" // lalr1.cc:919
+  case 85: // setexpr_binary: setexpr PLUS setexpr
+#line 416 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 795 "RSParserImpl.cpp"
     break;
 
-  case 54:
-#line 230 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 819 "RSParserImpl.cpp" // lalr1.cc:919
+  case 86: // setexpr_binary: setexpr MINUS setexpr
+#line 417 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 801 "RSParserImpl.cpp"
     break;
 
-  case 55:
-#line 231 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Decartian(yystack_[2].value, yystack_[1].value, yystack_[0].value);}
-#line 825 "RSParserImpl.cpp" // lalr1.cc:919
+  case 87: // setexpr_binary: setexpr MULTIPLY setexpr
+#line 418 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 807 "RSParserImpl.cpp"
     break;
 
-  case 56:
-#line 232 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 831 "RSParserImpl.cpp" // lalr1.cc:919
+  case 88: // setexpr_binary: setexpr UNION setexpr
+#line 419 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 813 "RSParserImpl.cpp"
     break;
 
-  case 60:
-#line 238 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = FilterCall(yystack_[6].value, yystack_[4].value, yystack_[1].value, yystack_[0].value); }
-#line 837 "RSParserImpl.cpp" // lalr1.cc:919
+  case 89: // setexpr_binary: setexpr SET_MINUS setexpr
+#line 420 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 819 "RSParserImpl.cpp"
     break;
 
-  case 64:
-#line 243 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = ReplaceBrackets(TokenID::NT_ENUMERATION, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 843 "RSParserImpl.cpp" // lalr1.cc:919
+  case 90: // setexpr_binary: setexpr SYMMINUS setexpr
+#line 421 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 825 "RSParserImpl.cpp"
     break;
 
-  case 65:
-#line 245 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 849 "RSParserImpl.cpp" // lalr1.cc:919
+  case 91: // setexpr_binary: setexpr INTERSECTION setexpr
+#line 422 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 831 "RSParserImpl.cpp"
     break;
 
-  case 66:
-#line 247 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 855 "RSParserImpl.cpp" // lalr1.cc:919
+  case 92: // setexpr_binary: setexpr DECART setexpr
+#line 423 "RSParserImpl.y"
+                                            { yylhs.value = Decartian(yystack_[2].value, yystack_[1].value, yystack_[0].value);}
+#line 837 "RSParserImpl.cpp"
     break;
 
-  case 67:
-#line 248 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value); }
-#line 861 "RSParserImpl.cpp" // lalr1.cc:919
+  case 93: // setexpr_binary: LP setexpr_binary RPE
+#line 424 "RSParserImpl.y"
+                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 843 "RSParserImpl.cpp"
     break;
 
-  case 68:
-#line 250 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
-#line 867 "RSParserImpl.cpp" // lalr1.cc:919
+  case 101: // enumeration: LC setexpr_enum RC
+#line 437 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_ENUMERATION, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 849 "RSParserImpl.cpp"
     break;
 
-  case 70:
-#line 253 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
-#line 873 "RSParserImpl.cpp" // lalr1.cc:919
+  case 102: // tuple: LP setexpr_enum_min2 RPE
+#line 440 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+#line 855 "RSParserImpl.cpp"
     break;
 
-  case 71:
-#line 255 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = TermDeclaration(yystack_[6].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 879 "RSParserImpl.cpp" // lalr1.cc:919
+  case 103: // boolean: BOOLEAN LP setexpr RPE
+#line 443 "RSParserImpl.y"
+                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 861 "RSParserImpl.cpp"
     break;
 
-  case 72:
-#line 257 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = TermDeclaration(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 885 "RSParserImpl.cpp" // lalr1.cc:919
+  case 104: // boolean: BOOLEAN boolean
+#line 444 "RSParserImpl.y"
+                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value); }
+#line 867 "RSParserImpl.cpp"
     break;
 
-  case 73:
-#line 260 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = FullRecursion(yystack_[9].value, yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 891 "RSParserImpl.cpp" // lalr1.cc:919
+  case 105: // filter_expression: FILTER LS setexpr_enum RS LP setexpr RPE
+#line 447 "RSParserImpl.y"
+                                               { yylhs.value = FilterCall(yystack_[6].value, yystack_[4].value, yystack_[1].value, yystack_[0].value); }
+#line 873 "RSParserImpl.cpp"
     break;
 
-  case 74:
-#line 262 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = ShortRecursion(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 897 "RSParserImpl.cpp" // lalr1.cc:919
+  case 106: // declarative: LC LOCAL IN setexpr BAR logic RCE
+#line 451 "RSParserImpl.y"
+                                            { yylhs.value = TermDeclaration(yystack_[6].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 879 "RSParserImpl.cpp"
     break;
 
-  case 75:
-#line 264 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Imperative(yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
-#line 903 "RSParserImpl.cpp" // lalr1.cc:919
+  case 107: // declarative: DECLARATIVE LC variable IN setexpr BAR logic RCE
+#line 452 "RSParserImpl.y"
+                                                       { yylhs.value = TermDeclaration(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 885 "RSParserImpl.cpp"
     break;
 
-  case 76:
-#line 266 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
-#line 909 "RSParserImpl.cpp" // lalr1.cc:919
+  case 108: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR logic BAR setexpr RCE
+#line 455 "RSParserImpl.y"
+                                                                     { yylhs.value = FullRecursion(yystack_[9].value, yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 891 "RSParserImpl.cpp"
     break;
 
-  case 77:
-#line 267 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
-#line 915 "RSParserImpl.cpp" // lalr1.cc:919
+  case 109: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR setexpr RCE
+#line 456 "RSParserImpl.y"
+                                                           { yylhs.value = ShortRecursion(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 897 "RSParserImpl.cpp"
     break;
 
-  case 78:
-#line 269 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::NT_IMP_DECLARE, yystack_[2].value, yystack_[0].value); }
-#line 921 "RSParserImpl.cpp" // lalr1.cc:919
+  case 110: // imperative: IMPERATIVE LC setexpr BAR imp_blocks RCE
+#line 459 "RSParserImpl.y"
+                                               { yylhs.value = Imperative(yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+#line 903 "RSParserImpl.cpp"
     break;
 
-  case 79:
-#line 270 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::NT_IMP_ASSIGN, yystack_[2].value, yystack_[0].value); }
-#line 927 "RSParserImpl.cpp" // lalr1.cc:919
+  case 111: // imp_blocks: imp_block
+#line 462 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
+#line 909 "RSParserImpl.cpp"
     break;
 
-  case 80:
-#line 271 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = AddNode(TokenID::NT_IMP_LOGIC, yystack_[0].value); }
-#line 933 "RSParserImpl.cpp" // lalr1.cc:919
+  case 112: // imp_blocks: imp_blocks SEMICOLON imp_blocks
+#line 463 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+#line 915 "RSParserImpl.cpp"
     break;
 
-  case 82:
-#line 274 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE_DECL, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
-#line 939 "RSParserImpl.cpp" // lalr1.cc:919
+  case 113: // imp_block: LOCAL ITERATE setexpr
+#line 466 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_DECLARE, yystack_[2].value, yystack_[0].value); }
+#line 921 "RSParserImpl.cpp"
     break;
 
-  case 83:
-#line 276 "RSParserImpl.y" // lalr1.cc:919
-    { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
-#line 945 "RSParserImpl.cpp" // lalr1.cc:919
+  case 114: // imp_block: LOCAL ASSIGN setexpr
+#line 467 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_ASSIGN, yystack_[2].value, yystack_[0].value); }
+#line 927 "RSParserImpl.cpp"
     break;
 
-  case 84:
-#line 277 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::expectedLocal); YYABORT; }
-#line 951 "RSParserImpl.cpp" // lalr1.cc:919
+  case 115: // imp_block: logic
+#line 468 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_LOGIC, yystack_[0].value); }
+#line 933 "RSParserImpl.cpp"
     break;
 
-  case 117:
-#line 325 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::missingParanthesis); YYABORT; }
-#line 957 "RSParserImpl.cpp" // lalr1.cc:919
+  case 117: // RPE: error
+#line 475 "RSParserImpl.y"
+            { state->OnError(ParseEID::missingParenthesis); YYABORT; }
+#line 939 "RSParserImpl.cpp"
     break;
 
-  case 119:
-#line 328 "RSParserImpl.y" // lalr1.cc:919
-    { state->OnError(ParseEID::missingCurlyBrace); YYABORT; }
-#line 963 "RSParserImpl.cpp" // lalr1.cc:919
+  case 119: // RCE: error
+#line 479 "RSParserImpl.y"
+            { state->OnError(ParseEID::missingCurlyBrace); YYABORT; }
+#line 945 "RSParserImpl.cpp"
     break;
 
 
-#line 967 "RSParserImpl.cpp" // lalr1.cc:919
+#line 949 "RSParserImpl.cpp"
+
             default:
               break;
             }
@@ -979,7 +962,6 @@ namespace ccl { namespace rslang { namespace detail {
       YY_SYMBOL_PRINT ("-> $$ =", yylhs);
       yypop_ (yylen);
       yylen = 0;
-      YY_STACK_PRINT ();
 
       // Shift the result of the reduction.
       yypush_ (YY_NULLPTR, YY_MOVE (yylhs));
@@ -995,7 +977,9 @@ namespace ccl { namespace rslang { namespace detail {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        error (yysyntax_error_ (yystack_[0].state, yyla));
+        context yyctx (*this, yyla);
+        std::string msg = yysyntax_error_ (yyctx);
+        error (YY_MOVE (msg));
       }
 
 
@@ -1005,7 +989,7 @@ namespace ccl { namespace rslang { namespace detail {
            error, discard it.  */
 
         // Return failure if at end of input.
-        if (yyla.type_get () == yyeof_)
+        if (yyla.kind () == symbol_kind::S_YYEOF)
           YYABORT;
         else if (!yyla.empty ())
           {
@@ -1031,6 +1015,7 @@ namespace ccl { namespace rslang { namespace detail {
        this YYERROR.  */
     yypop_ (yylen);
     yylen = 0;
+    YY_STACK_PRINT ();
     goto yyerrlab1;
 
 
@@ -1039,34 +1024,36 @@ namespace ccl { namespace rslang { namespace detail {
   `-------------------------------------------------------------*/
   yyerrlab1:
     yyerrstatus_ = 3;   // Each real token shifted decrements this.
+    // Pop stack until we find a state that shifts the error token.
+    for (;;)
+      {
+        yyn = yypact_[+yystack_[0].state];
+        if (!yy_pact_value_is_default_ (yyn))
+          {
+            yyn += symbol_kind::S_YYerror;
+            if (0 <= yyn && yyn <= yylast_
+                && yycheck_[yyn] == symbol_kind::S_YYerror)
+              {
+                yyn = yytable_[yyn];
+                if (0 < yyn)
+                  break;
+              }
+          }
+
+        // Pop the current state because it cannot handle the error token.
+        if (yystack_.size () == 1)
+          YYABORT;
+
+        yy_destroy_ ("Error: popping", yystack_[0]);
+        yypop_ ();
+        YY_STACK_PRINT ();
+      }
     {
       stack_symbol_type error_token;
-      for (;;)
-        {
-          yyn = yypact_[yystack_[0].state];
-          if (!yy_pact_value_is_default_ (yyn))
-            {
-              yyn += yyterror_;
-              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
-                {
-                  yyn = yytable_[yyn];
-                  if (0 < yyn)
-                    break;
-                }
-            }
-
-          // Pop the current state because it cannot handle the error token.
-          if (yystack_.size () == 1)
-            YYABORT;
-
-          yy_destroy_ ("Error: popping", yystack_[0]);
-          yypop_ ();
-          YY_STACK_PRINT ();
-        }
 
 
       // Shift the error token.
-      error_token.state = yyn;
+      error_token.state = state_type (yyn);
       yypush_ ("Shifting", YY_MOVE (error_token));
     }
     goto yynewstate;
@@ -1098,6 +1085,7 @@ namespace ccl { namespace rslang { namespace detail {
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYABORT or YYACCEPT.  */
     yypop_ (yylen);
+    YY_STACK_PRINT ();
     while (1 < yystack_.size ())
       {
         yy_destroy_ ("Cleanup: popping", yystack_[0]);
@@ -1131,18 +1119,100 @@ namespace ccl { namespace rslang { namespace detail {
     error (yyexc.what ());
   }
 
-  // Generate an error message.
+  /* Return YYSTR after stripping away unnecessary quotes and
+     backslashes, so that it's suitable for yyerror.  The heuristic is
+     that double-quoting is unnecessary unless the string contains an
+     apostrophe, a comma, or backslash (other than backslash-backslash).
+     YYSTR is taken from yytname.  */
   std::string
-  RSParserImpl::yysyntax_error_ (state_type yystate, const symbol_type& yyla) const
+  RSParserImpl::yytnamerr_ (const char *yystr)
   {
-    // Number of reported tokens (one for the "unexpected", one per
-    // "expected").
-    size_t yycount = 0;
-    // Its maximum.
-    enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-    // Arguments of yyformat.
-    char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+    if (*yystr == '"')
+      {
+        std::string yyr;
+        char const *yyp = yystr;
 
+        for (;;)
+          switch (*++yyp)
+            {
+            case '\'':
+            case ',':
+              goto do_not_strip_quotes;
+
+            case '\\':
+              if (*++yyp != '\\')
+                goto do_not_strip_quotes;
+              else
+                goto append;
+
+            append:
+            default:
+              yyr += *yyp;
+              break;
+
+            case '"':
+              return yyr;
+            }
+      do_not_strip_quotes: ;
+      }
+
+    return yystr;
+  }
+
+  std::string
+  RSParserImpl::symbol_name (symbol_kind_type yysymbol)
+  {
+    return yytnamerr_ (yytname_[yysymbol]);
+  }
+
+
+
+  // RSParserImpl::context.
+  RSParserImpl::context::context (const RSParserImpl& yyparser, const symbol_type& yyla)
+    : yyparser_ (yyparser)
+    , yyla_ (yyla)
+  {}
+
+  int
+  RSParserImpl::context::expected_tokens (symbol_kind_type yyarg[], int yyargn) const
+  {
+    // Actual number of expected tokens
+    int yycount = 0;
+
+    int yyn = yypact_[+yyparser_.yystack_[0].state];
+    if (!yy_pact_value_is_default_ (yyn))
+      {
+        /* Start YYX at -YYN if negative to avoid negative indexes in
+           YYCHECK.  In other words, skip the first -YYN actions for
+           this state because they are default actions.  */
+        int yyxbegin = yyn < 0 ? -yyn : 0;
+        // Stay within bounds of both yycheck and yytname.
+        int yychecklim = yylast_ - yyn + 1;
+        int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
+          if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
+              && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
+            {
+              if (!yyarg)
+                ++yycount;
+              else if (yycount == yyargn)
+                return 0;
+              else
+                yyarg[yycount++] = YY_CAST (symbol_kind_type, yyx);
+            }
+      }
+
+    if (yyarg && yycount == 0 && 0 < yyargn)
+      yyarg[0] = symbol_kind::S_YYEMPTY;
+    return yycount;
+  }
+
+
+
+  int
+  RSParserImpl::yy_syntax_error_arguments_ (const context& yyctx,
+                                                 symbol_kind_type yyarg[], int yyargn) const
+  {
     /* There are many possibilities here to consider:
        - If this state is a consistent state with a default action, then
          the only way this function was invoked is if the default action
@@ -1161,41 +1231,32 @@ namespace ccl { namespace rslang { namespace detail {
        - Of course, the expected token list depends on states to have
          correct lookahead information, and it depends on the parser not
          to perform extra reductions after fetching a lookahead from the
-         scanner and before detecting a syntax error.  Thus, state
-         merging (from LALR or IELR) and default reductions corrupt the
-         expected token list.  However, the list is correct for
-         canonical LR with one exception: it will still contain any
-         token that will not be accepted due to an error action in a
-         later state.
+         scanner and before detecting a syntax error.  Thus, state merging
+         (from LALR or IELR) and default reductions corrupt the expected
+         token list.  However, the list is correct for canonical LR with
+         one exception: it will still contain any token that will not be
+         accepted due to an error action in a later state.
     */
-    if (!yyla.empty ())
+
+    if (!yyctx.lookahead ().empty ())
       {
-        int yytoken = yyla.type_get ();
-        yyarg[yycount++] = yytname_[yytoken];
-        int yyn = yypact_[yystate];
-        if (!yy_pact_value_is_default_ (yyn))
-          {
-            /* Start YYX at -YYN if negative to avoid negative indexes in
-               YYCHECK.  In other words, skip the first -YYN actions for
-               this state because they are default actions.  */
-            int yyxbegin = yyn < 0 ? -yyn : 0;
-            // Stay within bounds of both yycheck and yytname.
-            int yychecklim = yylast_ - yyn + 1;
-            int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
-            for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
-              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
-                  && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
-                {
-                  if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                    {
-                      yycount = 1;
-                      break;
-                    }
-                  else
-                    yyarg[yycount++] = yytname_[yyx];
-                }
-          }
+        if (yyarg)
+          yyarg[0] = yyctx.token ();
+        int yyn = yyctx.expected_tokens (yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+        return yyn + 1;
       }
+    return 0;
+  }
+
+  // Generate an error message.
+  std::string
+  RSParserImpl::yysyntax_error_ (const context& yyctx) const
+  {
+    // Its maximum.
+    enum { YYARGS_MAX = 5 };
+    // Arguments of yyformat.
+    symbol_kind_type yyarg[YYARGS_MAX];
+    int yycount = yy_syntax_error_arguments_ (yyctx, yyarg, YYARGS_MAX);
 
     char const* yyformat = YY_NULLPTR;
     switch (yycount)
@@ -1216,11 +1277,11 @@ namespace ccl { namespace rslang { namespace detail {
 
     std::string yyres;
     // Argument number.
-    size_t yyi = 0;
+    std::ptrdiff_t yyi = 0;
     for (char const* yyp = yyformat; *yyp; ++yyp)
       if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
         {
-          yyres += yytnamerr_ (yyarg[yyi++]);
+          yyres += symbol_name (yyarg[yyi++]);
           ++yyp;
         }
       else
@@ -1229,120 +1290,120 @@ namespace ccl { namespace rslang { namespace detail {
   }
 
 
-  const signed char RSParserImpl::yypact_ninf_ = -65;
+  const signed char RSParserImpl::yypact_ninf_ = -58;
 
-  const signed char RSParserImpl::yytable_ninf_ = -87;
+  const signed char RSParserImpl::yytable_ninf_ = -116;
 
   const short
   RSParserImpl::yypact_[] =
   {
-     236,   -65,    92,   -43,   -40,   -65,   -65,   -65,   -65,   -65,
-     -65,   342,    37,   -65,   -65,   -37,   -65,   -65,   -65,   -65,
-     -16,    21,    26,   342,   414,   143,    56,   -65,   -65,   -65,
-     110,    90,   -65,   -65,   -65,   -65,   553,   -65,   -65,   -65,
-     -65,   -65,   -65,   -65,   -65,    83,   -65,   -65,   -65,    84,
-      85,   342,   466,   466,   466,   -65,   -65,   -65,   -65,   -65,
-     553,   -65,   466,   -65,   466,    93,    93,   466,   -65,    58,
-     101,   553,   202,   102,    19,   146,   -65,   466,   215,     2,
-     -65,   -65,    59,   103,   -65,   -65,   342,   342,   342,   342,
-     466,   466,   466,   -65,   -65,   -65,   -65,   -65,   -65,   -65,
-     -65,   -65,   -65,   -65,   466,   466,   466,   466,   466,   466,
-     114,   -65,   -65,   100,    12,   -65,   -65,   466,   -65,   215,
-     123,   195,   152,   203,    93,   163,   144,   489,   -65,   -65,
-     -65,   -65,   -65,   466,   -65,   466,   -65,   -65,   466,   342,
-     199,   125,   238,   185,   -65,   142,   142,   174,   -65,   -65,
-     -65,   -65,   -65,   215,   -65,   -65,   -65,    20,   194,   466,
-     127,   152,   -65,   -65,   -65,   207,   466,   466,   394,   215,
-     503,   215,   -65,   -65,   -65,   -65,   131,   290,   -65,   -65,
-     -65,   466,   516,   521,   106,     8,    10,   -65,   342,   -65,
-     -65,   -65,   -65,   152,   342,   342,   466,   466,   -65,   -65,
-     394,   -65,    11,   -65,    11,   208,    14,   215,   215,   -65,
-     -65,   -65,   466,   -65,    87,   -65
+     236,   -58,   111,   -34,   -17,   -58,   -58,   -58,   -58,   -58,
+     -58,   342,    82,   -58,   -58,    25,   -58,   -58,   -58,   -58,
+      46,    56,    75,   342,   414,     9,    60,   -58,    85,   -58,
+     -58,   137,   224,   -58,   -58,   -58,    79,   -58,   553,   118,
+     -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,
+     -58,   342,   466,   466,   466,   -58,   -58,   -58,   -58,   -58,
+     -58,   553,   466,   -58,   466,    35,    35,   466,   -58,    70,
+     101,   553,   121,    17,   202,   157,   -58,   466,   175,    24,
+     -58,   -58,    10,    63,   -58,   -58,    97,   342,   342,   342,
+     342,   -58,   -58,   100,   -58,   -19,   -58,   466,   466,   466,
+     -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,
+     -58,   466,   466,   466,   466,   466,   466,   466,   -58,   175,
+     126,   203,   129,   206,    35,   163,   144,   489,   -58,   -58,
+     -58,   -58,   466,   -58,   -58,   466,   -58,   -58,   466,   342,
+      89,   -58,   120,   241,   176,   -58,   -58,   -58,    19,   146,
+     466,   148,   143,   143,   190,   -58,   -58,   -58,   -58,   -58,
+     175,   129,   -58,   -58,   -58,   207,   466,   466,   394,   175,
+     503,   175,   -58,   -58,   -58,   -58,   154,   290,   -58,   -58,
+     -58,   466,   516,   521,   123,     6,     8,   -58,   342,   -58,
+     -58,   -58,   -58,   129,   342,   342,   466,   466,   -58,   -58,
+     394,   -58,    33,   -58,    33,   169,    14,   175,   175,   -58,
+     -58,   -58,   466,   -58,    73,   -58
   };
 
-  const unsigned char
+  const signed char
   RSParserImpl::yydefact_[] =
   {
-       0,    93,    89,    87,    88,    91,    94,    96,    95,    97,
-      98,     0,     0,   102,   103,     0,   104,    99,   100,   101,
-       0,     0,     0,     0,     0,     0,     0,     3,     4,     2,
-      21,     0,    22,    19,    18,    20,     6,    44,    45,    57,
-      58,    59,    61,    63,    62,    90,    92,    43,    42,     0,
-       0,    14,     0,     0,     0,    89,    28,    25,    24,    23,
-       0,    90,     0,    67,     0,     0,     0,     0,    21,     0,
-       0,    68,     0,     0,     0,    93,    88,     0,    68,     0,
-      69,     8,     0,     0,     9,     1,     0,     0,     0,     0,
-       0,     0,     0,   112,   113,   114,   115,   111,   110,   105,
-     106,   107,   108,   109,     0,     0,     0,     0,     0,     0,
-       0,    30,    81,     0,     0,    38,    37,     0,    16,    15,
+       0,    84,    81,     9,    10,    83,    78,    80,    79,    52,
+      53,     0,     0,    72,    73,     0,    74,    69,    70,    71,
+       0,     0,     0,     0,     0,     0,     0,     2,    82,     3,
+       4,    29,     0,    30,    26,    27,     0,    28,    12,     0,
+      63,    64,    65,    66,    94,    95,    96,    97,    98,   100,
+      99,     5,     0,     0,     0,    81,    82,    51,    49,    50,
+      45,     0,     0,   104,     0,     0,     0,     0,    29,     0,
+       0,    75,     0,     0,     0,    84,    10,     0,    75,     0,
+      76,    14,     0,     0,    15,     1,     0,     0,     0,     0,
+       0,    47,    20,     0,    54,     0,    55,     0,     0,     0,
+      41,    42,    43,    44,    40,    39,    34,    35,    36,    37,
+      38,     0,     0,     0,     0,     0,     0,     0,     7,     6,
        0,     0,     0,     0,     0,     0,     0,     0,   117,   116,
-      27,    26,    56,     0,    65,     0,    64,    13,     0,     0,
-       0,    33,    34,    35,    36,    48,    49,    50,    55,    51,
-      54,    52,    53,    32,    17,    39,    85,     0,     0,     0,
-       0,     0,    46,    31,    66,     0,     0,     0,     0,    70,
-       0,    12,     7,    11,    10,    82,     0,     0,    41,    40,
-      47,     0,     0,     0,    93,    21,     0,    76,     0,    84,
-      86,    83,    29,     0,     0,     0,     0,     0,   119,   118,
-       0,    75,     0,    60,     0,    21,     0,    79,    78,    77,
-      71,    72,     0,    74,     0,    73
+      32,    31,     0,   102,    93,     0,   101,    19,     0,     0,
+       0,     8,    59,    60,    61,    62,    56,    24,     0,     0,
+       0,     0,    85,    86,    87,    92,    88,    91,    89,    90,
+      33,     0,    67,    48,   103,     0,     0,     0,     0,    77,
+       0,    18,    13,    17,    16,    21,     0,     0,    58,    57,
+      68,     0,     0,     0,    84,    29,     0,   111,     0,    23,
+      25,    22,    46,     0,     0,     0,     0,     0,   119,   118,
+       0,   110,     0,   105,     0,    29,     0,   114,   113,   112,
+     106,   107,     0,   109,     0,   108
   };
 
   const short
   RSParserImpl::yypgoto_[] =
   {
-     -65,   -65,   -44,   155,   -65,   128,   -65,     4,   136,    95,
-      -8,    -6,    -9,   244,   109,   -65,     0,    -1,   -65,   -65,
-     -65,   258,    94,    17,   -65,   -65,   -65,    71,   -65,   -48,
-     108,   111,   285,   -65,   -65,   -65,   -65,   -65,   -65,   -64,
+     -58,   -58,   -58,   228,   -50,   178,   -58,   128,   -30,    93,
+      95,     4,   164,    -8,    -9,   -58,    -6,   107,   -58,   119,
+     -58,   249,     0,   -58,    94,    -4,   -58,   -58,    -2,   -58,
+     -58,   -58,   273,   -58,   -58,   -58,   -58,    86,   -58,   -57,
      -13
   };
 
   const short
   RSParserImpl::yydefgoto_[] =
   {
-      -1,    26,    27,    28,    83,    84,    29,    68,    31,    56,
-      32,    33,    34,    35,   114,   115,    60,    37,    38,    39,
-      40,    41,    73,    80,    42,    43,    44,   186,   187,   156,
-     157,   158,    61,    46,    47,    48,    49,    50,   109,   130,
+      -1,    26,    27,    56,    29,    30,    83,    84,   147,   148,
+     149,    68,    32,    33,    34,   116,    35,    60,    36,    95,
+      96,    37,    61,    39,    72,    80,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,   186,   187,   130,
      201
   };
 
   const short
   RSParserImpl::yytable_[] =
   {
-      36,   116,    59,    57,    30,    58,   131,   118,   132,   -80,
-     134,   198,   198,    53,    69,   198,    54,   125,   126,    64,
-     128,   128,    72,    71,    78,    90,    91,    92,    93,    94,
-      95,    96,    97,    98,   -21,   -21,   -21,   -21,    65,   159,
-      74,    99,   100,   101,   102,   103,   104,   105,   106,   107,
-     108,    36,   119,    78,    78,    30,    85,   136,   164,   128,
-     137,   133,   122,   -80,    78,   199,   199,   127,   -80,   199,
-     200,   160,   129,   129,    12,    66,    72,    78,   -69,   -86,
-      67,   -18,   -18,   -18,   -18,   111,   138,   112,   198,    62,
-     145,   146,   147,   175,    74,   172,   112,   180,    90,    91,
-      92,   155,   128,   112,   148,   149,   150,   151,   152,   153,
-      -5,   129,   116,    86,    87,    88,    89,   161,    79,   104,
-     105,   106,   107,   108,   -20,   -20,   -20,   -20,   178,   203,
-     112,   110,   189,   169,   112,   170,   113,   117,   171,    36,
-      51,    52,   199,    30,    81,   124,    82,   120,   121,    87,
-      88,    89,   124,   128,   129,    92,   196,   197,   123,   177,
-     139,   133,   140,    90,    91,    92,   182,   183,    59,    57,
-      25,    58,   185,   135,   104,   105,   106,   107,   108,   113,
-     162,   193,   133,   124,   104,   105,   106,   107,   108,   210,
+      38,   118,    58,    57,    31,    59,    94,  -115,   150,   198,
+      81,   137,    82,   131,    69,   198,   133,   134,   128,    73,
+     128,    74,    53,    71,    78,    97,    98,    99,   100,   101,
+     102,   103,   104,   105,   198,   125,   126,   138,    92,    54,
+     151,   106,   107,   108,   109,   110,   111,   112,   113,   114,
+     115,    38,   119,    78,    78,    31,   -29,   -29,   -29,   -29,
+      85,  -115,   122,   199,    78,   164,  -115,   127,   200,   199,
+     129,   128,   129,    73,   198,    74,   -76,    78,   -25,   136,
+      91,    64,    92,   132,    97,    98,    99,   124,   199,   172,
+     173,   175,    82,   -26,   -26,   -26,   -26,   152,   153,   154,
+      65,   146,   128,    92,   180,   111,   112,   113,   114,   115,
+      66,   155,   156,   157,   158,   159,   160,   161,    79,    12,
+     139,    94,   140,   129,   -28,   -28,   -28,   -28,   199,    67,
+     128,    93,   169,    86,    62,   170,   203,   -11,   171,    38,
+      97,    98,    99,    31,    88,    89,    90,   120,   121,   178,
+     177,    92,   124,    25,   129,   189,    99,    92,   123,    51,
+      52,   111,   112,   113,   114,   115,   182,   183,    58,    57,
+     117,    59,   185,   196,   197,   111,   112,   113,   114,   115,
+     132,   193,   129,   162,   135,   132,    97,    98,    99,   210,
      166,   211,   202,   213,   167,   206,   207,   208,   204,   205,
-     173,   215,    82,   128,   185,   129,   104,   105,   106,   107,
-     108,    89,   214,   -44,   -44,   -44,   -44,   -44,   -44,   -44,
-     -44,   -44,   141,   142,   143,   144,    90,    91,    92,   -44,
-     -44,   -44,   -44,   -44,   -44,   -44,   -44,   -44,   -44,     1,
-       2,     3,     4,     5,     6,     7,     8,   104,   105,   106,
-     107,   108,   163,   176,   133,   129,     9,    10,    11,   181,
-     165,   -44,   133,    88,    89,   154,   212,    70,   174,   179,
-      63,   209,   192,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,   190,    45,     0,   191,    23,     0,
+      93,   215,    90,   128,   185,   176,   124,   111,   112,   113,
+     114,   115,   214,   -65,   -65,   -65,   -65,   -65,   -65,   -65,
+     -65,   -65,   111,   112,   113,   114,   115,   212,    28,   -65,
+     -65,   -65,   -65,   -65,   -65,   -65,   -65,   -65,   -65,     1,
+       2,     3,     4,     5,     6,     7,     8,    87,    88,    89,
+      90,   142,   143,   144,   145,   129,     9,    10,    11,   181,
+     163,   -65,   132,   165,   141,   132,    89,    90,   174,   190,
+     179,   191,    70,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,   192,    63,   209,     0,    23,     0,
       24,     0,    25,     1,    55,     3,     4,     5,     6,     7,
-       8,    90,    91,    92,     0,     0,     0,     0,     0,     0,
+       8,    97,    98,    99,     0,     0,     0,     0,     0,     0,
        9,    10,    11,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,   104,   105,   106,   107,   108,    12,    13,    14,
+       0,     0,   111,   112,   113,   114,   115,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,     0,     0,
        0,     0,    23,     0,    24,     1,    55,     3,     4,     5,
        6,     7,     8,     0,     0,     0,     0,     0,     0,     0,
@@ -1360,49 +1421,49 @@ namespace ccl { namespace rslang { namespace detail {
       55,     3,    76,     5,     6,     7,     8,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      90,    91,    92,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    90,    91,    92,     0,    77,     0,
-      24,   104,   105,   106,   107,   108,     0,    90,    91,    92,
-       0,     0,    90,    91,    92,   104,   105,   106,   107,   108,
-       0,     0,     0,     0,     0,     0,     0,   168,   104,   105,
-     106,   107,   108,   104,   105,   106,   107,   108,     0,     0,
-       0,   188,     0,     0,    90,    91,    92,    93,    94,    95,
-      96,    97,    98,     0,   194,     0,     0,     0,     0,   195,
-      99,   100,   101,   102,   103,   104,   105,   106,   107,   108
+      97,    98,    99,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    97,    98,    99,     0,    77,     0,
+      24,   111,   112,   113,   114,   115,     0,    97,    98,    99,
+       0,     0,    97,    98,    99,   111,   112,   113,   114,   115,
+       0,     0,     0,     0,     0,     0,     0,   168,   111,   112,
+     113,   114,   115,   111,   112,   113,   114,   115,     0,     0,
+       0,   188,     0,     0,    97,    98,    99,   100,   101,   102,
+     103,   104,   105,     0,   194,     0,     0,     0,     0,   195,
+     106,   107,   108,   109,   110,   111,   112,   113,   114,   115
   };
 
   const short
   RSParserImpl::yycheck_[] =
   {
-       0,    49,    11,    11,     0,    11,    70,    51,    72,     1,
-      74,     1,     1,    56,    23,     1,    56,    65,    66,    56,
-       1,     1,    23,    23,    24,    11,    12,    13,    14,    15,
-      16,    17,    18,    19,    23,    24,    25,    26,    54,    27,
-      23,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-      36,    51,    52,    53,    54,    51,     0,    55,   122,     1,
-       1,    59,    62,    55,    64,    55,    55,    67,    60,    55,
-      60,    59,    53,    53,    37,    54,    77,    77,    59,    59,
-      54,    23,    24,    25,    26,     1,    27,     3,     1,    52,
-      90,    91,    92,   157,    77,   139,     3,   161,    11,    12,
-      13,     1,     1,     3,   104,   105,   106,   107,   108,   109,
-       0,    53,   160,    23,    24,    25,    26,   117,    24,    32,
-      33,    34,    35,    36,    23,    24,    25,    26,     1,   193,
-       3,    48,     1,   133,     3,   135,    52,    52,   138,   139,
-      48,    49,    55,   139,     1,    52,     3,    53,    54,    24,
-      25,    26,    52,     1,    53,    13,    50,    51,    64,   159,
-      57,    59,    59,    11,    12,    13,   166,   167,   177,   177,
-      56,   177,   168,    27,    32,    33,    34,    35,    36,    52,
-      57,   181,    59,    52,    32,    33,    34,    35,    36,   202,
+       0,    51,    11,    11,     0,    11,    36,     1,    27,     1,
+       1,     1,     3,    70,    23,     1,    73,    74,     1,    23,
+       1,    23,    56,    23,    24,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,     1,    65,    66,    27,     3,    56,
+      59,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    51,    52,    53,    54,    51,    23,    24,    25,    26,
+       0,    55,    62,    55,    64,   122,    60,    67,    60,    55,
+      53,     1,    53,    77,     1,    77,    59,    77,    59,    55,
+       1,    56,     3,    59,    11,    12,    13,    52,    55,   139,
+       1,   148,     3,    23,    24,    25,    26,    97,    98,    99,
+      54,     1,     1,     3,   161,    32,    33,    34,    35,    36,
+      54,   111,   112,   113,   114,   115,   116,   117,    24,    37,
+      57,   151,    59,    53,    23,    24,    25,    26,    55,    54,
+       1,    52,   132,    48,    52,   135,   193,     0,   138,   139,
+      11,    12,    13,   139,    24,    25,    26,    53,    54,     1,
+     150,     3,    52,    56,    53,     1,    13,     3,    64,    48,
+      49,    32,    33,    34,    35,    36,   166,   167,   177,   177,
+      52,   177,   168,    50,    51,    32,    33,    34,    35,    36,
+      59,   181,    53,    57,    27,    59,    11,    12,    13,   202,
       27,   204,   188,   206,    50,   195,   196,   197,   194,   195,
-       1,   214,     3,     1,   200,    53,    32,    33,    34,    35,
-      36,    26,   212,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    86,    87,    88,    89,    11,    12,    13,    27,
+      52,   214,    26,     1,   200,    59,    52,    32,    33,    34,
+      35,    36,   212,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    32,    33,    34,    35,    36,    58,     0,    27,
       28,    29,    30,    31,    32,    33,    34,    35,    36,     3,
-       4,     5,     6,     7,     8,     9,    10,    32,    33,    34,
-      35,    36,    57,    59,    59,    53,    20,    21,    22,    52,
-      57,    59,    59,    25,    26,   110,    58,    23,   140,   160,
-      12,   200,   177,    37,    38,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,   176,     0,    -1,   176,    52,    -1,
+       4,     5,     6,     7,     8,     9,    10,    23,    24,    25,
+      26,    87,    88,    89,    90,    53,    20,    21,    22,    52,
+      57,    59,    59,    57,    86,    59,    25,    26,   140,   176,
+     151,   176,    23,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,   177,    12,   200,    -1,    52,    -1,
       54,    -1,    56,     3,     4,     5,     6,     7,     8,     9,
       10,    11,    12,    13,    -1,    -1,    -1,    -1,    -1,    -1,
       20,    21,    22,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
@@ -1435,130 +1496,131 @@ namespace ccl { namespace rslang { namespace detail {
       27,    28,    29,    30,    31,    32,    33,    34,    35,    36
   };
 
-  const unsigned char
+  const signed char
   RSParserImpl::yystos_[] =
   {
        0,     3,     4,     5,     6,     7,     8,     9,    10,    20,
       21,    22,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    52,    54,    56,    62,    63,    64,    67,
-      68,    69,    71,    72,    73,    74,    77,    78,    79,    80,
-      81,    82,    85,    86,    87,    93,    94,    95,    96,    97,
-      98,    48,    49,    56,    56,     4,    70,    71,    72,    73,
-      77,    93,    52,    82,    56,    54,    54,    54,    68,    73,
-      74,    77,    78,    83,    84,     3,     6,    52,    77,    83,
-      84,     1,     3,    65,    66,     0,    23,    24,    25,    26,
-      11,    12,    13,    14,    15,    16,    17,    18,    19,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,    99,
-      48,     1,     3,    52,    75,    76,    90,    52,    63,    77,
-      83,    83,    77,    83,    52,    90,    90,    77,     1,    53,
-     100,   100,   100,    59,   100,    27,    55,     1,    27,    57,
-      59,    69,    69,    69,    69,    77,    77,    77,    77,    77,
-      77,    77,    77,    77,    64,     1,    90,    91,    92,    27,
-      59,    77,    57,    57,   100,    57,    27,    50,    58,    77,
-      77,    77,    63,     1,    66,   100,    59,    77,     1,    75,
-     100,    52,    77,    77,     3,    68,    88,    89,    58,     1,
-      91,    92,    70,    77,    58,    58,    50,    51,     1,    55,
-      60,   101,    68,   100,    68,    68,    77,    77,    77,    88,
-     101,   101,    58,   101,    77,   101
+      45,    46,    47,    52,    54,    56,    62,    63,    64,    65,
+      66,    72,    73,    74,    75,    77,    79,    82,    83,    84,
+      87,    88,    89,    90,    91,    92,    93,    94,    95,    96,
+      97,    48,    49,    56,    56,     4,    64,    74,    75,    77,
+      78,    83,    52,    93,    56,    54,    54,    54,    72,    75,
+      82,    83,    85,    86,    89,     3,     6,    52,    83,    85,
+      86,     1,     3,    67,    68,     0,    48,    23,    24,    25,
+      26,     1,     3,    52,    69,    80,    81,    11,    12,    13,
+      14,    15,    16,    17,    18,    19,    27,    28,    29,    30,
+      31,    32,    33,    34,    35,    36,    76,    52,    65,    83,
+      85,    85,    83,    85,    52,    69,    69,    83,     1,    53,
+     100,   100,    59,   100,   100,    27,    55,     1,    27,    57,
+      59,    66,    73,    73,    73,    73,     1,    69,    70,    71,
+      27,    59,    83,    83,    83,    83,    83,    83,    83,    83,
+      83,    83,    57,    57,   100,    57,    27,    50,    58,    83,
+      83,    83,    65,     1,    68,   100,    59,    83,     1,    80,
+     100,    52,    83,    83,     3,    72,    98,    99,    58,     1,
+      70,    71,    78,    83,    58,    58,    50,    51,     1,    55,
+      60,   101,    72,   100,    72,    72,    83,    83,    83,    98,
+     101,   101,    58,   101,    83,   101
   };
 
-  const unsigned char
+  const signed char
   RSParserImpl::yyr1_[] =
   {
-       0,    61,    62,    62,    62,    63,    63,    64,    64,    65,
-      65,    65,    66,    66,    67,    67,    67,    67,    68,    68,
-      68,    69,    69,    70,    70,    70,    71,    71,    72,    72,
-      72,    72,    73,    74,    74,    74,    74,    75,    75,    75,
-      76,    76,    77,    77,    77,    77,    77,    77,    78,    78,
-      78,    78,    78,    78,    78,    78,    78,    79,    79,    79,
-      79,    79,    79,    79,    80,    81,    82,    82,    83,    83,
-      84,    85,    85,    86,    86,    87,    88,    88,    89,    89,
-      89,    90,    90,    91,    91,    92,    92,    93,    93,    94,
-      94,    94,    95,    95,    96,    96,    96,    97,    97,    98,
-      98,    98,    98,    98,    98,    99,    99,    99,    99,    99,
-      99,    99,    99,    99,    99,    99,   100,   100,   101,   101
+       0,    61,    62,    62,    62,    63,    63,    63,    63,    64,
+      64,    65,    65,    66,    66,    67,    67,    67,    68,    68,
+      69,    69,    70,    70,    71,    71,    72,    72,    72,    73,
+      73,    74,    74,    75,    76,    76,    76,    76,    76,    76,
+      76,    76,    76,    76,    76,    77,    77,    77,    77,    78,
+      78,    78,    79,    79,    80,    80,    80,    81,    81,    82,
+      82,    82,    82,    83,    83,    83,    83,    83,    83,    84,
+      84,    84,    84,    84,    84,    85,    85,    86,    87,    87,
+      87,    88,    88,    88,    88,    89,    89,    89,    89,    89,
+      89,    89,    89,    89,    90,    90,    90,    90,    90,    90,
+      90,    91,    92,    93,    93,    94,    95,    95,    96,    96,
+      97,    98,    98,    99,    99,    99,   100,   100,   101,   101
   };
 
-  const unsigned char
+  const signed char
   RSParserImpl::yyr2_[] =
   {
-       0,     2,     1,     1,     1,     1,     1,     4,     2,     1,
-       3,     3,     3,     2,     2,     3,     3,     3,     1,     1,
-       1,     1,     1,     1,     1,     1,     3,     3,     2,     5,
-       2,     4,     3,     3,     3,     3,     3,     1,     1,     2,
-       3,     3,     1,     1,     1,     1,     4,     4,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     1,     1,     1,
-       7,     1,     1,     1,     3,     3,     4,     2,     1,     1,
-       3,     7,     8,    10,     8,     6,     1,     3,     3,     3,
-       1,     1,     3,     3,     3,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1
+       0,     2,     1,     1,     1,     2,     3,     3,     3,     1,
+       1,     1,     1,     4,     2,     1,     3,     3,     3,     2,
+       1,     3,     3,     3,     1,     1,     1,     1,     1,     1,
+       1,     3,     3,     3,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     2,     5,     2,     4,     1,
+       1,     1,     1,     1,     1,     1,     2,     3,     3,     3,
+       3,     3,     3,     1,     1,     1,     1,     4,     4,     1,
+       1,     1,     1,     1,     1,     1,     1,     3,     1,     1,
+       1,     1,     1,     1,     1,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     1,     1,     1,     1,     1,     1,
+       1,     3,     3,     4,     2,     7,     7,     8,    10,     8,
+       6,     1,     3,     3,     3,     1,     1,     1,     1,     1
   };
 
 
-
+#if YYDEBUG || 1
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-  // First, the terminals, then, starting at \a yyntokens_, nonterminals.
+  // First, the terminals, then, starting at \a YYNTOKENS, nonterminals.
   const char*
   const RSParserImpl::yytname_[] =
   {
-  "$end", "error", "$undefined", "LOCAL", "GLOBAL", "FUNCTION",
-  "PREDICATE", "RADICAL", "INTEGER", "INFINITY", "EMPTYSET", "PLUS",
-  "MINUS", "MULTIPLY", "GREATER", "LESSER", "GREATER_OR_EQ",
+  "\"end of file\"", "error", "\"invalid token\"", "LOCAL", "GLOBAL",
+  "FUNCTION", "PREDICATE", "RADICAL", "INTEGER", "INTSET", "EMPTYSET",
+  "PLUS", "MINUS", "MULTIPLY", "GREATER", "LESSER", "GREATER_OR_EQ",
   "LESSER_OR_EQ", "EQUAL", "NOTEQUAL", "FORALL", "EXISTS", "NOT",
   "EQUIVALENT", "IMPLICATION", "OR", "AND", "IN", "NOTIN", "SUBSET",
   "SUBOR_EQ", "NOTSUBSET", "DECART", "UNION", "INTERSECTION", "SET_MINUS",
   "SYMMINUS", "BOOLEAN", "BIGPR", "SMALLPR", "FILTER", "CARD", "BOOL",
   "DEBOOL", "RED", "DECLARATIVE", "RECURSIVE", "IMPERATIVE", "DEFINE",
   "STRUCT", "ASSIGN", "ITERATE", "LP", "RP", "LC", "RC", "LS", "RS", "BAR",
-  "COMMA", "SEMICOLON", "$accept", "expression", "term_or_logic",
-  "function_decl", "arg_declaration", "declaration", "global_declaration",
-  "logic", "logic_all", "logic_no_binary", "logic_par", "logic_unary",
-  "logic_predicates", "logic_binary", "quant_var", "quant_var_enum",
-  "term", "binary_operation", "typed_constructors", "enumeration", "tuple",
-  "boolean", "term_enum", "term_enum_min2", "declarative", "recursion",
-  "imperative", "imp_blocks", "imp_block", "variable", "var_enum",
-  "var_all", "function_name", "global_id", "identifier", "literal",
-  "quantifier", "operation_name", "binary_predicate", "RPE", "RCE", YY_NULLPTR
+  "COMMA", "SEMICOLON", "$accept", "expression", "global_declaration",
+  "function_name", "logic_or_setexpr", "function_decl", "arguments",
+  "declaration", "variable", "var_enum", "var_all", "logic", "logic_all",
+  "logic_par", "logic_predicates", "binary_predicate", "logic_unary",
+  "logic_no_binary", "quantifier", "quant_var", "quant_var_enum",
+  "logic_binary", "setexpr", "operation_name", "setexpr_enum",
+  "setexpr_enum_min2", "literal", "identifier", "setexpr_binary",
+  "setexpr_generators", "enumeration", "tuple", "boolean",
+  "filter_expression", "declarative", "recursion", "imperative",
+  "imp_blocks", "imp_block", "RPE", "RCE", YY_NULLPTR
   };
+#endif
+
 
 #if YYDEBUG
-  const unsigned short
+  const short
   RSParserImpl::yyrline_[] =
   {
-       0,   150,   150,   151,   152,   155,   156,   159,   160,   163,
-     164,   165,   167,   168,   172,   173,   174,   175,   179,   180,
-     181,   183,   184,   186,   187,   188,   190,   191,   193,   194,
-     196,   197,   199,   201,   202,   203,   204,   207,   208,   209,
-     211,   212,   216,   217,   218,   219,   220,   221,   224,   225,
-     226,   227,   228,   229,   230,   231,   232,   235,   236,   237,
-     238,   239,   240,   241,   243,   245,   247,   248,   250,   251,
-     253,   255,   256,   259,   261,   264,   266,   267,   269,   270,
-     271,   273,   274,   276,   277,   279,   280,   284,   285,   287,
-     288,   289,   291,   292,   294,   295,   296,   299,   300,   303,
-     304,   305,   306,   307,   308,   311,   312,   313,   314,   315,
-     316,   317,   318,   319,   320,   321,   324,   325,   327,   328
+       0,   262,   262,   263,   264,   268,   269,   270,   271,   274,
+     275,   279,   280,   284,   285,   290,   291,   292,   295,   296,
+     300,   301,   304,   305,   308,   309,   314,   315,   316,   319,
+     320,   323,   324,   328,   331,   332,   333,   334,   335,   336,
+     337,   338,   339,   340,   341,   345,   346,   347,   348,   351,
+     352,   353,   356,   357,   360,   361,   362,   365,   366,   370,
+     371,   372,   373,   379,   380,   381,   382,   383,   384,   387,
+     388,   389,   390,   391,   392,   395,   396,   399,   403,   404,
+     405,   409,   410,   411,   412,   416,   417,   418,   419,   420,
+     421,   422,   423,   424,   428,   429,   430,   431,   432,   433,
+     434,   437,   440,   443,   444,   447,   451,   452,   455,   456,
+     459,   462,   463,   466,   467,   468,   474,   475,   478,   479
   };
 
-  // Print the state stack on the debug stream.
   void
-  RSParserImpl::yystack_print_ ()
+  RSParserImpl::yy_stack_print_ () const
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
            i = yystack_.begin (),
            i_end = yystack_.end ();
          i != i_end; ++i)
-      *yycdebug_ << ' ' << i->state;
+      *yycdebug_ << ' ' << int (i->state);
     *yycdebug_ << '\n';
   }
 
-  // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  RSParserImpl::yy_reduce_print_ (int yyrule)
+  RSParserImpl::yy_reduce_print_ (int yyrule) const
   {
-    unsigned yylno = yyrline_[yyrule];
+    int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
     // Print the symbols being reduced, and their result.
     *yycdebug_ << "Reducing stack by rule " << yyrule - 1
@@ -1570,13 +1632,13 @@ namespace ccl { namespace rslang { namespace detail {
   }
 #endif // YYDEBUG
 
-  RSParserImpl::token_number_type
+  RSParserImpl::symbol_kind_type
   RSParserImpl::yytranslate_ (int t)
   {
     // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
     // TOKEN-NUM as returned by yylex.
     static
-    const token_number_type
+    const signed char
     translate_table[] =
     {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1612,21 +1674,22 @@ namespace ccl { namespace rslang { namespace detail {
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60
     };
-    const unsigned user_token_number_max_ = 315;
-    const token_number_type undef_token_ = 2;
+    // Last valid token kind.
+    const int code_max = 315;
 
-    if (static_cast<int> (t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned> (t) <= user_token_number_max_)
-      return translate_table[t];
+    if (t <= 0)
+      return symbol_kind::S_YYEOF;
+    else if (t <= code_max)
+      return YY_CAST (symbol_kind_type, translate_table[t]);
     else
-      return undef_token_;
+      return symbol_kind::S_YYUNDEF;
   }
 
-#line 11 "RSParserImpl.y" // lalr1.cc:1242
+#line 15 "RSParserImpl.y"
 } } } // ccl::rslang::detail
-#line 1629 "RSParserImpl.cpp" // lalr1.cc:1242
-#line 331 "RSParserImpl.y" // lalr1.cc:1243
+#line 1691 "RSParserImpl.cpp"
+
+#line 486 "RSParserImpl.y"
 
 
 #ifdef _MSC_VER

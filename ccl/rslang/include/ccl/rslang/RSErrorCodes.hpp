@@ -14,7 +14,7 @@ enum class LexerEID : uint32_t {
 //! Syntactic errors enumeration
 enum class ParseEID : uint32_t {
   syntax = 0x8400, // Неизвестная синтаксическая ошибка
-  missingParanthesis = 0x8406,      // Пропущена скобка ')'
+  missingParenthesis = 0x8406,      // Пропущена скобка ')'
   missingCurlyBrace = 0x8407,       // Пропущена скобка '}'
   invalidQuantifier = 0x8408,       // Некорректная кванторная декларация
   expectedDeclaration = 0x8414,     // Ожидалось объявление аргументов

@@ -17,6 +17,8 @@
   #pragma warning( disable : 26418 26415 26440 )
 #endif
 
+#include <optional>
+
 namespace ccl::rslang::detail {
 
 RSParser::RSParser(std::optional<ErrorReporter> reporter)
@@ -58,15 +60,13 @@ int yylex(RawNode* yylval, ParserState* state) {
 void RSParserImpl::error(const std::string& /*msg*/) {}
 
 RawNode AddNode(const TokenID token, RawNode son) {
-  auto result = std::make_shared<Node>(Token(token, son->token.pos));
-
+  auto result = std::make_shared<Node>(token, son->token.pos);
   result->children.emplace_back(son);
   return result;
 }
 
 RawNode AddNode(const TokenID token, RawNode son1, RawNode son2) {
-  auto result = std::make_shared<Node>(
-    Token{ token, StrRange{ son1->token.pos.start, son2->token.pos.finish } });
+  auto result = std::make_shared<Node>(token, StrRange{ son1->token.pos.start, son2->token.pos.finish });
   result->children.emplace_back(son1);
   result->children.emplace_back(son2);
   return result;
@@ -87,19 +87,19 @@ RawNode UnaryOperation(RawNode operation, RawNode operand) {
 
 RawNode RemoveBrackets(RawNode br1, RawNode operand, RawNode br2) {
   operand->token.pos = StrRange{ br1->token.pos.start, br2->token.pos.finish };
-  auto bracketNode = std::make_shared<Node>(Token(TokenID::PUNC_PL, operand->token.pos));
+  auto bracketNode = std::make_shared<Node>(TokenID::PUNC_PL, operand->token.pos);
   bracketNode->children.emplace_back(operand);
   return bracketNode;
 }
 
 RawNode ReplaceBrackets(const TokenID token, RawNode br1, RawNode argList, RawNode br2) {
-  auto result = std::make_shared<Node>(Token(token, StrRange{ br1->token.pos.start, br2->token.pos.finish }));
+  auto result = std::make_shared<Node>(token, StrRange{ br1->token.pos.start, br2->token.pos.finish });
   result->children = argList->children;
   return result;
 }
 
 RawNode Enumeration(const TokenID token, RawNode el1, RawNode el2) {
-  auto result = std::make_shared<Node>(Token(token, StrRange{ el1->token.pos.start, el2->token.pos.finish }));
+  auto result = std::make_shared<Node>(token, StrRange{ el1->token.pos.start, el2->token.pos.finish });
   if (el1->token.id != token) {
     result->children.emplace_back(el1);
   } else {
@@ -121,19 +121,27 @@ RawNode Quantifier(RawNode quant, RawNode declaration, RawNode domain, RawNode p
   return quant;
 }
 
-RawNode FunctionDeclaration(RawNode start, RawNode argdecl, RawNode expr) {
+RawNode FunctionDeclaration(RawNode start, RawNode argumentsDeclaration, RawNode expr) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_FUNC_DEFINITION,  StrRange{ start->token.pos.start, expr->token.pos.finish } });
-  result->children.emplace_back(argdecl);
+    TokenID::NT_FUNC_DEFINITION,
+    StrRange{ start->token.pos.start, expr->token.pos.finish }
+  );
+  result->children.emplace_back(argumentsDeclaration);
   result->children.emplace_back(expr);
   return result;
 }
 
 RawNode FunctionCall(RawNode function, RawNode args, RawNode rs) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_FUNC_CALL,  StrRange{ function->token.pos.start, rs->token.pos.finish } });
+    TokenID::NT_FUNC_CALL,
+    StrRange{ function->token.pos.start, rs->token.pos.finish }
+  );
   result->children.emplace_back(function);
-  result->children.insert(end(result->children), begin(args->children), end(args->children));
+  result->children.insert(
+    end(result->children),
+    begin(args->children),
+    end(args->children)
+  );
   return result;
 }
 
@@ -144,48 +152,71 @@ RawNode FilterCall(RawNode filter, RawNode params, RawNode argument, RawNode rp)
   return filter;
 }
 
-RawNode TextOperator(RawNode oper, RawNode args, RawNode rp) {
-  oper->token.pos.finish = rp->token.pos.finish;
-  oper->children.emplace_back(args);
-  return oper;
+RawNode TextOperator(RawNode operatorName, RawNode args, RawNode rp) {
+  operatorName->token.pos.finish = rp->token.pos.finish;
+  operatorName->children.emplace_back(args);
+  return operatorName;
 }
 
-RawNode Decartian(RawNode op1, RawNode decart, RawNode op2) {
+RawNode Decartian(RawNode op1, RawNode decartian, RawNode op2) {
   if (op1->token.id == TokenID::DECART) {
     auto result = std::move(op1);
     result->token.pos.finish = op2->token.pos.finish;
     result->children.emplace_back(op2);
     return result;
   } else {
-    return BinaryOperation(std::move(op1), std::move(decart), std::move(op2));
+    return BinaryOperation(std::move(op1), std::move(decartian), std::move(op2));
   }
 }
 
-RawNode TermDeclaration(RawNode lc, RawNode declaration, RawNode domain, RawNode predicate, RawNode rc) {
+RawNode TermDeclaration(
+  RawNode lc,
+  RawNode declaration,
+  RawNode domain,
+  RawNode predicate,
+  RawNode rc
+) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_DECLARATIVE_EXPR,  StrRange{ lc->token.pos.start, rc->token.pos.finish } });
+    TokenID::NT_DECLARATIVE_EXPR,
+    StrRange{ lc->token.pos.start, rc->token.pos.finish }
+  );
   result->children.emplace_back(declaration);
   result->children.emplace_back(domain);
   result->children.emplace_back(predicate);
   return result;
 }
 
-RawNode FullRecursion(RawNode rec, RawNode localid, 
-                      RawNode domain, RawNode condition, RawNode iteration, RawNode rc) {
+RawNode FullRecursion(
+  RawNode rec,
+  RawNode declaration, 
+  RawNode domain,
+  RawNode condition,
+  RawNode iteration,
+  RawNode rc
+) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_RECURSIVE_FULL, StrRange{ rec->token.pos.start, rc->token.pos.finish } });
-  result->children.emplace_back(localid);
+    TokenID::NT_RECURSIVE_FULL,
+    StrRange{ rec->token.pos.start, rc->token.pos.finish }
+  );
+  result->children.emplace_back(declaration);
   result->children.emplace_back(domain);
   result->children.emplace_back(condition);
   result->children.emplace_back(iteration);
   return result;
 }
 
-RawNode ShortRecursion(RawNode rec, RawNode localid, 
-                       RawNode domain, RawNode iteration, RawNode rc) {
+RawNode ShortRecursion(
+  RawNode rec,
+  RawNode declaration, 
+  RawNode domain,
+  RawNode iteration,
+  RawNode rc
+) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_RECURSIVE_SHORT, StrRange{ rec->token.pos.start, rc->token.pos.finish } });
-  result->children.emplace_back(localid);
+    TokenID::NT_RECURSIVE_SHORT,
+    StrRange{ rec->token.pos.start, rc->token.pos.finish }
+  );
+  result->children.emplace_back(declaration);
   result->children.emplace_back(domain);
   result->children.emplace_back(iteration);
   return result;
@@ -193,7 +224,9 @@ RawNode ShortRecursion(RawNode rec, RawNode localid,
 
 RawNode Imperative(RawNode imp, RawNode value, RawNode actions, RawNode rc) {
   auto result = std::make_shared<Node>(
-    Token{ TokenID::NT_IMPERATIVE_EXPR, StrRange{ imp->token.pos.start, rc->token.pos.finish } });
+    TokenID::NT_IMPERATIVE_EXPR,
+    StrRange{ imp->token.pos.start, rc->token.pos.finish }
+  );
   result->children.emplace_back(value);
   result->children.insert(end(result->children), begin(actions->children), end(actions->children));
   return result;

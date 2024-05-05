@@ -5,6 +5,7 @@
 #include "ccl/rslang/RSErrorCodes.hpp"
 
 #include <functional>
+#include <optional>
 
 namespace ccl::rslang::detail {
 
@@ -18,6 +19,8 @@ struct Node {
 public:
   explicit Node(Token token) noexcept
     : token{ std::move(token) } {}
+  explicit Node(TokenID id, StrRange pos, TokenData val = {}) noexcept 
+    : Node(Token(id, pos, std::move(val))) {}
 };
 
 struct ParserState {

@@ -19,7 +19,7 @@ C++ library for manipulating concepts in formal language of advanced set theory
 
 After changing grammar / syntax you can rebuild lexers and parser using 'scripts' folder.
 
-- parser requires [Bison](https://www.gnu.org/software/bison/) installed
+- parser requires [Bison](https://www.gnu.org/software/bison/) installed on through chocolatey: 'choco install winflexbison3'
 - lexer requires [Re-flex](https://github.com/Genivia/RE-flex)
 
 To run terminal after building docker container use command

@@ -20,6 +20,7 @@ Checks: "*,\
  -google-readability-todo,\
  -google-global-names-in-headers,\
  -readability-redundant-access-specifiers,\
+ -readability-redundant-member-init,\
  -readability-else-after-return,\
  -readability-implicit-bool-conversion,\
  -readability-use-anyofallof,\

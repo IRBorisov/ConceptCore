@@ -2,6 +2,8 @@
 
 #include "ccl/rslang/Interpreter.h"
 
+#include <optional>
+
 namespace ccl::rslang {
 
 Interpreter::Interpreter(const TypeContext& types, SyntaxTreeContext ast, DataContext data)

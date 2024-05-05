@@ -147,8 +147,8 @@ bool SDPowerSet::Contains(StructuredData element) const {
   return element.B().IsSubsetOrEq(base.B());
 }
 
-SDDecartian::Iterator::Iterator(const SDDecartian& decart, const bool completed)
-  : decartian{ &decart }, isCompleted{ completed || decartian->Cardinality() == 0 } {
+SDDecartian::Iterator::Iterator(const SDDecartian& base, const bool completed)
+  : decartian{ &base }, isCompleted{ completed || base.Cardinality() == 0 } {
   if (!isCompleted) {
     componentIters.reserve(size(decartian->factors));
     for (const auto& factor : decartian->factors) {

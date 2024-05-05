@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.3.2.
+// A Bison parser, made by GNU Bison 3.7.4.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,13 +38,14 @@
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-// Undocumented macros, especially those whose name start with YY_,
-// are private implementation details.  Do not rely on them.
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
 
 #ifndef YY_YY_HEADER_RSPARSERIMPL_H_INCLUDED
 # define YY_YY_HEADER_RSPARSERIMPL_H_INCLUDED
-// //                    "%code requires" blocks.
-#line 36 "RSParserImpl.y" // lalr1.cc:401
+// "%code requires" blocks.
+#line 48 "RSParserImpl.y"
 
 #include "ccl/rslang/SyntaxTree.h"
 #include "ccl/rslang/ParserState.hpp"
@@ -54,32 +55,89 @@ namespace ccl::rslang::detail {
 #define YYSTYPE RawNode
 struct ParserState;
 
+int yylex(RawNode* yylval, ParserState* state);
+
 RawNode AddNode(TokenID token, RawNode son);
 RawNode AddNode(TokenID token, RawNode son1, RawNode son2);
 
-RawNode BinaryOperation(RawNode op1, RawNode operation, RawNode op2);
-RawNode UnaryOperation(RawNode operation, RawNode operand);
 RawNode RemoveBrackets(RawNode br1, RawNode operand, RawNode br2);
 RawNode ReplaceBrackets(TokenID token, RawNode br1, RawNode argList, RawNode br2);
+RawNode BinaryOperation(RawNode op1, RawNode operation, RawNode op2);
+RawNode UnaryOperation(RawNode operation, RawNode operand);
 RawNode Enumeration(TokenID token, RawNode el1, RawNode el2);
-RawNode Decartian(RawNode op1, RawNode decart, RawNode op2);
 
-RawNode Quantifier(RawNode quant, RawNode declaration, RawNode domain, RawNode predicate);
-RawNode FunctionDeclaration(RawNode start, RawNode argdecl, RawNode expr);
-RawNode FunctionCall(RawNode function, RawNode args, RawNode rs);
-RawNode FilterCall(RawNode filter, RawNode params, RawNode argument, RawNode rp);
-RawNode TextOperator(RawNode oper, RawNode args, RawNode rp);
-RawNode TermDeclaration(RawNode lc, RawNode declaration, RawNode domain, RawNode predicate, RawNode rc);
-RawNode FullRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode condition, RawNode iteration, RawNode rc);
-RawNode ShortRecursion(RawNode rec, RawNode localid, RawNode domain, RawNode iteration, RawNode rc);
-RawNode Imperative(RawNode imp, RawNode value, RawNode actions, RawNode rc);
+RawNode Decartian(
+    RawNode op1,
+    RawNode decartian,
+    RawNode op2
+);
 
-int yylex(RawNode* yylval, ParserState* state);
+RawNode Quantifier(
+    RawNode quant,
+    RawNode declaration,
+    RawNode domain,
+    RawNode predicate
+);
+
+RawNode FunctionDeclaration(
+    RawNode start,
+    RawNode argumentsDeclaration,
+    RawNode expr
+);
+
+RawNode FunctionCall(
+    RawNode function,
+    RawNode args, RawNode
+    rs
+);
+
+RawNode FilterCall(
+    RawNode filter,
+    RawNode params,
+    RawNode argument,
+    RawNode rp
+);
+
+RawNode TextOperator(
+    RawNode operatorName,
+    RawNode args,
+    RawNode rp
+);
+
+RawNode TermDeclaration(
+    RawNode lc,
+    RawNode declaration,
+    RawNode domain,
+    RawNode predicate,
+    RawNode rc);
+
+RawNode FullRecursion(
+    RawNode rec,
+    RawNode declaration,
+    RawNode domain,
+    RawNode condition,
+    RawNode iteration,
+    RawNode rc
+);
+
+RawNode ShortRecursion(
+    RawNode rec,
+    RawNode declaration,
+    RawNode domain,
+    RawNode iteration,
+    RawNode rc
+);
+
+RawNode Imperative(
+    RawNode imp,
+    RawNode value,
+    RawNode actions,
+    RawNode rc
+);
 
 } // namespace ccl::rslang::detail
 
-
-#line 83 "../header/RSParserImpl.h" // lalr1.cc:401
+#line 141 "../header/RSParserImpl.h"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -127,22 +185,20 @@ int yylex(RawNode* yylval, ParserState* state);
 
 
 
-#ifndef YY_ATTRIBUTE
-# if (defined __GNUC__                                               \
-      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+#ifndef YY_ATTRIBUTE_PURE
+# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
 # else
-#  define YY_ATTRIBUTE(Spec) /* empty */
+#  define YY_ATTRIBUTE_PURE
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
-#endif
-
 #ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
+# else
+#  define YY_ATTRIBUTE_UNUSED
+# endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
@@ -154,11 +210,11 @@ int yylex(RawNode* yylval, ParserState* state);
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    _Pragma ("GCC diagnostic push") \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -171,6 +227,27 @@ int yylex(RawNode* yylval, ParserState* state);
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
+#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
+# define YY_IGNORE_USELESS_CAST_BEGIN                          \
+    _Pragma ("GCC diagnostic push")                            \
+    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
+# define YY_IGNORE_USELESS_CAST_END            \
+    _Pragma ("GCC diagnostic pop")
+#endif
+#ifndef YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_END
+#endif
+
+# ifndef YY_CAST
+#  ifdef __cplusplus
+#   define YY_CAST(Type, Val) static_cast<Type> (Val)
+#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
+#  else
+#   define YY_CAST(Type, Val) ((Type) (Val))
+#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
+#  endif
+# endif
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -188,9 +265,10 @@ int yylex(RawNode* yylval, ParserState* state);
 # define YYDEBUG 0
 #endif
 
-#line 11 "RSParserImpl.y" // lalr1.cc:401
+#line 15 "RSParserImpl.y"
 namespace ccl { namespace rslang { namespace detail {
-#line 194 "../header/RSParserImpl.h" // lalr1.cc:401
+#line 271 "../header/RSParserImpl.h"
+
 
 
 
@@ -219,88 +297,206 @@ namespace ccl { namespace rslang { namespace detail {
       ~syntax_error () YY_NOEXCEPT YY_NOTHROW;
     };
 
-    /// Tokens.
+    /// Token kinds.
     struct token
     {
-      enum yytokentype
+      enum token_kind_type
       {
-        RST_LOCAL = 258,
-        RST_GLOBAL = 259,
-        RST_FUNCTION = 260,
-        RST_PREDICATE = 261,
-        RST_RADICAL = 262,
-        RST_INTEGER = 263,
-        RST_INFINITY = 264,
-        RST_EMPTYSET = 265,
-        RST_PLUS = 266,
-        RST_MINUS = 267,
-        RST_MULTIPLY = 268,
-        RST_GREATER = 269,
-        RST_LESSER = 270,
-        RST_GREATER_OR_EQ = 271,
-        RST_LESSER_OR_EQ = 272,
-        RST_EQUAL = 273,
-        RST_NOTEQUAL = 274,
-        RST_FORALL = 275,
-        RST_EXISTS = 276,
-        RST_NOT = 277,
-        RST_EQUIVALENT = 278,
-        RST_IMPLICATION = 279,
-        RST_OR = 280,
-        RST_AND = 281,
-        RST_IN = 282,
-        RST_NOTIN = 283,
-        RST_SUBSET = 284,
-        RST_SUBOR_EQ = 285,
-        RST_NOTSUBSET = 286,
-        RST_DECART = 287,
-        RST_UNION = 288,
-        RST_INTERSECTION = 289,
-        RST_SET_MINUS = 290,
-        RST_SYMMINUS = 291,
-        RST_BOOLEAN = 292,
-        RST_BIGPR = 293,
-        RST_SMALLPR = 294,
-        RST_FILTER = 295,
-        RST_CARD = 296,
-        RST_BOOL = 297,
-        RST_DEBOOL = 298,
-        RST_RED = 299,
-        RST_DECLARATIVE = 300,
-        RST_RECURSIVE = 301,
-        RST_IMPERATIVE = 302,
-        RST_DEFINE = 303,
-        RST_STRUCT = 304,
-        RST_ASSIGN = 305,
-        RST_ITERATE = 306,
-        RST_LP = 307,
-        RST_RP = 308,
-        RST_LC = 309,
-        RST_RC = 310,
-        RST_LS = 311,
-        RST_RS = 312,
-        RST_BAR = 313,
-        RST_COMMA = 314,
-        RST_SEMICOLON = 315
+        RST_YYEMPTY = -2,
+    RST_YYEOF = 0,                 // "end of file"
+    RST_YYerror = 256,             // error
+    RST_YYUNDEF = 257,             // "invalid token"
+    RST_LOCAL = 258,               // LOCAL
+    RST_GLOBAL = 259,              // GLOBAL
+    RST_FUNCTION = 260,            // FUNCTION
+    RST_PREDICATE = 261,           // PREDICATE
+    RST_RADICAL = 262,             // RADICAL
+    RST_INTEGER = 263,             // INTEGER
+    RST_INTSET = 264,              // INTSET
+    RST_EMPTYSET = 265,            // EMPTYSET
+    RST_PLUS = 266,                // PLUS
+    RST_MINUS = 267,               // MINUS
+    RST_MULTIPLY = 268,            // MULTIPLY
+    RST_GREATER = 269,             // GREATER
+    RST_LESSER = 270,              // LESSER
+    RST_GREATER_OR_EQ = 271,       // GREATER_OR_EQ
+    RST_LESSER_OR_EQ = 272,        // LESSER_OR_EQ
+    RST_EQUAL = 273,               // EQUAL
+    RST_NOTEQUAL = 274,            // NOTEQUAL
+    RST_FORALL = 275,              // FORALL
+    RST_EXISTS = 276,              // EXISTS
+    RST_NOT = 277,                 // NOT
+    RST_EQUIVALENT = 278,          // EQUIVALENT
+    RST_IMPLICATION = 279,         // IMPLICATION
+    RST_OR = 280,                  // OR
+    RST_AND = 281,                 // AND
+    RST_IN = 282,                  // IN
+    RST_NOTIN = 283,               // NOTIN
+    RST_SUBSET = 284,              // SUBSET
+    RST_SUBOR_EQ = 285,            // SUBOR_EQ
+    RST_NOTSUBSET = 286,           // NOTSUBSET
+    RST_DECART = 287,              // DECART
+    RST_UNION = 288,               // UNION
+    RST_INTERSECTION = 289,        // INTERSECTION
+    RST_SET_MINUS = 290,           // SET_MINUS
+    RST_SYMMINUS = 291,            // SYMMINUS
+    RST_BOOLEAN = 292,             // BOOLEAN
+    RST_BIGPR = 293,               // BIGPR
+    RST_SMALLPR = 294,             // SMALLPR
+    RST_FILTER = 295,              // FILTER
+    RST_CARD = 296,                // CARD
+    RST_BOOL = 297,                // BOOL
+    RST_DEBOOL = 298,              // DEBOOL
+    RST_RED = 299,                 // RED
+    RST_DECLARATIVE = 300,         // DECLARATIVE
+    RST_RECURSIVE = 301,           // RECURSIVE
+    RST_IMPERATIVE = 302,          // IMPERATIVE
+    RST_DEFINE = 303,              // DEFINE
+    RST_STRUCT = 304,              // STRUCT
+    RST_ASSIGN = 305,              // ASSIGN
+    RST_ITERATE = 306,             // ITERATE
+    RST_LP = 307,                  // LP
+    RST_RP = 308,                  // RP
+    RST_LC = 309,                  // LC
+    RST_RC = 310,                  // RC
+    RST_LS = 311,                  // LS
+    RST_RS = 312,                  // RS
+    RST_BAR = 313,                 // BAR
+    RST_COMMA = 314,               // COMMA
+    RST_SEMICOLON = 315            // SEMICOLON
+      };
+      /// Backward compatibility alias (Bison 3.6).
+      typedef token_kind_type yytokentype;
+    };
+
+    /// Token kind, as returned by yylex.
+    typedef token::yytokentype token_kind_type;
+
+    /// Backward compatibility alias (Bison 3.6).
+    typedef token_kind_type token_type;
+
+    /// Symbol kinds.
+    struct symbol_kind
+    {
+      enum symbol_kind_type
+      {
+        YYNTOKENS = 61, ///< Number of tokens.
+        S_YYEMPTY = -2,
+        S_YYEOF = 0,                             // "end of file"
+        S_YYerror = 1,                           // error
+        S_YYUNDEF = 2,                           // "invalid token"
+        S_LOCAL = 3,                             // LOCAL
+        S_GLOBAL = 4,                            // GLOBAL
+        S_FUNCTION = 5,                          // FUNCTION
+        S_PREDICATE = 6,                         // PREDICATE
+        S_RADICAL = 7,                           // RADICAL
+        S_INTEGER = 8,                           // INTEGER
+        S_INTSET = 9,                            // INTSET
+        S_EMPTYSET = 10,                         // EMPTYSET
+        S_PLUS = 11,                             // PLUS
+        S_MINUS = 12,                            // MINUS
+        S_MULTIPLY = 13,                         // MULTIPLY
+        S_GREATER = 14,                          // GREATER
+        S_LESSER = 15,                           // LESSER
+        S_GREATER_OR_EQ = 16,                    // GREATER_OR_EQ
+        S_LESSER_OR_EQ = 17,                     // LESSER_OR_EQ
+        S_EQUAL = 18,                            // EQUAL
+        S_NOTEQUAL = 19,                         // NOTEQUAL
+        S_FORALL = 20,                           // FORALL
+        S_EXISTS = 21,                           // EXISTS
+        S_NOT = 22,                              // NOT
+        S_EQUIVALENT = 23,                       // EQUIVALENT
+        S_IMPLICATION = 24,                      // IMPLICATION
+        S_OR = 25,                               // OR
+        S_AND = 26,                              // AND
+        S_IN = 27,                               // IN
+        S_NOTIN = 28,                            // NOTIN
+        S_SUBSET = 29,                           // SUBSET
+        S_SUBOR_EQ = 30,                         // SUBOR_EQ
+        S_NOTSUBSET = 31,                        // NOTSUBSET
+        S_DECART = 32,                           // DECART
+        S_UNION = 33,                            // UNION
+        S_INTERSECTION = 34,                     // INTERSECTION
+        S_SET_MINUS = 35,                        // SET_MINUS
+        S_SYMMINUS = 36,                         // SYMMINUS
+        S_BOOLEAN = 37,                          // BOOLEAN
+        S_BIGPR = 38,                            // BIGPR
+        S_SMALLPR = 39,                          // SMALLPR
+        S_FILTER = 40,                           // FILTER
+        S_CARD = 41,                             // CARD
+        S_BOOL = 42,                             // BOOL
+        S_DEBOOL = 43,                           // DEBOOL
+        S_RED = 44,                              // RED
+        S_DECLARATIVE = 45,                      // DECLARATIVE
+        S_RECURSIVE = 46,                        // RECURSIVE
+        S_IMPERATIVE = 47,                       // IMPERATIVE
+        S_DEFINE = 48,                           // DEFINE
+        S_STRUCT = 49,                           // STRUCT
+        S_ASSIGN = 50,                           // ASSIGN
+        S_ITERATE = 51,                          // ITERATE
+        S_LP = 52,                               // LP
+        S_RP = 53,                               // RP
+        S_LC = 54,                               // LC
+        S_RC = 55,                               // RC
+        S_LS = 56,                               // LS
+        S_RS = 57,                               // RS
+        S_BAR = 58,                              // BAR
+        S_COMMA = 59,                            // COMMA
+        S_SEMICOLON = 60,                        // SEMICOLON
+        S_YYACCEPT = 61,                         // $accept
+        S_expression = 62,                       // expression
+        S_global_declaration = 63,               // global_declaration
+        S_function_name = 64,                    // function_name
+        S_logic_or_setexpr = 65,                 // logic_or_setexpr
+        S_function_decl = 66,                    // function_decl
+        S_arguments = 67,                        // arguments
+        S_declaration = 68,                      // declaration
+        S_variable = 69,                         // variable
+        S_var_enum = 70,                         // var_enum
+        S_var_all = 71,                          // var_all
+        S_logic = 72,                            // logic
+        S_logic_all = 73,                        // logic_all
+        S_logic_par = 74,                        // logic_par
+        S_logic_predicates = 75,                 // logic_predicates
+        S_binary_predicate = 76,                 // binary_predicate
+        S_logic_unary = 77,                      // logic_unary
+        S_logic_no_binary = 78,                  // logic_no_binary
+        S_quantifier = 79,                       // quantifier
+        S_quant_var = 80,                        // quant_var
+        S_quant_var_enum = 81,                   // quant_var_enum
+        S_logic_binary = 82,                     // logic_binary
+        S_setexpr = 83,                          // setexpr
+        S_operation_name = 84,                   // operation_name
+        S_setexpr_enum = 85,                     // setexpr_enum
+        S_setexpr_enum_min2 = 86,                // setexpr_enum_min2
+        S_literal = 87,                          // literal
+        S_identifier = 88,                       // identifier
+        S_setexpr_binary = 89,                   // setexpr_binary
+        S_setexpr_generators = 90,               // setexpr_generators
+        S_enumeration = 91,                      // enumeration
+        S_tuple = 92,                            // tuple
+        S_boolean = 93,                          // boolean
+        S_filter_expression = 94,                // filter_expression
+        S_declarative = 95,                      // declarative
+        S_recursion = 96,                        // recursion
+        S_imperative = 97,                       // imperative
+        S_imp_blocks = 98,                       // imp_blocks
+        S_imp_block = 99,                        // imp_block
+        S_RPE = 100,                             // RPE
+        S_RCE = 101                              // RCE
       };
     };
 
-    /// (External) token type, as returned by yylex.
-    typedef token::yytokentype token_type;
+    /// (Internal) symbol kind.
+    typedef symbol_kind::symbol_kind_type symbol_kind_type;
 
-    /// Symbol type: an internal symbol number.
-    typedef int symbol_number_type;
-
-    /// The symbol type number to denote an empty symbol.
-    enum { empty_symbol = -2 };
-
-    /// Internal symbol number for tokens (subsumed by symbol_number_type).
-    typedef unsigned char token_number_type;
+    /// The number of tokens.
+    static const symbol_kind_type YYNTOKENS = symbol_kind::YYNTOKENS;
 
     /// A complete symbol.
     ///
-    /// Expects its Base type to provide access to the symbol type
-    /// via type_get ().
+    /// Expects its Base type to provide access to the symbol kind
+    /// via kind ().
     ///
     /// Provide access to semantic value.
     template <typename Base>
@@ -316,7 +512,10 @@ namespace ccl { namespace rslang { namespace detail {
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      basic_symbol (basic_symbol&& that);
+      basic_symbol (basic_symbol&& that)
+        : Base (std::move (that))
+        , value (std::move (that.value))
+      {}
 #endif
 
       /// Copy constructor.
@@ -340,6 +539,15 @@ namespace ccl { namespace rslang { namespace detail {
         Base::clear ();
       }
 
+      /// The user-facing name of this symbol.
+      std::string name () const YY_NOEXCEPT
+      {
+        return RSParserImpl::symbol_name (this->kind ());
+      }
+
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
+
       /// Whether empty.
       bool empty () const YY_NOEXCEPT;
 
@@ -357,51 +565,60 @@ namespace ccl { namespace rslang { namespace detail {
     };
 
     /// Type access provider for token (enum) based symbols.
-    struct by_type
+    struct by_kind
     {
       /// Default constructor.
-      by_type ();
+      by_kind ();
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      by_type (by_type&& that);
+      by_kind (by_kind&& that);
 #endif
 
       /// Copy constructor.
-      by_type (const by_type& that);
+      by_kind (const by_kind& that);
 
-      /// The symbol type as needed by the constructor.
-      typedef token_type kind_type;
+      /// The symbol kind as needed by the constructor.
+      typedef token_kind_type kind_type;
 
       /// Constructor from (external) token numbers.
-      by_type (kind_type t);
+      by_kind (kind_type t);
 
       /// Record that this symbol is empty.
       void clear ();
 
-      /// Steal the symbol type from \a that.
-      void move (by_type& that);
+      /// Steal the symbol kind from \a that.
+      void move (by_kind& that);
 
       /// The (internal) type number (corresponding to \a type).
       /// \a empty when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
-      /// The token.
-      token_type token () const YY_NOEXCEPT;
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
 
-      /// The symbol type.
-      /// \a empty_symbol when empty.
-      /// An int, not token_number_type, to be able to store empty_symbol.
-      int type;
+      /// The symbol kind.
+      /// \a S_YYEMPTY when empty.
+      symbol_kind_type kind_;
     };
 
+    /// Backward compatibility for a private implementation detail (Bison 3.6).
+    typedef by_kind by_type;
+
     /// "External" symbols: returned by the scanner.
-    struct symbol_type : basic_symbol<by_type>
+    struct symbol_type : basic_symbol<by_kind>
     {};
 
     /// Build a parser object.
     RSParserImpl (ParserState* state_yyarg);
     virtual ~RSParserImpl ();
+
+#if 201103L <= YY_CPLUSPLUS
+    /// Non copyable.
+    RSParserImpl (const RSParserImpl&) = delete;
+    /// Non copyable.
+    RSParserImpl& operator= (const RSParserImpl&) = delete;
+#endif
 
     /// Parse.  An alias for parse ().
     /// \returns  0 iff parsing succeeded.
@@ -432,26 +649,51 @@ namespace ccl { namespace rslang { namespace detail {
     /// Report a syntax error.
     void error (const syntax_error& err);
 
+    /// The user-facing name of the symbol whose (internal) number is
+    /// YYSYMBOL.  No bounds checking.
+    static std::string symbol_name (symbol_kind_type yysymbol);
 
+
+
+    class context
+    {
+    public:
+      context (const RSParserImpl& yyparser, const symbol_type& yyla);
+      const symbol_type& lookahead () const { return yyla_; }
+      symbol_kind_type token () const { return yyla_.kind (); }
+      /// Put in YYARG at most YYARGN of the expected tokens, and return the
+      /// number of tokens stored in YYARG.  If YYARG is null, return the
+      /// number of expected tokens (guaranteed to be less than YYNTOKENS).
+      int expected_tokens (symbol_kind_type yyarg[], int yyargn) const;
+
+    private:
+      const RSParserImpl& yyparser_;
+      const symbol_type& yyla_;
+    };
 
   private:
-    /// This class is not copyable.
+#if YY_CPLUSPLUS < 201103L
+    /// Non copyable.
     RSParserImpl (const RSParserImpl&);
+    /// Non copyable.
     RSParserImpl& operator= (const RSParserImpl&);
+#endif
 
-    /// State numbers.
-    typedef int state_type;
+
+    /// Stored state numbers (used for stacks).
+    typedef unsigned char state_type;
+
+    /// The arguments of the error message.
+    int yy_syntax_error_arguments_ (const context& yyctx,
+                                    symbol_kind_type yyarg[], int yyargn) const;
 
     /// Generate an error message.
-    /// \param yystate   the state where the error occurred.
-    /// \param yyla      the lookahead token.
-    virtual std::string yysyntax_error_ (state_type yystate,
-                                         const symbol_type& yyla) const;
-
+    /// \param yyctx     the context in which the error occurred.
+    virtual std::string yysyntax_error_ (const context& yyctx) const;
     /// Compute post-reduction state.
     /// \param yystate   the current state
     /// \param yysym     the nonterminal to push on the stack
-    state_type yy_lr_goto_state_ (state_type yystate, int yysym);
+    static state_type yy_lr_goto_state_ (state_type yystate, int yysym);
 
     /// Whether the given \c yypact_ value indicates a defaulted state.
     /// \param yyvalue   the value to check
@@ -464,63 +706,66 @@ namespace ccl { namespace rslang { namespace detail {
     static const signed char yypact_ninf_;
     static const signed char yytable_ninf_;
 
-    /// Convert a scanner token number \a t to a symbol number.
-    static token_number_type yytranslate_ (int t);
-
-    // Tables.
-  // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-  // STATE-NUM.
-  static const short yypact_[];
-
-  // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-  // Performed when YYTABLE does not specify something else to do.  Zero
-  // means the default is an error.
-  static const unsigned char yydefact_[];
-
-  // YYPGOTO[NTERM-NUM].
-  static const short yypgoto_[];
-
-  // YYDEFGOTO[NTERM-NUM].
-  static const short yydefgoto_[];
-
-  // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-  // positive, shift that token.  If negative, reduce the rule whose
-  // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const short yytable_[];
-
-  static const short yycheck_[];
-
-  // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-  // symbol of state STATE-NUM.
-  static const unsigned char yystos_[];
-
-  // YYR1[YYN] -- Symbol number of symbol that rule YYN derives.
-  static const unsigned char yyr1_[];
-
-  // YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.
-  static const unsigned char yyr2_[];
-
+    /// Convert a scanner token kind \a t to a symbol kind.
+    /// In theory \a t should be a token_kind_type, but character literals
+    /// are valid, yet not members of the token_type enum.
+    static symbol_kind_type yytranslate_ (int t);
 
     /// Convert the symbol name \a n to a form suitable for a diagnostic.
-    static std::string yytnamerr_ (const char *n);
-
+    static std::string yytnamerr_ (const char *yystr);
 
     /// For a symbol, its name in clear.
     static const char* const yytname_[];
+
+
+    // Tables.
+    // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+    // STATE-NUM.
+    static const short yypact_[];
+
+    // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+    // Performed when YYTABLE does not specify something else to do.  Zero
+    // means the default is an error.
+    static const signed char yydefact_[];
+
+    // YYPGOTO[NTERM-NUM].
+    static const short yypgoto_[];
+
+    // YYDEFGOTO[NTERM-NUM].
+    static const short yydefgoto_[];
+
+    // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+    // positive, shift that token.  If negative, reduce the rule whose
+    // number is the opposite.  If YYTABLE_NINF, syntax error.
+    static const short yytable_[];
+
+    static const short yycheck_[];
+
+    // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
+    // symbol of state STATE-NUM.
+    static const signed char yystos_[];
+
+    // YYR1[YYN] -- Symbol number of symbol that rule YYN derives.
+    static const signed char yyr1_[];
+
+    // YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.
+    static const signed char yyr2_[];
+
+
 #if YYDEBUG
-  // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned short yyrline_[];
+    // YYRLINE[YYN] -- Source line where rule number YYN was defined.
+    static const short yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
-    virtual void yy_reduce_print_ (int r);
+    virtual void yy_reduce_print_ (int r) const;
     /// Print the state stack on the debug stream.
-    virtual void yystack_print_ ();
+    virtual void yy_stack_print_ () const;
 
     /// Debugging level.
     int yydebug_;
     /// Debug stream.
     std::ostream* yycdebug_;
 
-    /// \brief Display a symbol type, value and location.
+    /// \brief Display a symbol kind, value and location.
     /// \param yyo    The output stream.
     /// \param yysym  The symbol.
     template <typename Base>
@@ -541,7 +786,7 @@ namespace ccl { namespace rslang { namespace detail {
       /// Default constructor.
       by_state () YY_NOEXCEPT;
 
-      /// The symbol type as needed by the constructor.
+      /// The symbol kind as needed by the constructor.
       typedef state_type kind_type;
 
       /// Constructor.
@@ -553,15 +798,16 @@ namespace ccl { namespace rslang { namespace detail {
       /// Record that this symbol is empty.
       void clear () YY_NOEXCEPT;
 
-      /// Steal the symbol type from \a that.
+      /// Steal the symbol kind from \a that.
       void move (by_state& that);
 
-      /// The (internal) type number (corresponding to \a state).
-      /// \a empty_symbol when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      /// The symbol kind (corresponding to \a state).
+      /// \a symbol_kind::S_YYEMPTY when empty.
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
       /// The state number used to denote an empty symbol.
-      enum { empty_state = -1 };
+      /// We use the initial state, as it does not have a value.
+      enum { empty_state = 0 };
 
       /// The state.
       /// \a empty when empty.
@@ -583,6 +829,10 @@ namespace ccl { namespace rslang { namespace detail {
       /// Assignment, needed by push_back by some old implementations.
       /// Moves the contents of that.
       stack_symbol_type& operator= (stack_symbol_type& that);
+
+      /// Assignment, needed by push_back by other implementations.
+      /// Needed by some other old implementations.
+      stack_symbol_type& operator= (const stack_symbol_type& that);
 #endif
     };
 
@@ -592,48 +842,38 @@ namespace ccl { namespace rslang { namespace detail {
     {
     public:
       // Hide our reversed order.
-      typedef typename S::reverse_iterator iterator;
-      typedef typename S::const_reverse_iterator const_iterator;
+      typedef typename S::iterator iterator;
+      typedef typename S::const_iterator const_iterator;
       typedef typename S::size_type size_type;
+      typedef typename std::ptrdiff_t index_type;
 
       stack (size_type n = 200)
         : seq_ (n)
       {}
 
-      /// Random access.
-      ///
-      /// Index 0 returns the topmost element.
-      T&
-      operator[] (size_type i)
-      {
-        return seq_[size () - 1 - i];
-      }
-
-      /// Random access.
-      ///
-      /// Index 0 returns the topmost element.
-      T&
-      operator[] (int i)
-      {
-        return operator[] (size_type (i));
-      }
+#if 201103L <= YY_CPLUSPLUS
+      /// Non copyable.
+      stack (const stack&) = delete;
+      /// Non copyable.
+      stack& operator= (const stack&) = delete;
+#endif
 
       /// Random access.
       ///
       /// Index 0 returns the topmost element.
       const T&
-      operator[] (size_type i) const
+      operator[] (index_type i) const
       {
-        return seq_[size () - 1 - i];
+        return seq_[size_type (size () - 1 - i)];
       }
 
       /// Random access.
       ///
       /// Index 0 returns the topmost element.
-      const T&
-      operator[] (int i) const
+      T&
+      operator[] (index_type i)
       {
-        return operator[] (size_type (i));
+        return seq_[size_type (size () - 1 - i)];
       }
 
       /// Steal the contents of \a t.
@@ -648,7 +888,7 @@ namespace ccl { namespace rslang { namespace detail {
 
       /// Pop elements from the stack.
       void
-      pop (int n = 1) YY_NOEXCEPT
+      pop (std::ptrdiff_t n = 1) YY_NOEXCEPT
       {
         for (; 0 < n; --n)
           seq_.pop_back ();
@@ -662,49 +902,53 @@ namespace ccl { namespace rslang { namespace detail {
       }
 
       /// Number of elements on the stack.
-      size_type
+      index_type
       size () const YY_NOEXCEPT
       {
-        return seq_.size ();
+        return index_type (seq_.size ());
       }
 
       /// Iterator on top of the stack (going downwards).
       const_iterator
       begin () const YY_NOEXCEPT
       {
-        return seq_.rbegin ();
+        return seq_.begin ();
       }
 
       /// Bottom of the stack.
       const_iterator
       end () const YY_NOEXCEPT
       {
-        return seq_.rend ();
+        return seq_.end ();
       }
 
       /// Present a slice of the top of a stack.
       class slice
       {
       public:
-        slice (const stack& stack, int range)
+        slice (const stack& stack, index_type range)
           : stack_ (stack)
           , range_ (range)
         {}
 
         const T&
-        operator[] (int i) const
+        operator[] (index_type i) const
         {
           return stack_[range_ - i];
         }
 
       private:
         const stack& stack_;
-        int range_;
+        index_type range_;
       };
 
     private:
+#if YY_CPLUSPLUS < 201103L
+      /// Non copyable.
       stack (const stack&);
+      /// Non copyable.
       stack& operator= (const stack&);
+#endif
       /// The wrapped container.
       S seq_;
     };
@@ -737,24 +981,21 @@ namespace ccl { namespace rslang { namespace detail {
     /// Constants.
     enum
     {
-      yyeof_ = 0,
       yylast_ = 589,     ///< Last index in yytable_.
       yynnts_ = 41,  ///< Number of nonterminal symbols.
-      yyfinal_ = 85, ///< Termination state number.
-      yyterror_ = 1,
-      yyerrcode_ = 256,
-      yyntokens_ = 61  ///< Number of tokens.
+      yyfinal_ = 85 ///< Termination state number.
     };
 
 
     // User arguments.
     ParserState* state;
+
   };
 
 
-#line 11 "RSParserImpl.y" // lalr1.cc:401
+#line 15 "RSParserImpl.y"
 } } } // ccl::rslang::detail
-#line 758 "../header/RSParserImpl.h" // lalr1.cc:401
+#line 999 "../header/RSParserImpl.h"
 
 
 

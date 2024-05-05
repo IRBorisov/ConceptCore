@@ -154,7 +154,7 @@ private:
     uint32_t counter{ 0 };
 
   public:
-    explicit Iterator(const SDDecartian& decartaian, bool isCompleted = false);
+    explicit Iterator(const SDDecartian& base, bool isCompleted = false);
 
   public:
     using iterator_category = std::forward_iterator_tag;

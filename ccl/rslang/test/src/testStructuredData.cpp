@@ -309,20 +309,20 @@ TEST_F(UTStructuredData, SetProjection) {
 TEST_F(UTStructuredData, DecartianCreate) {
   const auto bSet1 = Factory::Set({ el1, el2 });
   const auto bSet2 = Factory::Set({ el1, el2, el3 });
-  const auto decart = Factory::Decartian({ bSet1, bSet2 });
-  EXPECT_TRUE(decart.IsCollection());
-  EXPECT_TRUE(std::begin(decart.B())->IsTuple());
-  EXPECT_EQ(bSet1.B().Cardinality() * bSet2.B().Cardinality(), decart.B().Cardinality());
+  const auto decartian = Factory::Decartian({ bSet1, bSet2 });
+  EXPECT_TRUE(decartian.IsCollection());
+  EXPECT_TRUE(std::begin(decartian.B())->IsTuple());
+  EXPECT_EQ(bSet1.B().Cardinality() * bSet2.B().Cardinality(), decartian.B().Cardinality());
 }
 
 TEST_F(UTStructuredData, DecartianAddElement) {
   const auto bSet1 = Factory::Set({ el1 });
   const auto bSet2 = Factory::Set({ el1 });
-  auto decart = Factory::Decartian({ bSet1, bSet2 });
-  EXPECT_FALSE(decart.ModifyB().AddElement(Factory::Set({ el1 })));
-  EXPECT_FALSE(decart.ModifyB().AddElement(Factory::Tuple({ el1, el1 })));
-  EXPECT_FALSE(decart.ModifyB().AddElement(Factory::Tuple({ el1, el2 })));
-  EXPECT_FALSE(decart.ModifyB().AddElement(Factory::EmptySet()));
+  auto decartian = Factory::Decartian({ bSet1, bSet2 });
+  EXPECT_FALSE(decartian.ModifyB().AddElement(Factory::Set({ el1 })));
+  EXPECT_FALSE(decartian.ModifyB().AddElement(Factory::Tuple({ el1, el1 })));
+  EXPECT_FALSE(decartian.ModifyB().AddElement(Factory::Tuple({ el1, el2 })));
+  EXPECT_FALSE(decartian.ModifyB().AddElement(Factory::EmptySet()));
 }
 
 TEST_F(UTStructuredData, DecartianEmpty) {
@@ -334,29 +334,29 @@ TEST_F(UTStructuredData, DecartianEmpty) {
 TEST_F(UTStructuredData, DecartianAsymmetry) {
   const auto bSet1 = Factory::Singleton(el1);
   const auto bSet2 = Factory::Singleton(el3);
-  const auto decart12 = Factory::Decartian({ bSet1, bSet2 });
-  const auto decart21 = Factory::Decartian({ bSet2, bSet1 });
-  EXPECT_NE(decart12, decart21);
+  const auto decartian12 = Factory::Decartian({ bSet1, bSet2 });
+  const auto decartian21 = Factory::Decartian({ bSet2, bSet1 });
+  EXPECT_NE(decartian12, decartian21);
 }
 
 TEST_F(UTStructuredData, DecartianContains) {
   const auto bSet1 = Factory::Set({ el1, el2 });
   const auto bSet2 = Factory::Set({ el1, el2, el3 });
-  const auto decart = Factory::Decartian({ bSet1, bSet2 });
-  EXPECT_TRUE(decart.B().Contains(Factory::Tuple({ el1, el3 })));
-  EXPECT_FALSE(decart.B().Contains(Factory::Tuple({ el3, el3 })));
-  EXPECT_FALSE(decart.B().Contains(Factory::Tuple({ el1, el3, el3 })));
+  const auto decartian = Factory::Decartian({ bSet1, bSet2 });
+  EXPECT_TRUE(decartian.B().Contains(Factory::Tuple({ el1, el3 })));
+  EXPECT_FALSE(decartian.B().Contains(Factory::Tuple({ el3, el3 })));
+  EXPECT_FALSE(decartian.B().Contains(Factory::Tuple({ el1, el3, el3 })));
 }
 
 TEST_F(UTStructuredData, DecartianIteration) {
   const auto bSet1 = Factory::Set({ el1, el2 });
   const auto bSet2 = Factory::Set({ el1, el2, el3 });
-  const auto decart = Factory::Decartian({ bSet1, bSet2 });
+  const auto decartian = Factory::Decartian({ bSet1, bSet2 });
   auto elements = std::set<StructuredData>{};
-  for (const auto& el : decart.B()) {
+  for (const auto& el : decartian.B()) {
     elements.insert(el);
   }
-  EXPECT_EQ(decart.B().Cardinality(), ssize(elements));
+  EXPECT_EQ(decartian.B().Cardinality(), ssize(elements));
 }
 
 TEST_F(UTStructuredData, BooleanCreate) {

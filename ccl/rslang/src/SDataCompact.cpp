@@ -1,6 +1,10 @@
 #include "ccl/rslang/SDataCompact.h"
 
 #include "ccl/rslang/RSToken.h"
+#include "ccl/rslang/Typification.h"
+#include "ccl/rslang/StructuredData.h"
+
+#include <optional>
 
 namespace ccl::object {
 
