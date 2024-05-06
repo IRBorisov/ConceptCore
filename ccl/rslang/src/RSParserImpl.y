@@ -199,7 +199,7 @@ RawNode Imperative(
     IN              // IsElement
     NOTIN           // NotElement
     SUBSET          // IsSubset and NotEqual
-    SUBOR_EQ        // IsSubset
+    SUBSET_OR_EQ        // IsSubset
     NOTSUBSET       // NotSubset
 
 
@@ -331,7 +331,7 @@ binary_predicate
     : IN
     | NOTIN
     | SUBSET
-    | SUBOR_EQ
+    | SUBSET_OR_EQ
     | NOTSUBSET
     | NOTEQUAL
     | EQUAL

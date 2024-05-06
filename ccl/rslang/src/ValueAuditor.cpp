@@ -102,9 +102,11 @@ bool ValueAuditor::ViFunctionCall(Cursor iter) {
   }
 }
 
-bool ValueAuditor::RunCheckOnFunc(Cursor iter, 
-                                  const std::string& funcName, 
-                                  const std::vector<ValueClass>& argumentVals) {
+bool ValueAuditor::RunCheckOnFunc(
+  Cursor iter, 
+  const std::string& funcName, 
+  const std::vector<ValueClass>& argumentVals
+) {
   const auto* ast = globalAST(funcName);
   if (ast == nullptr) {
     OnError(SemanticEID::globalMissingAST, iter->pos.start, funcName);
@@ -123,10 +125,9 @@ bool ValueAuditor::RunCheckOnFunc(Cursor iter,
   if (!ast->Root().Child(1).Child(1).DispatchVisit(funcAuditor)) {
     OnError(SemanticEID::globalFuncNoInterpretation, iter->pos.start);
     return false;
-  } else {
-    current = funcAuditor.VType();
-    return true;
   }
+  current = funcAuditor.VType();
+  return true;
 }
 
 bool ValueAuditor::ViGlobal(Cursor iter) {
@@ -138,10 +139,9 @@ bool ValueAuditor::ViGlobal(Cursor iter) {
     if (type == ValueClass::invalid) {
       OnError(SemanticEID::globalNoValue, iter->pos.start, globalName);
       return false;
-    } else {
-      current = type;
-      return true;
     }
+    current = type;
+    return true;
   }
 }
 

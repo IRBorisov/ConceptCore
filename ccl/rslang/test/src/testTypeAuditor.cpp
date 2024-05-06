@@ -215,8 +215,8 @@ TEST_F(UTTypeAuditor, LogicErrors) {
   ExpectError(R"(\A a \in X1*X1 a \eq {})", SemanticEID::invalidEqualsEmpty, 15);
 
   ExpectError(R"(\A (a,a) \in S1 pr2(a) \in X1)", SemanticEID::localShadowing, 6);
-  ExpectError(R"(\A (a,b) \in X1 1 \eq 1)", SemanticEID::ivalidBinding, 4);
-  ExpectError(R"(\A (a,b,c) \in S1 1 \eq 1)", SemanticEID::ivalidBinding, 4);
+  ExpectError(R"(\A (a,b) \in X1 1 \eq 1)", SemanticEID::invalidBinding, 4);
+  ExpectError(R"(\A (a,b,c) \in S1 1 \eq 1)", SemanticEID::invalidBinding, 4);
 
   ExpectError(R"(\A t \in X1 {t \in X1 | t \eq t} \eq X1)", SemanticEID::localShadowing, 13);
   ExpectError(R"(\A t \in X1 t \eq t \and t \eq X1)", SemanticEID::localOutOfScope, 25);
@@ -289,17 +289,17 @@ TEST_F(UTTypeAuditor, TypedPredicatesCorrect) {
 TEST_F(UTTypeAuditor, TypedPredicatesError) {
   SetupConstants();
 
-  ExpectError(R"(X1 \in X1)", SemanticEID::invalidElementPredicat, 7);
-  ExpectError(R"(S4 \in C2)", SemanticEID::invalidElementPredicat, 7);
-  ExpectError(R"(S5 \in Z)", SemanticEID::invalidElementPredicat, 7);
-  ExpectError(R"(S6 \in Z)", SemanticEID::invalidElementPredicat, 7);
-  ExpectError(R"((1,2) \in Z)", SemanticEID::invalidElementPredicat, 10);
-  ExpectError(R"({1} \in Z)", SemanticEID::invalidElementPredicat, 8);
-  ExpectError(R"((1,2) \in Z)", SemanticEID::invalidElementPredicat, 10);
+  ExpectError(R"(X1 \in X1)", SemanticEID::invalidElementPredicate, 7);
+  ExpectError(R"(S4 \in C2)", SemanticEID::invalidElementPredicate, 7);
+  ExpectError(R"(S5 \in Z)", SemanticEID::invalidElementPredicate, 7);
+  ExpectError(R"(S6 \in Z)", SemanticEID::invalidElementPredicate, 7);
+  ExpectError(R"((1,2) \in Z)", SemanticEID::invalidElementPredicate, 10);
+  ExpectError(R"({1} \in Z)", SemanticEID::invalidElementPredicate, 8);
+  ExpectError(R"((1,2) \in Z)", SemanticEID::invalidElementPredicate, 10);
 
   ExpectError(R"(X1 \subset S2)", SemanticEID::typesNotEqual, 11);
 
-  ExpectError(R"(X1 \notin X1)", SemanticEID::invalidElementPredicat, 10);
+  ExpectError(R"(X1 \notin X1)", SemanticEID::invalidElementPredicate, 10);
   ExpectError(R"(X1 \subseteq S2)", SemanticEID::typesNotEqual, 13);
   ExpectError(R"(X1 \notsubset S2)", SemanticEID::typesNotEqual, 14);
 }
@@ -364,10 +364,10 @@ TEST_F(UTTypeAuditor, TypedFunctions) {
   ExpectTypification(R"(F1[Pr1(S1), Pr2(S1)])", "B(X1)"_t);
 
   ExpectError(R"(F1)", SemanticEID::globalFuncWithoutArgs, 0);
-  ExpectError(R"(F1[X1])", SemanticEID::invalidArgsArtity, 3);
+  ExpectError(R"(F1[X1])", SemanticEID::invalidArgsArity, 3);
   EXPECT_EQ(parser.log.All()[0].params[0], "1");
   EXPECT_EQ(parser.log.All()[0].params[1], "2");
-  ExpectError(R"(F1[X1, X1, X1])", SemanticEID::invalidArgsArtity, 3);
+  ExpectError(R"(F1[X1, X1, X1])", SemanticEID::invalidArgsArity, 3);
   EXPECT_EQ(parser.log.All()[0].params[0], "3");
   EXPECT_EQ(parser.log.All()[0].params[1], "2");
 
@@ -388,8 +388,8 @@ TEST_F(UTTypeAuditor, LogicFunctions) {
   ExpectLogic(R"(P1[Pr1(S1), Pr2(S1)])");
 
   ExpectError(R"(P1)", SemanticEID::globalFuncWithoutArgs, 0);
-  ExpectError(R"(P1[X1])", SemanticEID::invalidArgsArtity, 3);
-  ExpectError(R"(P1[X1, X1, X1])", SemanticEID::invalidArgsArtity, 3);
+  ExpectError(R"(P1[X1])", SemanticEID::invalidArgsArity, 3);
+  ExpectError(R"(P1[X1, X1, X1])", SemanticEID::invalidArgsArity, 3);
 
   ExpectError(R"(P1[S1, X1])", SemanticEID::invalidArgumentType, 3);
   ExpectError(R"(P1[X1, S1])", SemanticEID::invalidArgumentType, 7);

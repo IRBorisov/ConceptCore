@@ -30,7 +30,7 @@ public:
 private:
   void Quantifier(SyntaxTree::Node& quant);
   static void EnumDeclaration(SyntaxTree::Node& quant);
-  void TupleDeclaration(SyntaxTree::Node& declaration, SyntaxTree::Node& predicat);
+  void TupleDeclaration(SyntaxTree::Node& declaration, SyntaxTree::Node& predicate);
   void TupleDeclaration(SyntaxTree::Node& target);
 
   [[nodiscard]] std::string CreateTupleName(const SyntaxTree::Node& root);

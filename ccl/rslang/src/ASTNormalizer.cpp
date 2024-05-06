@@ -57,14 +57,15 @@ void Normalizer::EnumDeclaration(SyntaxTree::Node& quant) {
   quant(0) = quant(0)(0);
 }
 
-void Normalizer::TupleDeclaration(SyntaxTree::Node& declaration,
-                                  SyntaxTree::Node& predicat) {
+void Normalizer::TupleDeclaration(
+  SyntaxTree::Node& declaration,
+  SyntaxTree::Node& predicate
+) {
   const auto newName = CreateTupleName(declaration);
   declaration.RemoveAll();
   declaration.token.data = TokenData{ newName };
   declaration.token.id = TokenID::ID_LOCAL;
-
-  SubstituteTupleVariables(predicat, newName);
+  SubstituteTupleVariables(predicate, newName);
 }
 
 void Normalizer::TupleDeclaration(SyntaxTree::Node& target) {
@@ -116,7 +117,8 @@ std::string Normalizer::CreateTupleName(const SyntaxTree::Node& root) {
 void Normalizer::SubstituteTupleVariables(SyntaxTree::Node& target, const std::string& newName) {
   for (Index child = 0; child < target.ChildrenCount(); ++child) {
     if (target(child).token.id == TokenID::ID_LOCAL) {
-      if (const auto& localName = target(child).token.data.ToText(); tuples.contains(localName)) {
+      const auto& localName = target(child).token.data.ToText();
+      if (tuples.contains(localName)) {
         const auto& indexes = tuples.at(localName);
         target(child).token.data = TokenData{ newName };
         for (const auto prIndex : indexes) {
@@ -164,12 +166,14 @@ void Normalizer::SubstituteArgs(SyntaxTree::Node& target, const StrRange pos) {
       SubstituteArgs(target(child), pos);
     }
   } else {
-    if (const auto& localName = target.token.ToString(); nodes.contains(localName)) {
+    const auto& localName = target.token.ToString();
+    if (nodes.contains(localName)) {
       target = *nodes.at(localName);
     } else {
       const auto& oldName = target.token.ToString();
       std::string newName{};
-      if (const auto iter = nameSubstitutes.find(oldName); iter == std::end(nameSubstitutes)) {
+      const auto iter = nameSubstitutes.find(oldName);
+      if (iter == std::end(nameSubstitutes)) {
         ++localVarBase;
         newName = R"(__var)" + std::to_string(localVarBase);
         nameSubstitutes.insert(make_pair(oldName, newName));

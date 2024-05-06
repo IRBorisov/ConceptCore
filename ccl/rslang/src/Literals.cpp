@@ -47,19 +47,24 @@ Typification operator""_t(const char* input, const size_t /*size*/) {
   if (!parser.Parse(lexer(input).Stream())) {
     assert(false);
     return Typification::Integer();
-  } else if (!analyse.CheckType(parser.AST())) {
+  } 
+  if (!analyse.CheckType(parser.AST())) {
     assert(false);
     return Typification::Integer();
-  } else if (const auto& result = analyse.GetType();
-             !std::holds_alternative<Typification>(result)) {
+  } 
+
+  const auto& result = analyse.GetType();
+  if (!std::holds_alternative<Typification>(result)) {
     assert(false);
     return Typification::Integer();
-  } else if (const auto& type = std::get<Typification>(result); !type.IsCollection()) {
+  } 
+
+  const auto& type = std::get<Typification>(result); 
+  if (!type.IsCollection()) {
     assert(false);
     return Typification::Integer();
-  } else {
-    return type.B().Base();
   }
+  return type.B().Base();
 }
 
 std::string operator"" _rs(const char* input, const size_t size) {

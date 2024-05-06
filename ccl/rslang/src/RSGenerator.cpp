@@ -6,9 +6,13 @@
 #include "ccl/rslang/RSExpr.h"
 #include "ccl/rslang/Parser.h"
 
+#include <string_view>
+
 namespace ccl::rslang {
 
 namespace {
+
+using Description = Generator::StructureDescription;
 
 [[nodiscard]] size_t FindArgumentSectionEnd(const std::string& input) {
   auto counter = 0;
@@ -26,46 +30,55 @@ namespace {
   return std::string::npos;
 }
 
-[[nodiscard]] std::string SubstituteInPrefix(const StrSubstitutes& substitutes,
-                                             const std::vector<std::string>& args, const TypeContext& env) {
+[[nodiscard]] std::string SubstituteInPrefix(
+  const StrSubstitutes& substitutes,
+  const std::vector<std::string>& args,
+  const TypeContext& env
+) {
   FunctionArguments argsTypes{};
   for (const auto& argName : args) {
-    if (const auto* type = env.TypeFor(argName); type == nullptr) {
+    const auto* type = env.TypeFor(argName);
+    if (type == nullptr) {
       return {};
-    } else {
-      const auto& newName = substitutes.at(argName);
-      argsTypes.emplace_back(TypedID{ newName, std::get<Typification>(*type) });
     }
+    const auto& newName = substitutes.at(argName);
+    argsTypes.emplace_back(TypedID{ newName, std::get<Typification>(*type) });
   }
   return Generator::CreatePrefix(argsTypes);
 }
 
-class StructureContextGenerator final {
+class StructureGenerator final {
 private:
-  Generator::StructureDescription structure{};
+  Description structure{};
 
 public:
-  [[nodiscard]] static Generator::StructureDescription GenerateFor(const std::string& cstName, 
-                                                                   const Typification& type);
+  [[nodiscard]] static Description GenerateFor(
+    const std::string& cstName,
+    const Typification& type
+  );
 
 private:
   void GenerateRecursive(const std::string& currentStr, const Typification& type);
   void GenerateReduce(const std::string& currentStr, const Typification& type);
   void GenerateProjection(const std::string& currentStr, const Typification& type);
-  void CallRecursionForToken(const std::string& tokenText,
-                             const std::string& currentStr,
-                             const Typification& type);
+  void CallRecursionForToken(
+    const std::string& tokenText,
+    const std::string& currentStr,
+    const Typification& type
+  );
 };
 
-Generator::StructureDescription StructureContextGenerator::GenerateFor(const std::string& cstName, 
-                                                                       const Typification& type) {
-  static StructureContextGenerator generator{};
+Description StructureGenerator::GenerateFor(
+  const std::string& cstName,
+  const Typification& type
+) {
+  static StructureGenerator generator{};
   generator.structure.clear();
   generator.GenerateRecursive(cstName, type);
   return generator.structure;
 }
 
-void StructureContextGenerator::GenerateRecursive(const std::string& currentStr, const Typification& type) {
+void StructureGenerator::GenerateRecursive(const std::string& currentStr, const Typification& type) {
   if (!empty(currentStr) && type.IsCollection()) {
     const auto& elementType = type.B().Base();
     switch (elementType.Structure()) {
@@ -76,11 +89,11 @@ void StructureContextGenerator::GenerateRecursive(const std::string& currentStr,
   }
 }
 
-void StructureContextGenerator::GenerateReduce(const std::string& currentStr, const Typification& type) {
+void StructureGenerator::GenerateReduce(const std::string& currentStr, const Typification& type) {
   CallRecursionForToken(rslang::Token::Str(rslang::TokenID::REDUCE), currentStr, type);
 }
 
-void StructureContextGenerator::GenerateProjection(const std::string& currentStr, const Typification& type) {
+void StructureGenerator::GenerateProjection(const std::string& currentStr, const Typification& type) {
   for (Index i = 0; i < type.T().Arity(); ++i) {
     Typification component = type.T().Component(Typification::PR_START + i); // NOLINT
     const auto tokenText = rslang::Token::Str(rslang::TokenID::BIGPR) + std::to_string(Typification::PR_START + i);
@@ -88,9 +101,11 @@ void StructureContextGenerator::GenerateProjection(const std::string& currentStr
   }
 }
 
-void StructureContextGenerator::CallRecursionForToken(const std::string& tokenText,
-                                                      const std::string& currentStr,
-                                                      const Typification& type) {
+void StructureGenerator::CallRecursionForToken(
+  const std::string& tokenText,
+  const std::string& currentStr,
+  const Typification& type
+) {
   std::string newStr = tokenText;
   newStr += '(';
   newStr += currentStr;
@@ -99,8 +114,10 @@ void StructureContextGenerator::CallRecursionForToken(const std::string& tokenTe
   GenerateRecursive(newStr, type);
 }
 
-[[nodiscard]] StrSubstitutes UniqueSubstitutes(const std::vector<std::string>& args,
-                                    const std::unordered_set<std::string>& takenNames) {
+[[nodiscard]] StrSubstitutes UniqueSubstitutes(
+  const std::vector<std::string>& args,
+  const std::unordered_set<std::string>& takenNames
+) {
   static constexpr auto LOCAL_ID_BASE = 1;
   static const std::string_view LOCAL_NAME_BASE = "arg";
   StrSubstitutes substitutes{};
@@ -152,8 +169,10 @@ std::string Generator::ExtractPrefix(const std::string& declaration) {
   }
 }
 
-std::string Generator::FunctionFromExpr(const std::vector<std::string>& args, 
-                                        const std::string& expression) const {
+std::string Generator::FunctionFromExpr(
+  const std::vector<std::string>& args, 
+  const std::string& expression
+) const {
   if (empty(args) || empty(expression)) {
     return expression;
   }
@@ -183,9 +202,11 @@ std::string Generator::CreateCall(const std::string& funcName, const std::vector
   return funcName + '[' + argString + ']';
 }
 
-std::string Generator::TermFromFunction(const std::string& funcName, 
-                                        const std::string& expression,
-                                        const std::vector<std::string>& args) const {
+std::string Generator::TermFromFunction(
+  const std::string& funcName, 
+  const std::string& expression,
+  const std::vector<std::string>& args
+) const {
   const auto* argsTypes = environment.FunctionArgsFor(funcName);
   if (argsTypes == nullptr || ssize(*argsTypes) != ssize(args)) {
     return {};
@@ -208,9 +229,11 @@ std::string Generator::TermFromFunction(const std::string& funcName,
   return result;
 }
 
-Generator::StructureDescription Generator::StructureFor(const std::string& globalName, 
-                                                        const Typification& type) {
-  return StructureContextGenerator::GenerateFor(globalName, type);
+Generator::StructureDescription Generator::StructureFor(
+  const std::string& globalName, 
+  const Typification& type
+) {
+  return StructureGenerator::GenerateFor(globalName, type);
 }
 
 std::string ConvertTo(const std::string& input, const Syntax targetSyntax) {

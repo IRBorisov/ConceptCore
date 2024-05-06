@@ -333,7 +333,7 @@ namespace ccl { namespace rslang { namespace detail {
     RST_IN = 282,                  // IN
     RST_NOTIN = 283,               // NOTIN
     RST_SUBSET = 284,              // SUBSET
-    RST_SUBOR_EQ = 285,            // SUBOR_EQ
+    RST_SUBSET_OR_EQ = 285,        // SUBSET_OR_EQ
     RST_NOTSUBSET = 286,           // NOTSUBSET
     RST_DECART = 287,              // DECART
     RST_UNION = 288,               // UNION
@@ -412,7 +412,7 @@ namespace ccl { namespace rslang { namespace detail {
         S_IN = 27,                               // IN
         S_NOTIN = 28,                            // NOTIN
         S_SUBSET = 29,                           // SUBSET
-        S_SUBOR_EQ = 30,                         // SUBOR_EQ
+        S_SUBSET_OR_EQ = 30,                     // SUBSET_OR_EQ
         S_NOTSUBSET = 31,                        // NOTSUBSET
         S_DECART = 32,                           // DECART
         S_UNION = 33,                            // UNION

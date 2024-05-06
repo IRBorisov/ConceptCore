@@ -3,6 +3,7 @@
 #include "NameCollector.h"
 
 #include <stack>
+#include <optional>
 
 #ifdef _MSC_VER
   #pragma warning( push )
@@ -94,11 +95,11 @@ private:
     auto element = parent.EvaluateChild(imperative, 0);
     if (!element.has_value()) {
       return false;
-    } else {
-      value.ModifyB().AddElement(std::get<StructuredData>(element.value()));
-      incrementIter = true;
-      return true;
     }
+
+    value.ModifyB().AddElement(std::get<StructuredData>(element.value()));
+    incrementIter = true;
+    return true;
   }
 
   [[nodiscard]] bool ProcessBlock() {
@@ -188,8 +189,7 @@ void ASTInterpreter::OnError(const ValueEID eid, const StrPos position, std::str
 
 std::optional<ExpressionValue> ASTInterpreter::Evaluate(const rslang::SyntaxTree& tree) {
   Clear();
-  if (!NameCollector{ *this }.Visit(tree.Root())
-      || !tree.Root().DispatchVisit(*this)) {
+  if (!NameCollector{ *this }.Visit(tree.Root()) || !tree.Root().DispatchVisit(*this)) {
     AfterVisit(false);
     return std::nullopt;
   } else {
@@ -247,46 +247,49 @@ bool ASTInterpreter::ViEmptySet(Cursor /*iter*/) {
 }
 
 bool ASTInterpreter::ViArithmetic(Cursor iter) {
-  if (const auto val1 = EvaluateChild(iter, 0); !val1.has_value()) {
+  const auto val1 = EvaluateChild(iter, 0);
+  if (!val1.has_value()) {
     return false;
-  } else if (const auto val2 = EvaluateChild(iter, 1); !val2.has_value()) {
+  }
+  const auto val2 = EvaluateChild(iter, 1);
+  if (!val2.has_value()) {
     return false;
-  } else {
-    const auto op1 = std::get<StructuredData>(val1.value()).E().Value();
-    const auto op2 = std::get<StructuredData>(val2.value()).E().Value();
-    switch (iter->id) {
-    default:
-    case TokenID::PLUS:
-      return VisitAndReturn(Factory::Val(op1 + op2));
-    case TokenID::MINUS:
-      return VisitAndReturn(Factory::Val(op1 - op2));
-    case TokenID::MULTIPLY:
-      return VisitAndReturn(Factory::Val(op1 * op2));
-    }
+  }
+  const auto op1 = std::get<StructuredData>(val1.value()).E().Value();
+  const auto op2 = std::get<StructuredData>(val2.value()).E().Value();
+  switch (iter->id) {
+  default:
+  case TokenID::PLUS:
+    return VisitAndReturn(Factory::Val(op1 + op2));
+  case TokenID::MINUS:
+    return VisitAndReturn(Factory::Val(op1 - op2));
+  case TokenID::MULTIPLY:
+    return VisitAndReturn(Factory::Val(op1 * op2));
   }
 }
 
 bool ASTInterpreter::ViCard(Cursor iter) {
-  if (const auto base = EvaluateChild(iter, 0); !base.has_value()) {
+  const auto base = EvaluateChild(iter, 0);
+  if (!base.has_value()) {
     return false;
-  } else if (const auto size = std::get<StructuredData>(base.value()).B().Cardinality();
-             size == StructuredData::SET_INFINITY) {
+  }
+  const auto size = std::get<StructuredData>(base.value()).B().Cardinality();
+  if (size == StructuredData::SET_INFINITY) {
     OnError(ValueEID::typedOverflow, iter->pos.start, std::to_string(StructuredData::SET_INFINITY));
     return false;
-  } else {
-    return VisitAndReturn(Factory::Val(size));
   }
+  return VisitAndReturn(Factory::Val(size));
 }
 
 bool ASTInterpreter::ViQuantifier(Cursor iter) {
-  const auto quantorDomain = ExtractDomain(iter);
-  if (!quantorDomain.has_value()) {
+  const auto domain = ExtractDomain(iter);
+  if (!domain.has_value()) {
     return false;
   }
 
   const auto varID = *begin(nodeVars[iter.Child(0).get()]);
-  const auto quantorForAll = iter->id == TokenID::FORALL;
-  for (const auto& child : quantorDomain->B()) {
+  const auto isUniversal = iter->id == TokenID::FORALL;
+  for (const auto& child : domain->B()) {
     if (++iterationCounter > MAX_ITERATIONS) {
       OnError(ValueEID::iterationsLimit, iter->pos.start, std::to_string(MAX_ITERATIONS));
       return false;
@@ -294,46 +297,50 @@ bool ASTInterpreter::ViQuantifier(Cursor iter) {
     idsData[varID] = child;
     if (const auto iterationValue = EvaluateChild(iter, 2); !iterationValue.has_value()) {
       return false;
-    } else if (std::get<bool>(iterationValue.value()) != quantorForAll) {
-      return VisitAndReturn(!quantorForAll);
+    } else if (std::get<bool>(iterationValue.value()) != isUniversal) {
+      return VisitAndReturn(!isUniversal);
     }
   }
-  return VisitAndReturn(quantorForAll);
+  return VisitAndReturn(isUniversal);
 }
 
 std::optional<StructuredData> ASTInterpreter::ExtractDomain(Cursor iter) {
   if (!VisitChild(iter, 1)) {
     return std::nullopt;
-  } else {
-    return std::optional<StructuredData>{std::get<StructuredData>(curValue)};
   }
+  return std::optional<StructuredData>{std::get<StructuredData>(curValue)};
 }
 
 bool ASTInterpreter::ViNegation(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else {
-    return VisitAndReturn(!std::get<bool>(childValue.value()));
   }
+  return VisitAndReturn(!std::get<bool>(childValue.value()));
 }
 
 bool ASTInterpreter::ViLogicBinary(Cursor iter) {
-  if (const auto val1 = EvaluateChild(iter, 0); !val1.has_value()) {
+  const auto val1 = EvaluateChild(iter, 0);
+  if (!val1.has_value()) {
     return false;
-  } else if (TryEvaluateFromFirstArg(iter->id, std::get<bool>(val1.value()))) {
+  }
+
+  if (TryEvaluateFromFirstArg(iter->id, std::get<bool>(val1.value()))) {
     return true;
-  } else if (const auto val2 = EvaluateChild(iter, 1); !val2.has_value()) {
+  } 
+
+  const auto val2 = EvaluateChild(iter, 1);
+  if (!val2.has_value()) {
     return false;
-  } else {
-    const auto op1 = std::get<bool>(val1.value());
-    const auto op2 = std::get<bool>(val2.value());
-    switch (iter->id) {
+  }
+  const auto op1 = std::get<bool>(val1.value());
+  const auto op2 = std::get<bool>(val2.value());
+  switch (iter->id) {
     default:
     case TokenID::AND: curValue = op1 && op2;  return true;
     case TokenID::OR: curValue = op1 || op2;  return true;
     case TokenID::IMPLICATION: curValue = !op1 || op2;  return true;
-    case TokenID::EQUIVALENT: curValue = op1 == op2;  return true;
-    }
+    case TokenID::EQUIVALENT: curValue = op1 == op2; return true;
   }
 }
 
@@ -349,30 +356,34 @@ bool ASTInterpreter::TryEvaluateFromFirstArg(TokenID operation, bool firstArgVal
 }
 
 bool ASTInterpreter::ViEquals(Cursor iter) {
-  if (const auto val1 = EvaluateChild(iter, 0); !val1.has_value()) {
+  const auto val1 = EvaluateChild(iter, 0);
+  if (!val1.has_value()) {
     return false;
-  } else if (const auto val2 = EvaluateChild(iter, 1); !val2.has_value()) {
-    return false;
-  } else {
-    return VisitAndReturn((val1 == val2) != (iter->id == TokenID::NOTEQUAL));
   }
+  const auto val2 = EvaluateChild(iter, 1);
+  if (!val2.has_value()) {
+    return false;
+  }
+  return VisitAndReturn((val1 == val2) != (iter->id == TokenID::NOTEQUAL));
 }
 
 bool ASTInterpreter::ViOrdering(Cursor iter) {
-  if (const auto val1 = EvaluateChild(iter, 0); !val1.has_value()) {
+  const auto val1 = EvaluateChild(iter, 0);
+  if (!val1.has_value()) {
     return false;
-  } else if (const auto val2 = EvaluateChild(iter, 1); !val2.has_value()) {
+  }
+  const auto val2 = EvaluateChild(iter, 1);
+  if (!val2.has_value()) {
     return false;
-  } else {
-    const auto op1 = std::get<StructuredData>(val1.value()).E().Value();
-    const auto op2 = std::get<StructuredData>(val2.value()).E().Value();
-    switch (iter->id) {
+  }
+  const auto op1 = std::get<StructuredData>(val1.value()).E().Value();
+  const auto op2 = std::get<StructuredData>(val2.value()).E().Value();
+  switch (iter->id) {
     default:
     case TokenID::GREATER: return VisitAndReturn(op1 > op2);
     case TokenID::LESSER: return VisitAndReturn(op1 < op2);
     case TokenID::GREATER_OR_EQ: return VisitAndReturn(op1 >= op2);
     case TokenID::LESSER_OR_EQ: return VisitAndReturn(op1 <= op2);
-    }
   }
 }
 
@@ -389,9 +400,11 @@ bool ASTInterpreter::ViDeclarative(Cursor iter) {
       return false;
     }
     idsData[varID] = child;
-    if (const auto predicatValue = EvaluateChild(iter, 2); !predicatValue.has_value()) {
+    const auto predicatValue = EvaluateChild(iter, 2);
+    if (!predicatValue.has_value()) {
       return false;
-    } else if (std::get<bool>(predicatValue.value())) {
+    }
+    if (std::get<bool>(predicatValue.value())) {
       result.ModifyB().AddElement(child);
     }
   }
@@ -402,9 +415,8 @@ bool ASTInterpreter::ViImperative(const Cursor iter) {
   ImpEvaluator eval{ *this, iter };
   if (!eval.Evaluate()) {
     return false;
-  } else {
-    return VisitAndReturn(eval.value);
   }
+  return VisitAndReturn(eval.value);
 }
 
 bool ASTInterpreter::ViRecursion(Cursor iter) {
@@ -422,9 +434,11 @@ bool ASTInterpreter::ViRecursion(Cursor iter) {
 
     idsData[varID] = current;
     if (iter->id == TokenID::NT_RECURSIVE_FULL) {
-      if (const auto predicat = EvaluateChild(iter, 2); !predicat.has_value()) {
+      const auto predicat = EvaluateChild(iter, 2);
+      if (!predicat.has_value()) {
         return false;
-      } else if (!std::get<bool>(predicat.value())) {
+      }
+      if (!std::get<bool>(predicat.value())) {
         break;
       }
     }
@@ -451,32 +465,38 @@ bool ASTInterpreter::ViDecart(Cursor iter) {
   if (std::get<StructuredData>(curValue).B().Cardinality() == StructuredData::SET_INFINITY) {
     OnError(ValueEID::typedOverflow, iter->pos.start, std::to_string(StructuredData::SET_INFINITY));
     return false;
-  } else {
-    return true;
   }
+  return true;
 }
 
 bool ASTInterpreter::ViBoolean(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else if (const auto value = std::get<StructuredData>(childValue.value());
-             (iter.IsRoot() || (iter.Parent().id != TokenID::IN && iter.Parent().id != TokenID::NT_DECLARATIVE_EXPR)) &&
-             value.B().Cardinality() >= StructuredData::BOOL_INFINITY) {
-    OnError(ValueEID::booleanLimit, iter->pos.start, std::to_string(StructuredData::BOOL_INFINITY));
-    return false;
-  } else {
-    return VisitAndReturn(Factory::Boolean(value));
   }
+  const auto value = std::get<StructuredData>(childValue.value());
+  if (
+      (iter.IsRoot() || (iter.Parent().id != TokenID::IN && iter.Parent().id != TokenID::NT_DECLARATIVE_EXPR)) &&
+      value.B().Cardinality() >= StructuredData::BOOL_INFINITY
+    ) {
+    OnError(
+      ValueEID::booleanLimit,
+      iter->pos.start,
+      std::to_string(StructuredData::BOOL_INFINITY)
+    );
+    return false;
+  }
+  return VisitAndReturn(Factory::Boolean(value));
 }
 
 bool ASTInterpreter::ViTuple(Cursor iter) {
   std::vector<StructuredData> args{};
   for (Index child = 0; child < iter.ChildrenCount(); ++child) {
-    if (const auto childValue = EvaluateChild(iter, child); !childValue.has_value()) {
+    const auto childValue = EvaluateChild(iter, child);
+    if (!childValue.has_value()) {
       return false;
-    } else {
-      args.emplace_back(std::get<StructuredData>(childValue.value()));
     }
+    args.emplace_back(std::get<StructuredData>(childValue.value()));
   }
   return VisitAndReturn(Factory::Tuple(args));
 }
@@ -484,32 +504,36 @@ bool ASTInterpreter::ViTuple(Cursor iter) {
 bool ASTInterpreter::ViSetEnum(Cursor iter) {
   std::vector<StructuredData> args{};
   for (Index child = 0; child < iter.ChildrenCount(); ++child) {
-    if (const auto childValue = EvaluateChild(iter, child); !childValue.has_value()) {
+    const auto childValue = EvaluateChild(iter, child);
+    if (!childValue.has_value()) {
       return false;
-    } else {
-      args.emplace_back(std::get<StructuredData>(childValue.value()));
     }
+    args.emplace_back(std::get<StructuredData>(childValue.value()));
   }
   return VisitAndReturn(Factory::Set(args));
 }
 
 bool ASTInterpreter::ViBool(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else {
-    return VisitAndReturn(Factory::Singleton(std::get<StructuredData>(childValue.value())));
   }
+  return VisitAndReturn(Factory::Singleton(std::get<StructuredData>(childValue.value())));
 }
 
 bool ASTInterpreter::ViTypedBinary(Cursor iter) {
-  if (const auto val1 = EvaluateChild(iter, 0); !val1.has_value()) {
+  const auto val1 = EvaluateChild(iter, 0);
+  if (!val1.has_value()) {
     return false;
-  } else if (const auto val2 = EvaluateChild(iter, 1); !val2.has_value()) {
+  }
+  const auto val2 = EvaluateChild(iter, 1); 
+  if (!val2.has_value()) {
     return false;
-  } else {
-    const auto& op1 = std::get<StructuredData>(val1.value());
-    const auto& op2 = std::get<StructuredData>(val2.value());
-    switch (iter->id) {
+  }
+
+  const auto& op1 = std::get<StructuredData>(val1.value());
+  const auto& op2 = std::get<StructuredData>(val2.value());
+  switch (iter->id) {
     default:
     case TokenID::UNION: return VisitAndReturn(op1.B().Union(op2.B()));
     case TokenID::INTERSECTION: return VisitAndReturn(op1.B().Intersect(op2.B()));
@@ -521,16 +545,15 @@ bool ASTInterpreter::ViTypedBinary(Cursor iter) {
     case TokenID::SUBSET: return VisitAndReturn(!(op1 == op2) && op1.B().IsSubsetOrEq(op2.B()));
     case TokenID::NOTSUBSET: return VisitAndReturn(op1 == op2 || !op1.B().IsSubsetOrEq(op2.B()));
     case TokenID::SUBSET_OR_EQ: return VisitAndReturn(op1.B().IsSubsetOrEq(op2.B()));
-    }
   }
 }
 
 bool ASTInterpreter::ViProjectSet(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else {
-    return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Projection(iter->data.ToTuple()));
   }
+  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Projection(iter->data.ToTuple()));
 }
 
 bool ASTInterpreter::ViProjectTuple(Cursor iter) {
@@ -562,9 +585,11 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
   std::vector<StructuredData> params{};
   params.reserve(size(indicies));
   for (Index child = 0; child < iter.ChildrenCount() - 1; ++child) {
-    if (const auto param = EvaluateChild(iter, child); !param.has_value()) {
+    const auto param = EvaluateChild(iter, child);
+    if (!param.has_value()) {
       return false;
-    } else if (const auto val = std::get<StructuredData>(param.value()); val.B().IsEmpty()) {
+    } 
+    if (const auto val = std::get<StructuredData>(param.value()); val.B().IsEmpty()) {
       return VisitAndReturn(Factory::EmptySet());
     } else {
       params.emplace_back(val);
@@ -588,23 +613,24 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
 }
 
 bool ASTInterpreter::ViReduce(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else {
-    return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Reduce());
   }
+  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Reduce());
 }
 
 bool ASTInterpreter::ViDebool(Cursor iter) {
-  if (const auto childValue = EvaluateChild(iter, 0); !childValue.has_value()) {
+  const auto childValue = EvaluateChild(iter, 0);
+  if (!childValue.has_value()) {
     return false;
-  } else if (const auto value = std::get<StructuredData>(childValue.value());
-             value.B().Cardinality() != 1) {
+  }
+  const auto value = std::get<StructuredData>(childValue.value());
+  if (value.B().Cardinality() != 1) {
     OnError(ValueEID::invalidDebool, iter->pos.start);
     return false;
-  } else {
-    return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Debool());
   }
+  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Debool());
 }
 
 std::optional<ExpressionValue> ASTInterpreter::EvaluateChild(Cursor iter, const Index index) {

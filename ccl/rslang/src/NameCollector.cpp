@@ -49,14 +49,15 @@ bool ASTInterpreter::NameCollector::ViGlobal(Cursor iter) {
 
   const auto nextID = static_cast<uint32_t>(size(parent.idsData));
   parent.idsBase.insert({ idName, nextID });
-  if (const auto data = parent.context(iter->data.ToText()); data.has_value()) {
-    parent.idsData.emplace_back(data.value());
-    parent.nodeVars[iter.get()] = { nextID };
-    return true;
-  } else {
+  const auto data = parent.context(iter->data.ToText());
+  if (!data.has_value()) {
     parent.OnError(ValueEID::globalMissingValue, iter->pos.start, iter->data.ToText());
     return false;
-  }
+    
+  } 
+  parent.idsData.emplace_back(data.value());
+  parent.nodeVars[iter.get()] = { nextID };
+  return true;
 }
 
 bool ASTInterpreter::NameCollector::ViLocal(Cursor iter) {
