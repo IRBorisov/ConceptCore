@@ -126,8 +126,12 @@ void OSSchema::SetPictLink(const PictID target, const MediaLink& lnk) {
   }
 }
 
-const Pict& OSSchema::LoadPict(Pict&& pict, GridPosition pos, const src::Handle& handle, 
-                           std::unique_ptr<OperationHandle> params) {
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
+const Pict& OSSchema::LoadPict(
+  Pict&& pict, GridPosition pos,
+  const src::Handle& handle, 
+  std::unique_ptr<OperationHandle> params
+) {
   if (Grid()(pos).has_value()) {
     pos = Grid().ClosestFreePos(pos);
   }
@@ -149,10 +153,12 @@ PictPtr OSSchema::InsertOperation(const PictID operand1, const PictID operand2) 
     graph->AddItem(newID, { operand1, operand2 });
 
     const auto newPos = Grid().ChildPosFor(operand1, operand2);
-    InsertInternal(Pict{ newID },
-                   newPos,
-                   src::Handle{ src::SrcType::rsDoc },
-                   std::make_unique<OperationHandle>());
+    InsertInternal(
+      Pict{ newID },
+      newPos,
+      src::Handle{ src::SrcType::rsDoc },
+      std::make_unique<OperationHandle>()
+    );
 
     NotifyModification();
     return &storage.at(newID);
@@ -168,9 +174,12 @@ PictPtr OSSchema::InsertBase() {
   return &storage.at(newID);
 }
 
-void OSSchema::InsertInternal(const Pict& pict, GridPosition pos,
-                              const src::Handle& srcHandle,
-                              std::unique_ptr<OperationHandle> opHandle) {
+void OSSchema::InsertInternal(
+  const Pict& pict,
+  GridPosition pos,
+  const src::Handle& srcHandle,
+  std::unique_ptr<OperationHandle> opHandle
+) {
   const auto pid = pict.uid;
 
   idGen.AddUID(pid);

@@ -172,7 +172,8 @@ void rsValuesFacet::PruneStructure(const EntityUID target) {
   } 
   const auto& typeValue = core.GetParse(target).exprType;
   assert(typeValue.has_value());
-  const auto& type = std::get<rslang::Typification>(typeValue.value()); // NOLINT(bugprone-exception-escape)
+  // NOLINTNEXTLINE(bugprone-exception-escape, bugprone-unchecked-optional-access)
+  const auto& type = std::get<rslang::Typification>(typeValue.value());
   if (!oldData->IsCollection()) {
     if (!CheckBasicElements(oldData.value(), type)) {
       storage->Erase(target);

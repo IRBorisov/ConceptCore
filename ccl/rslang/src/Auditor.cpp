@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ccl/rslang/Auditor.h"
 
 namespace ccl::rslang {

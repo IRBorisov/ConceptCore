@@ -64,7 +64,8 @@ namespace {
 [[nodiscard]] UTF8Iterator ReferenceStart(const std::string_view refStr, const StrPos start) noexcept {
   for (auto iter = UTF8Iterator(refStr, start); iter != UTF8End(refStr); ++iter) {
     if (*iter == '@') {
-      if (++iter == UTF8End(refStr) || *iter == '{') {
+      ++iter;
+      if (iter == UTF8End(refStr) || *iter == '{') {
         return iter;
       }
     }

@@ -42,7 +42,7 @@ using Description = Generator::StructureDescription;
       return {};
     }
     const auto& newName = substitutes.at(argName);
-    argsTypes.emplace_back(TypedID{ newName, std::get<Typification>(*type) });
+    argsTypes.emplace_back(newName, std::get<Typification>(*type));
   }
   return Generator::CreatePrefix(argsTypes);
 }

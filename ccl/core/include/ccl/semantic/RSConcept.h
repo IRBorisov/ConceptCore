@@ -16,10 +16,19 @@ struct RSConcept {
   std::string definition{};
   std::string convention{};
 
-  explicit RSConcept(const EntityUID entity, std::string alias, const CstType type = CstType::base,
-                     std::string definition = {}, std::string convention = {}) noexcept
-    : uid{ entity }, alias{ std::move(alias) }, type{ type },
-    definition{ std::move(definition) }, convention{ std::move(convention) } {}
+  explicit RSConcept(
+    const EntityUID entity,
+    std::string alias,
+    const CstType type = CstType::base,
+    std::string definition = {},
+    std::string convention = {}
+  ) noexcept :
+    uid{ entity },
+    alias{ std::move(alias) },
+    type{ type },
+    definition{ std::move(definition) },
+    convention{ std::move(convention) }
+  {}
 
   RSConcept() = default;
 

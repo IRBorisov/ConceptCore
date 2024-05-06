@@ -17,17 +17,20 @@ bool EquationOptions::IsEqualTo(const Options& opt2) const {
 bool EquationOptions::SwapKeyVal(const EntityUID key) {
   if (!ContainsKey(key)) {
     return false;
-  } else if (const auto val = translation(key); ContainsKey(translation(key))) {
-    return false;
-  } else {
-    Equation props = properties[key];
-    if (props.mode != Equation::Mode::createNew) {
-      props.mode = props.mode == Equation::Mode::keepHier ? Equation::Mode::keepDel : Equation::Mode::keepHier;
-    }
-    Erase(key);
-    Insert(val, key, props);
-    return true;
   }
+  const auto newKey = translation(key);
+  if (ContainsKey(newKey)) {
+    return false;
+  }
+
+  Equation props = properties[key];
+  if (props.mode != Equation::Mode::createNew) {
+    props.mode = props.mode == Equation::Mode::keepHier ? Equation::Mode::keepDel : Equation::Mode::keepHier;
+  }
+  Erase(key);
+  const auto newValue = key;
+  Insert(newKey, newValue, props);
+  return true;
 }
 
 const Equation& EquationOptions::PropsFor(const EntityUID key) const {

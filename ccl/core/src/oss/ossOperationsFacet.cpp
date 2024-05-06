@@ -216,9 +216,12 @@ ops::Result ossOperationsFacet::CreateNewResult(const PictID pid) {
   return opResult;
 }
 
-bool ossOperationsFacet::SaveOperationResult(const PictID pid, 
-                                             const EntityTranslation& old2New, 
-                                             ops::Result&& opResult) {
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
+bool ossOperationsFacet::SaveOperationResult(
+  const PictID pid,
+  const EntityTranslation& old2New,
+  ops::Result&& opResult
+) {
   auto& opHandle = operations.at(pid);
   assert(opHandle != nullptr);
   const auto guard = core.DndGuard();

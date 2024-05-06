@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ccl/rslang/Interpreter.h"
 
 #include <optional>

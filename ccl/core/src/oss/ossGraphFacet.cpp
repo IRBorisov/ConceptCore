@@ -119,7 +119,7 @@ std::optional<size_t> ossGraphFacet::FindItemIndex(const PictID item) const {
 }
 
 size_t ossGraphFacet::InsertKeyValue(const PictID item) {
-  graph.emplace_back(std::vector<size_t>{});
+  graph.emplace_back();
   items.emplace_back(item);
   return size(items) - 1U;
 }

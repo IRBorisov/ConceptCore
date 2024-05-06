@@ -298,7 +298,7 @@ CGraph::ItemsGroup CGraph::GetAllLoopsItems() const {
       }
     }
     if (size(component) != 1 || HasEdge(index, index)) {
-      result.push_back({});
+      result.emplace_back();
       result.back().reserve(size(component));
       for (const auto item : component) {
         result.back().emplace(graph[item].uid);

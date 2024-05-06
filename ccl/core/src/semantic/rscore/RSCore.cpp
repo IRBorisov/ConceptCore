@@ -87,6 +87,7 @@ EntityUID RSCore::Emplace(const CstType type, const std::string& definition) {
   return newID.uid;
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 EntityUID RSCore::Insert(ConceptRecord&& cst) {
   RSConcept newRS{cst.uid, cst.alias, cst.type, std::move(cst.rs), std::move(cst.convention) };
   TextConcept newText{cst.uid, cst.alias, std::move(cst.term), std::move(cst.definition) };
@@ -213,6 +214,7 @@ VectorOfEntities RSCore::InsertCopy(const std::vector<ConceptRecord>& input) {
   return result;
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 EntityUID RSCore::Load(ConceptRecord&& cst) {
   RSConcept newRS{ cst.uid, cst.alias, cst.type, std::move(cst.rs), std::move(cst.convention) };
   TextConcept newText{ cst.uid, cst.alias, std::move(cst.term), std::move(cst.definition) };

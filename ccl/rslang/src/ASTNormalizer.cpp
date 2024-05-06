@@ -92,7 +92,7 @@ std::string Normalizer::CreateTupleName(const SyntaxTree::Node& root) {
   std::stack<const SyntaxTree::Node*> nodeStack{};
   std::stack<std::vector<Index>> pathStack{};
   nodeStack.push(&root);
-  pathStack.push({});
+  pathStack.emplace();
   while (!std::empty(nodeStack)) {
     auto curPath = pathStack.top();
     pathStack.pop();

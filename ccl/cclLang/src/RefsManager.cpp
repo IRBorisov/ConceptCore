@@ -160,7 +160,7 @@ std::string RefsManager::OutputRefs(const std::string& normStr, const StrRange s
   auto finish = subRange.finish;
   for (const auto& ref : refs) {
     const auto intersection = subRange.Intersect(ref.position);
-    if (!intersection.has_value() || intersection->length() == 0) {
+    if (!intersection.has_value() || intersection->empty()) {
       if (subRange.IsBefore(ref.position)) {
         break;
       }

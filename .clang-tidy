@@ -1,40 +1,44 @@
 Checks: "*,\
+ -altera-id-dependent-backward-branch,\
  -altera-struct-pack-align,\
  -altera-unroll-loops,\
- -altera-id-dependent-backward-branch,\
- -llvmlibc-callee-namespace,\
- -llvmlibc-restrict-system-libc-headers,\
- -llvmlibc-implementation-in-namespace,\
- -llvmlibc-inline-function-decl,\
+ -bugprone-branch-clone,\
+ -bugprone-easily-swappable-parameters,\
+ -bugprone-suspicious-include,\
+ -bugprone-exception-escape,\
+ -cppcoreguidelines-avoid-const-or-ref-data-members,\
+ -cppcoreguidelines-avoid-do-while,\
+ -cppcoreguidelines-non-private-member-variables-in-classes,\
+ -cppcoreguidelines-prefer-member-initializer,\
+ -cppcoreguidelines-special-member-functions,\
+ -fuchsia-default-arguments,\
+ -fuchsia-default-arguments-calls,\
+ -fuchsia-default-arguments-declarations,\
+ -fuchsia-multiple-inheritance,\
+ -fuchsia-overloaded-operator,\
+ -fuchsia-statically-constructed-objects,\
+ -fuchsia-trailing-return,\
+ -google-global-names-in-headers,\
+ -google-readability-todo,\
+ -google-runtime-references,\
+ -hicpp-special-member-functions,\
  -llvm-else-after-return,\
  -llvm-header-guard,\
  -llvm-include-order,\
- -bugprone-branch-clone,\
- -bugprone-suspicious-include,\
- -bugprone-easily-swappable-parameters,\
+ -llvmlibc-callee-namespace,\
+ -llvmlibc-implementation-in-namespace,\
+ -llvmlibc-inline-function-decl,\
+ -llvmlibc-restrict-system-libc-headers,\
+ -misc-include-cleaner,\
+ -misc-no-recursion,\
+ -misc-non-private-member-variables-in-classes,\
  -modernize-use-trailing-return-type,\
- -hicpp-special-member-functions,\
- -google-runtime-references,\
- -fuchsia-overloaded-operator,\
- -fuchsia-default-arguments,\
- -google-readability-todo,\
- -google-global-names-in-headers,\
- -readability-redundant-access-specifiers,\
- -readability-redundant-member-init,\
- -readability-else-after-return,\
- -readability-implicit-bool-conversion,\
- -readability-use-anyofallof,\
- -readability-identifier-length,\
  -performance-inefficient-string-concatenation,\
  -performance-unnecessary-value-param,\
- -fuchsia-default-arguments-declarations,\
- -fuchsia-trailing-return,\
- -fuchsia-multiple-inheritance,\
- -fuchsia-default-arguments-calls,\
- -misc-non-private-member-variables-in-classes,\
- -misc-no-recursion,\
- -misc-include-cleaner,\
- -cppcoreguidelines-special-member-functions,\
- -cppcoreguidelines-prefer-member-initializer,\
- -cppcoreguidelines-avoid-const-or-ref-data-members,\
- -cppcoreguidelines-non-private-member-variables-in-classes"
+ -readability-else-after-return,\
+ -readability-function-cognitive-complexity,\
+ -readability-identifier-length,\
+ -readability-implicit-bool-conversion,\
+ -readability-redundant-access-specifiers,\
+ -readability-redundant-member-init,\
+ -readability-use-anyofallof"

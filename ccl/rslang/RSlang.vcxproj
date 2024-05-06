@@ -46,7 +46,7 @@
     <ClCompile Include="unity\reflex_unity2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\RSParserImpl.y"/>
+    <None Include="src\RSParserImpl.y" />
     <None Include="src\AsciiLexerImpl.l" />
     <None Include="src\MathLexerImpl.l" />
   </ItemGroup>

@@ -63,7 +63,7 @@ SDCompact::Header SDCompact::CreateHeader(const Typification& type) {
       result.push_back(host.E().baseID); break;
 
     case rslang::StructureType::collection:
-      result.push_back("B"); break;
+      result.emplace_back("B"); break;
 
     case rslang::StructureType::tuple:
       break;

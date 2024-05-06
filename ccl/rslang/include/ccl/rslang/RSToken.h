@@ -18,7 +18,7 @@ enum class Syntax : uint8_t {
 };
 
 //! RS language token types enumeration
-enum class TokenID : uint32_t {
+enum class TokenID : uint32_t { // NOLINT(performance-enum-size)
   // Global, local IDs and literals
   ID_LOCAL = 258,
   ID_GLOBAL,

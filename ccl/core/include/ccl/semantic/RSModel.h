@@ -71,7 +71,7 @@ public:
   void UpdateState();
 
 private:
-  [[nodiscard]] inline bool NotifyAndReturn(const bool result) {
+  [[nodiscard]] bool NotifyAndReturn(const bool result) {
     if (result) {
       NotifyModification();
     }

@@ -223,8 +223,8 @@ std::optional<SyntaxTree::Cursor> FindMinimalNode(SyntaxTree::Cursor root, StrRa
   } else {
     root.MoveToChild(0);
     do {
-      if (const auto result = FindMinimalNode(root, range); 
-          result.has_value()) {
+      const auto result = FindMinimalNode(root, range);
+      if (result.has_value()) {
         return result;
       }
     } while (root.MoveToNextSibling());
