@@ -381,9 +381,9 @@ setexpr
     | setexpr_binary
     | setexpr_generators
     | FUNCTION LS setexpr_enum RS           { $$ = FunctionCall($1, $3, $4); }  
-    | operation_name LP setexpr RPE         { $$ = TextOperator($1, $3, $4); }
+    | text_function LP setexpr RPE          { $$ = TextOperator($1, $3, $4); }
     ;
-operation_name
+text_function
     : BOOL
     | DEBOOL
     | RED
