@@ -19,6 +19,15 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.3] - 2024-05-08
+
+### Changed
+
+- Allow EmptySet to be used as standalone expression. Mostly used in recursion initialization
+- Grammar rules refactoring
+
 ## [0.1.2] - 2024-04-18
 
-Add URLS to package and improve build process
+### Added
+
+- Add URLS to package and improve build process
