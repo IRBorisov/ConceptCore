@@ -41,19 +41,20 @@ Typification operator""_t(const char* input, const size_t /*size*/) {
   static detail::AsciiLexer lexer{};
   static detail::RSParser parser{};
   static EchoTypeEnvironment env{};
-  static TypeAuditor analyse{ env };
+  static TypeAuditor analyser{ env };
+  analyser.SetExepectTypification();
 
   env.Clear();
   if (!parser.Parse(lexer(input).Stream())) {
     assert(false);
     return Typification::Integer();
   } 
-  if (!analyse.CheckType(parser.AST())) {
+  if (!analyser.CheckType(parser.AST())) {
     assert(false);
     return Typification::Integer();
   } 
 
-  const auto& result = analyse.GetType();
+  const auto& result = analyser.GetType();
   if (!std::holds_alternative<Typification>(result)) {
     assert(false);
     return Typification::Integer();

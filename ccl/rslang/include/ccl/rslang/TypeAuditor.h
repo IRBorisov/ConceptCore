@@ -54,6 +54,7 @@ class TypeAuditor final : public ASTVisitor<TypeAuditor> {
   std::vector<size_t> functionArgsID{};
   FunctionArguments functionArgs{};
 
+  bool isTypification{ false };
   types::GuardableBool isArgDeclaration{ false };
   types::GuardableBool isLocalDeclaration{ false };
   types::GuardableBool isFuncDeclaration{ false };
@@ -68,6 +69,7 @@ public:
   [[nodiscard]] bool CheckType(const SyntaxTree& tree);
   [[nodiscard]] const FunctionArguments& GetDeclarationArgs() const noexcept { return functionArgs; }
   [[nodiscard]] const ExpressionType& GetType() const noexcept;
+  void SetExepectTypification(const bool value = true) noexcept;
 
 protected:
   bool ViGlobalDefinition(Cursor iter);
@@ -79,7 +81,7 @@ protected:
   bool ViLocal(Cursor iter);
   bool ViInteger(Cursor /*iter*/) { return VisitAndReturn(Typification::Integer()); }
   bool ViIntegerSet(Cursor /*iter*/) { return VisitAndReturn(Typification::Integer().Bool()); }
-  bool ViEmptySet(Cursor iter);
+  bool ViEmptySet(Cursor /*iter*/);
 
   bool ViLocalBind(Cursor iter);
   bool ViLocalEnum(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }

@@ -31,6 +31,11 @@ const Typification& Typification::Integer() {
   return integers;
 }
 
+const Typification& Typification::EmptySet() {
+  static const auto empty = Typification{ std::string{anyTypificationName} }.Bool();
+  return empty;
+}
+
 std::string Typification::ToString() const noexcept(false) {
   std::string result{};
   std::visit(meta::Overloads{ [&](const auto& val) { result = val.ToString(); }},

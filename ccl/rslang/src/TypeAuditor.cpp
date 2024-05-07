@@ -119,13 +119,25 @@ bool TypeEnv::AreCompatible(const ExpressionType& type1, const ExpressionType& t
 bool TypeEnv::AreCompatible(const Typification& type1, const Typification& type2) const {
   if (type1 == type2) {
     return true;
-  } else if (type1.Structure() != type2.Structure()) {
+  } 
+  
+  const auto struct1 = type1.Structure();
+  const auto struct2 = type2.Structure();
+  
+  if (struct1 == rslang::StructureType::basic && type1.E().baseID == Typification::anyTypificationName) {
+    return true;
+  }
+  if (struct2 == rslang::StructureType::basic && type2.E().baseID == Typification::anyTypificationName) {
+    return true;
+  }
+  if (struct1 != struct2) {
     return false;
   }
-  switch (type1.Structure()) {
+
+  switch (struct1) {
   default:
   case rslang::StructureType::basic: return CommonType(type1, type2) != nullptr;
-  case rslang::StructureType::collection:  return AreCompatible(type1.B().Base(), type2.B().Base());
+  case rslang::StructureType::collection: return AreCompatible(type1.B().Base(), type2.B().Base());
   case rslang::StructureType::tuple: {
     if (type1.T().Arity() != type2.T().Arity()) {
       return false;
@@ -148,7 +160,18 @@ std::optional<Typification> TypeEnv::Merge(const Typification& type1, const Typi
   if (type1.Structure() != type2.Structure()) {
     return std::nullopt;
   }
-  switch (type1.Structure()) {
+
+  const auto struct1 = type1.Structure();
+  const auto struct2 = type2.Structure();
+
+  if (struct1 == rslang::StructureType::basic && type1.E().baseID == Typification::anyTypificationName) {
+    return type2;
+  }
+  if (struct2 == rslang::StructureType::basic && type2.E().baseID == Typification::anyTypificationName) {
+    return type1;
+  }
+
+  switch (struct1) {
   default:
     case rslang::StructureType::basic: {
       const auto* type = CommonType(type1, type2);
@@ -237,6 +260,10 @@ bool TypeAuditor::CheckType(const rslang::SyntaxTree& tree) {
 
 const ExpressionType& TypeAuditor::GetType() const noexcept {
   return currentType;
+}
+
+void TypeAuditor::SetExepectTypification(const bool value) noexcept {
+  isTypification = value;
 }
 
 void TypeAuditor::OnError(const SemanticEID eid, const StrPos position) {
@@ -391,7 +418,7 @@ std::optional<Typification::Substitutes> TypeAuditor::CheckFuncArguments(Cursor 
 bool TypeAuditor::ViGlobal(Cursor iter) {
   const auto& globalName = iter->data.ToText();
   if (iter->id == TokenID::ID_RADICAL) {
-    if (!isFuncDeclaration) {
+    if (!isFuncDeclaration && !isTypification) {
       OnError(
         SemanticEID::radicalUsage,
         iter->pos.start,
@@ -435,9 +462,8 @@ bool TypeAuditor::ViLocal(Cursor iter) {
   }
 }
 
-bool TypeAuditor::ViEmptySet(Cursor iter) {
-  OnError(SemanticEID::emptySetUsage, iter->pos.start);
-  return false;
+bool TypeAuditor::ViEmptySet(Cursor /*iter*/) {
+  return VisitAndReturn(Typification::EmptySet());
 }
 
 bool TypeAuditor::ViLocalBind(Cursor iter) {
@@ -575,11 +601,6 @@ bool TypeAuditor::ViQuantifier(Cursor iter) {
 }
 
 bool TypeAuditor::ViEquals(Cursor iter) {
-  if (iter(1).id == TokenID::LIT_EMPTYSET) {
-    const auto type = ChildTypeDebool(iter, 0, SemanticEID::invalidEqualsEmpty);
-    return type.has_value() && VisitAndReturn(LogicT{});
-  }
-
   const auto test1 = ChildType(iter, 0);
   if (!test1.has_value()) {
     return false;

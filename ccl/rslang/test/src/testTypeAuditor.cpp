@@ -99,6 +99,7 @@ TEST_F(UTTypeAuditor, DefinitionsCorrect) {
   ExpectTypification(R"(X1 \defexpr )", "B(X1)"_t);
   ExpectTypification(R"(D1 \defexpr X1 \union X1)", "B(X1)"_t);
   ExpectLogic(R"(A1 \defexpr 1 \eq 1)");
+  ExpectTypification(R"(D1 \defexpr {})", "B(R0)"_t);
 
   ExpectTypification(R"(S1 \deftype X1)", "X1"_t);
   ExpectTypification(R"(S1 \deftype Z)", "Z"_t);
@@ -110,11 +111,11 @@ TEST_F(UTTypeAuditor, DefinitionsCorrect) {
   EXPECT_EQ(args[0].name, "a");
   EXPECT_EQ(args[0].type, "X1"_t);
 
-  ExpectTypification(R"(F42 \defexpr [a \in R1] {a})", Typification("R1").Bool());
+  ExpectTypification(R"(F42 \defexpr [a \in R1] {a})", "B(R1)"_t);
   const auto& args2 = analyse.GetDeclarationArgs();
   ASSERT_EQ(size(args2), 1U);
   EXPECT_EQ(args2[0].name, "a");
-  EXPECT_EQ(args2[0].type, Typification("R1"));
+  EXPECT_EQ(args2[0].type, "R1"_t);
 
   ExpectTypification(R"(F42 \defexpr [a \in D{ b \in X1 | b \eq b}] {a})", "B(X1)"_t);
   const auto& args3 = analyse.GetDeclarationArgs();
@@ -211,8 +212,8 @@ TEST_F(UTTypeAuditor, LogicCorrect) {
 }
 
 TEST_F(UTTypeAuditor, LogicErrors) {
-  ExpectError(R"(\A a \in X1 a \eq {})", SemanticEID::invalidEqualsEmpty, 12);
-  ExpectError(R"(\A a \in X1*X1 a \eq {})", SemanticEID::invalidEqualsEmpty, 15);
+  ExpectError(R"(\A a \in X1 a \eq {})", SemanticEID::typesNotCompatible, 18);
+  ExpectError(R"(\A a \in X1*X1 a \eq {})", SemanticEID::typesNotCompatible, 21);
 
   ExpectError(R"(\A (a,a) \in S1 pr2(a) \in X1)", SemanticEID::localShadowing, 6);
   ExpectError(R"(\A (a,b) \in X1 1 \eq 1)", SemanticEID::invalidBinding, 4);
@@ -243,6 +244,7 @@ TEST_F(UTTypeAuditor, ConstructorsCorrect) {
   ExpectTypification(R"(R{a \assign S1 | a \union a})", "B(X1*X1)"_t);
   ExpectTypification(R"(R{a \assign 1 | a \ls 10 | a \plus 1})", "Z"_t);
   ExpectTypification(R"(R{a \assign 1 | a \ls S4 | a \plus S4})", "C1"_t);
+  ExpectTypification(R"(R{a \assign {} | a \union {S4}})", "B(C1)"_t);
 
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a})", "B(X1*X1)"_t);
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a; 1 \eq 1})", "B(X1*X1)"_t);
@@ -261,6 +263,7 @@ TEST_F(UTTypeAuditor, ConstructorsErrors) {
   ExpectError(R"({S6, 1})", SemanticEID::invalidEnumeration, 5);
 
   ExpectError(R"(R{a \assign S1 | {a}})", SemanticEID::typesNotEqual, 17);
+  ExpectError(R"(R{a \assign {} | a \union S4})", SemanticEID::invalidTypeOperation, 26);
   ExpectError(R"(\A a \in S1 R{(a1, a2) \assign a | a1} \eq a)", SemanticEID::typesNotEqual, 35);
 
   ExpectError(R"(I{(a, b) | a \from X1; b \assign {a}; a \noteq b})", SemanticEID::typesNotCompatible, 47);
@@ -308,6 +311,9 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   SetupConstants();
 
   ExpectTypification(R"(X1 \union X1)", "B(X1)"_t);
+  ExpectTypification(R"({} \union {})", "B(R0)"_t);
+  ExpectTypification(R"(X1 \union {})", "B(X1)"_t);
+  ExpectTypification(R"({} \union X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \setminus X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \intersect X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \symmdiff X1)", "B(X1)"_t);
@@ -333,7 +339,6 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
 TEST_F(UTTypeAuditor, TypedOperationsErrors) {
   SetupConstants();
 
-  ExpectError(R"(X1 \union {})", SemanticEID::emptySetUsage, 10);
   ExpectError(R"(X1 \union S2)", SemanticEID::typesNotEqual, 10);
   ExpectError(R"(S2 \union X1)", SemanticEID::typesNotEqual, 10);
 
@@ -410,10 +415,10 @@ TEST_F(UTTypeAuditor, TemplatedFunctions) {
   ExpectTypification(R"(F2[{S4}, 1])", "B(C1)"_t);
   ExpectError(R"(F2[X1, B(X1)])", SemanticEID::invalidArgumentType, 7);
 
-  env.Insert("F3", Typification::Tuple({ Typification("R1"), Typification("R2") }));
+  env.Insert("F3", "R1*R2"_t);
   FunctionArguments f3Args{};
-  f3Args.emplace_back("a", Typification("R1").Bool());
-  f3Args.emplace_back("b", Typification::Tuple({ Typification("R1"), Typification("R2") }).Bool());
+  f3Args.emplace_back("a", "B(R1)"_t);
+  f3Args.emplace_back("b", "B(R1*R2)"_t);
   env.data["F3"].arguments = f3Args;
 
   ExpectTypification(R"(F3[X1, X1*B(X1)])", "X1*B(X1)"_t);
@@ -423,14 +428,14 @@ TEST_F(UTTypeAuditor, TemplatedFunctions) {
 }
 
 TEST_F(UTTypeAuditor, TemplatedFunctionsNesting) {
-  env.Insert("F2", Typification("R1").Bool());
+  env.Insert("F2", "B(R1)"_t);
   FunctionArguments f2Args{};
-  f2Args.emplace_back(TypedID{ "a", Typification("R1") });
-  f2Args.emplace_back(TypedID{ "b", Typification::Tuple({ Typification("R1"), Typification("R2") }) });
+  f2Args.emplace_back(TypedID{ "a", "R1"_t });
+  f2Args.emplace_back(TypedID{ "b", "R1*R2"_t });
   env.data["F2"].arguments = f2Args;
 
-  ExpectTypification(R"(F3 \defexpr [a \in R2, b \in R2*R1] F2[a, b])", Typification("R2").Bool());
-  ExpectTypification(R"(F3 \defexpr [a \in R3, b \in R3*R4] F2[a, b])", Typification("R3").Bool());
+  ExpectTypification(R"(F3 \defexpr [a \in R2, b \in R2*R1] F2[a, b])", "B(R2)"_t);
+  ExpectTypification(R"(F3 \defexpr [a \in R3, b \in R3*R4] F2[a, b])", "B(R3)"_t);
   ExpectError(R"(F3 \defexpr [a \in R2, b \in R1*R2] F2[a, b])", SemanticEID::invalidArgumentType, 42);
   ExpectError(R"(F3 \defexpr [a \in R3, b \in R1*R2] F2[a, b])", SemanticEID::invalidArgumentType, 42);
 }

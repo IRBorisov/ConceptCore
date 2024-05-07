@@ -74,6 +74,7 @@ class Typification : public Structured<EchelonBase, EchelonTuple, EchelonBool> {
 public:
   static constexpr Index PR_START = 1;
   static constexpr std::string_view integerTypeName = "Z";
+  static constexpr std::string_view anyTypificationName = "R0";
 
 private:
   using Structured::Structured;
@@ -87,6 +88,7 @@ public:
 
   [[nodiscard]] static Typification Tuple(std::vector<Typification> factors);
   [[nodiscard]] static const Typification& Integer();
+  [[nodiscard]] static const Typification& EmptySet();
 
 public:
   using Substitutes = std::unordered_map<std::string, Typification>;
