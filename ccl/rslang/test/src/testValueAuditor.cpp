@@ -115,6 +115,7 @@ TEST_F(UTValueAuditor, LogicErrors) {
 }
 
 TEST_F(UTValueAuditor, TypedCorrect) {
+  ExpectClass(R"({})", ValueClass::value);
   ExpectClass(R"(X1)", ValueClass::value);
   ExpectClass(R"(D2)", ValueClass::props);
 

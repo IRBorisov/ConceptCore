@@ -229,13 +229,16 @@ TEST_F(UTASTInterpreter, TypedPredicates) {
 }
 
 TEST_F(UTASTInterpreter, TypedBasics) {
+  ExpectValue(R"({})", Factory::EmptySet());
   ExpectValue(R"(X1)", data.at("X1"));
 
   ExpectValue(R"(X1 \union X1)", data.at("X1"));
+  ExpectValue(R"(X1 \union {})", data.at("X1"));
   ExpectValue(R"(X1 \union S1)", data.at("X1"));
   ExpectValue(R"(S1 \union X1)", data.at("X1"));
 
   ExpectValue(R"(X1 \intersect X1)", data.at("X1"));
+  ExpectValue(R"(X1 \intersect {})", Factory::EmptySet());
   ExpectValue(R"(X1 \intersect S1)", data.at("S1"));
   ExpectValue(R"(S1 \intersect X1)", data.at("S1"));
 
@@ -247,6 +250,7 @@ TEST_F(UTASTInterpreter, TypedBasics) {
   ExpectValue(R"(X1 \symmdiff S1)", Factory::Singleton(Factory::Val(2)));
   ExpectValue(R"(S1 \symmdiff X1)", Factory::Singleton(Factory::Val(2)));
 
+  ExpectValue(R"(X1*{})", Factory::EmptySet());
   ExpectValue(R"(X1*X2)", Factory::Decartian({ data.at("X1"),  data.at("X2") }));
   ExpectValue(R"(X1*X2*X1)", Factory::Decartian({ data.at("X1"),  data.at("X2"), data.at("X1") }));
   ExpectValue(R"(X1*(X2 \setminus X2))", Factory::EmptySet());
@@ -295,6 +299,7 @@ TEST_F(UTASTInterpreter, TypedExpressions) {
   ExpectValue(R"(I{a | a \from X1})", data.at("X1"));
 
   ExpectValue(R"(R{a \assign X1 | a \setminus a})", Factory::EmptySet());
+  ExpectValue(R"(R{a \assign {} | a \union X1})", data.at("X1"));
   ExpectValue(R"(R{a \assign X1 \setminus X1 | a \union X1})", data.at("X1"));
 }
 
