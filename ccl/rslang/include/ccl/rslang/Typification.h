@@ -93,6 +93,8 @@ public:
 public:
   using Substitutes = std::unordered_map<std::string, Typification>;
 
+  [[nodiscard]] bool IsAnyType() const noexcept;
+
   Typification& ApplyBool();
   [[nodiscard]] Typification Bool() const;
 

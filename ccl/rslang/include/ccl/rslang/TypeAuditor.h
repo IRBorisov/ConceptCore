@@ -58,6 +58,7 @@ class TypeAuditor final : public ASTVisitor<TypeAuditor> {
   types::GuardableBool isArgDeclaration{ false };
   types::GuardableBool isLocalDeclaration{ false };
   types::GuardableBool isFuncDeclaration{ false };
+  types::GuardableBool noWarnings{ false };
 
 public:
   explicit TypeAuditor(const TypeContext& context) noexcept
@@ -79,21 +80,21 @@ protected:
 
   bool ViGlobal(Cursor iter);
   bool ViLocal(Cursor iter);
-  bool ViInteger(Cursor /*iter*/) { return VisitAndReturn(Typification::Integer()); }
-  bool ViIntegerSet(Cursor /*iter*/) { return VisitAndReturn(Typification::Integer().Bool()); }
+  bool ViInteger(Cursor /*iter*/) { return SetCurrent(Typification::Integer()); }
+  bool ViIntegerSet(Cursor /*iter*/) { return SetCurrent(Typification::Integer().Bool()); }
   bool ViEmptySet(Cursor /*iter*/);
 
   bool ViLocalBind(Cursor iter);
-  bool ViLocalEnum(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }
-  bool ViArgumentsEnum(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }
+  bool ViLocalEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
+  bool ViArgumentsEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViArgument(Cursor iter);
 
   bool ViArithmetic(Cursor iter);
   bool ViCard(Cursor iter);
 
   bool ViQuantifier(Cursor iter);
-  bool ViNegation(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }
-  bool ViLogicBinary(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }
+  bool ViNegation(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
+  bool ViLogicBinary(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViEquals(Cursor iter);
   bool ViOrdering(Cursor iter);
   bool ViTypedPredicate(Cursor iter);
@@ -105,7 +106,7 @@ protected:
   bool ViImperative(Cursor iter);
   bool ViImpDeclare(Cursor iter);
   bool ViImpAssign(Cursor iter);
-  bool ViImpCheck(Cursor iter) { return VisitAllAndReturn(iter, LogicT{}); }
+  bool ViImpCheck(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViRecursion(Cursor iter);
 
   bool ViTuple(Cursor iter);
@@ -124,8 +125,8 @@ private:
 
   [[nodiscard]] bool VisitChildDeclaration(const Cursor& iter, Index index, const Typification& domain);
 
-  [[nodiscard]] bool VisitAndReturn(ExpressionType type) noexcept;
-  [[nodiscard]] bool VisitAllAndReturn(Cursor iter, const ExpressionType& type);
+  [[nodiscard]] bool SetCurrent(ExpressionType type) noexcept;
+  [[nodiscard]] bool VisitAllAndSetCurrent(Cursor iter, const ExpressionType& type);
 
   [[nodiscard]] std::optional<ExpressionType> ChildType(Cursor iter, Index index);
   [[nodiscard]] std::optional<Typification> ChildTypeDebool(Cursor iter, Index index,  SemanticEID eid);
@@ -139,7 +140,9 @@ private:
     CheckFuncArguments(Cursor iter, const std::string& funcName);
 
   [[nodiscard]] const Typification* GetLocalTypification(const std::string& name, StrPos pos);
-  [[nodiscard]] bool AddLocalVar(const std::string& name, const Typification& type, StrPos pos);
+  [[nodiscard]] bool AddLocalVariable(const std::string& name, const Typification& type, StrPos pos);
+  void ClearLocalVariables();
+
   void StartScope() noexcept;
   void EndScope(StrPos pos);
 };

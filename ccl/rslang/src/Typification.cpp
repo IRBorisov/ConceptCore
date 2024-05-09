@@ -7,6 +7,10 @@
 
 namespace ccl::rslang {
 
+bool Typification::IsAnyType() const noexcept {
+  return IsElement() && E().baseID == anyTypificationName;
+}
+
 Typification& Typification::ApplyBool() {
   state = EchelonBool(*this);
   return *this;

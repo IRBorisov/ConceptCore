@@ -106,8 +106,8 @@ private:
   void OnError(ValueEID eid, StrPos position);
   void OnError(ValueEID eid, StrPos position, std::string param);
 
-  [[nodiscard]] bool VisitAndReturn(ExpressionValue&& value) noexcept;
-  [[nodiscard]] bool VisitAndReturn(const ExpressionValue& value) noexcept;
+  [[nodiscard]] bool SetCurrent(ExpressionValue&& value) noexcept;
+  [[nodiscard]] bool SetCurrent(const ExpressionValue& value) noexcept;
   [[nodiscard]] std::optional<ExpressionValue> EvaluateChild(Cursor iter, Index index);
 
   [[nodiscard]] std::optional<object::StructuredData> ExtractDomain(Cursor iter);

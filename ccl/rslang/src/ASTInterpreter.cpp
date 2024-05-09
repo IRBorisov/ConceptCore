@@ -215,12 +215,12 @@ void ASTInterpreter::Clear() noexcept {
   countCriticalErrors = 0;
 }
 
-bool ASTInterpreter::VisitAndReturn(ExpressionValue&& value) noexcept {
+bool ASTInterpreter::SetCurrent(ExpressionValue&& value) noexcept {
   curValue = std::move(value);
   return true;
 }
 
-bool ASTInterpreter::VisitAndReturn(const ExpressionValue& value) noexcept {
+bool ASTInterpreter::SetCurrent(const ExpressionValue& value) noexcept {
   curValue = value;
   return true;
 }
@@ -230,11 +230,11 @@ bool ASTInterpreter::ViGlobalDefinition(Cursor iter) {
 }
 
 bool ASTInterpreter::ViLocal(Cursor iter) {
-  return VisitAndReturn(idsData[*begin(nodeVars[iter.get()])]);
+  return SetCurrent(idsData[*begin(nodeVars[iter.get()])]);
 }
 
 bool ASTInterpreter::ViInteger(Cursor iter) {
-  return VisitAndReturn(Factory::Val(iter->data.ToInt()));
+  return SetCurrent(Factory::Val(iter->data.ToInt()));
 }
 
 bool ASTInterpreter::ViIntegerSet(Cursor iter) {
@@ -243,7 +243,7 @@ bool ASTInterpreter::ViIntegerSet(Cursor iter) {
 }
 
 bool ASTInterpreter::ViEmptySet(Cursor /*iter*/) {
-  return VisitAndReturn(Factory::EmptySet());
+  return SetCurrent(Factory::EmptySet());
 }
 
 bool ASTInterpreter::ViArithmetic(Cursor iter) {
@@ -260,11 +260,11 @@ bool ASTInterpreter::ViArithmetic(Cursor iter) {
   switch (iter->id) {
   default:
   case TokenID::PLUS:
-    return VisitAndReturn(Factory::Val(op1 + op2));
+    return SetCurrent(Factory::Val(op1 + op2));
   case TokenID::MINUS:
-    return VisitAndReturn(Factory::Val(op1 - op2));
+    return SetCurrent(Factory::Val(op1 - op2));
   case TokenID::MULTIPLY:
-    return VisitAndReturn(Factory::Val(op1 * op2));
+    return SetCurrent(Factory::Val(op1 * op2));
   }
 }
 
@@ -278,7 +278,7 @@ bool ASTInterpreter::ViCard(Cursor iter) {
     OnError(ValueEID::typedOverflow, iter->pos.start, std::to_string(StructuredData::SET_INFINITY));
     return false;
   }
-  return VisitAndReturn(Factory::Val(size));
+  return SetCurrent(Factory::Val(size));
 }
 
 bool ASTInterpreter::ViQuantifier(Cursor iter) {
@@ -298,10 +298,10 @@ bool ASTInterpreter::ViQuantifier(Cursor iter) {
     if (const auto iterationValue = EvaluateChild(iter, 2); !iterationValue.has_value()) {
       return false;
     } else if (std::get<bool>(iterationValue.value()) != isUniversal) {
-      return VisitAndReturn(!isUniversal);
+      return SetCurrent(!isUniversal);
     }
   }
-  return VisitAndReturn(isUniversal);
+  return SetCurrent(isUniversal);
 }
 
 std::optional<StructuredData> ASTInterpreter::ExtractDomain(Cursor iter) {
@@ -316,7 +316,7 @@ bool ASTInterpreter::ViNegation(Cursor iter) {
   if (!childValue.has_value()) {
     return false;
   }
-  return VisitAndReturn(!std::get<bool>(childValue.value()));
+  return SetCurrent(!std::get<bool>(childValue.value()));
 }
 
 bool ASTInterpreter::ViLogicBinary(Cursor iter) {
@@ -347,9 +347,9 @@ bool ASTInterpreter::ViLogicBinary(Cursor iter) {
 bool ASTInterpreter::TryEvaluateFromFirstArg(TokenID operation, bool firstArgValue) noexcept {
   if ((operation == TokenID::AND && !firstArgValue) ||
     (operation == TokenID::OR && firstArgValue)) {
-    return VisitAndReturn(firstArgValue);
+    return SetCurrent(firstArgValue);
   } else if (operation == TokenID::IMPLICATION && !firstArgValue) {
-    return VisitAndReturn(!firstArgValue);
+    return SetCurrent(!firstArgValue);
   } else {
     return false;
   }
@@ -364,7 +364,7 @@ bool ASTInterpreter::ViEquals(Cursor iter) {
   if (!val2.has_value()) {
     return false;
   }
-  return VisitAndReturn((val1 == val2) != (iter->id == TokenID::NOTEQUAL));
+  return SetCurrent((val1 == val2) != (iter->id == TokenID::NOTEQUAL));
 }
 
 bool ASTInterpreter::ViOrdering(Cursor iter) {
@@ -380,10 +380,10 @@ bool ASTInterpreter::ViOrdering(Cursor iter) {
   const auto op2 = std::get<StructuredData>(val2.value()).E().Value();
   switch (iter->id) {
     default:
-    case TokenID::GREATER: return VisitAndReturn(op1 > op2);
-    case TokenID::LESSER: return VisitAndReturn(op1 < op2);
-    case TokenID::GREATER_OR_EQ: return VisitAndReturn(op1 >= op2);
-    case TokenID::LESSER_OR_EQ: return VisitAndReturn(op1 <= op2);
+    case TokenID::GREATER: return SetCurrent(op1 > op2);
+    case TokenID::LESSER: return SetCurrent(op1 < op2);
+    case TokenID::GREATER_OR_EQ: return SetCurrent(op1 >= op2);
+    case TokenID::LESSER_OR_EQ: return SetCurrent(op1 <= op2);
   }
 }
 
@@ -408,7 +408,7 @@ bool ASTInterpreter::ViDeclarative(Cursor iter) {
       result.ModifyB().AddElement(child);
     }
   }
-  return VisitAndReturn(std::move(result));
+  return SetCurrent(std::move(result));
 }
 
 bool ASTInterpreter::ViImperative(const Cursor iter) {
@@ -416,7 +416,7 @@ bool ASTInterpreter::ViImperative(const Cursor iter) {
   if (!eval.Evaluate()) {
     return false;
   }
-  return VisitAndReturn(eval.value);
+  return SetCurrent(eval.value);
 }
 
 bool ASTInterpreter::ViRecursion(Cursor iter) {
@@ -448,7 +448,7 @@ bool ASTInterpreter::ViRecursion(Cursor iter) {
     }
     current = std::get<StructuredData>(curValue);
   } while (idsData[varID] != current);
-  return VisitAndReturn(std::move(current));
+  return SetCurrent(std::move(current));
 }
 
 bool ASTInterpreter::ViDecart(Cursor iter) {
@@ -486,7 +486,7 @@ bool ASTInterpreter::ViBoolean(Cursor iter) {
     );
     return false;
   }
-  return VisitAndReturn(Factory::Boolean(value));
+  return SetCurrent(Factory::Boolean(value));
 }
 
 bool ASTInterpreter::ViTuple(Cursor iter) {
@@ -498,7 +498,7 @@ bool ASTInterpreter::ViTuple(Cursor iter) {
     }
     args.emplace_back(std::get<StructuredData>(childValue.value()));
   }
-  return VisitAndReturn(Factory::Tuple(args));
+  return SetCurrent(Factory::Tuple(args));
 }
 
 bool ASTInterpreter::ViSetEnum(Cursor iter) {
@@ -510,7 +510,7 @@ bool ASTInterpreter::ViSetEnum(Cursor iter) {
     }
     args.emplace_back(std::get<StructuredData>(childValue.value()));
   }
-  return VisitAndReturn(Factory::Set(args));
+  return SetCurrent(Factory::Set(args));
 }
 
 bool ASTInterpreter::ViBool(Cursor iter) {
@@ -518,7 +518,7 @@ bool ASTInterpreter::ViBool(Cursor iter) {
   if (!childValue.has_value()) {
     return false;
   }
-  return VisitAndReturn(Factory::Singleton(std::get<StructuredData>(childValue.value())));
+  return SetCurrent(Factory::Singleton(std::get<StructuredData>(childValue.value())));
 }
 
 bool ASTInterpreter::ViTypedBinary(Cursor iter) {
@@ -535,16 +535,16 @@ bool ASTInterpreter::ViTypedBinary(Cursor iter) {
   const auto& op2 = std::get<StructuredData>(val2.value());
   switch (iter->id) {
     default:
-    case TokenID::UNION: return VisitAndReturn(op1.B().Union(op2.B()));
-    case TokenID::INTERSECTION: return VisitAndReturn(op1.B().Intersect(op2.B()));
-    case TokenID::SET_MINUS: return VisitAndReturn(op1.B().Diff(op2.B()));
-    case TokenID::SYMMINUS: return VisitAndReturn(op1.B().SymDiff(op2.B()));
+    case TokenID::UNION: return SetCurrent(op1.B().Union(op2.B()));
+    case TokenID::INTERSECTION: return SetCurrent(op1.B().Intersect(op2.B()));
+    case TokenID::SET_MINUS: return SetCurrent(op1.B().Diff(op2.B()));
+    case TokenID::SYMMINUS: return SetCurrent(op1.B().SymDiff(op2.B()));
 
-    case TokenID::IN: return VisitAndReturn(op2.B().Contains(op1));
-    case TokenID::NOTIN: return VisitAndReturn(!op2.B().Contains(op1));
-    case TokenID::SUBSET: return VisitAndReturn(!(op1 == op2) && op1.B().IsSubsetOrEq(op2.B()));
-    case TokenID::NOTSUBSET: return VisitAndReturn(op1 == op2 || !op1.B().IsSubsetOrEq(op2.B()));
-    case TokenID::SUBSET_OR_EQ: return VisitAndReturn(op1.B().IsSubsetOrEq(op2.B()));
+    case TokenID::IN: return SetCurrent(op2.B().Contains(op1));
+    case TokenID::NOTIN: return SetCurrent(!op2.B().Contains(op1));
+    case TokenID::SUBSET: return SetCurrent(!(op1 == op2) && op1.B().IsSubsetOrEq(op2.B()));
+    case TokenID::NOTSUBSET: return SetCurrent(op1 == op2 || !op1.B().IsSubsetOrEq(op2.B()));
+    case TokenID::SUBSET_OR_EQ: return SetCurrent(op1.B().IsSubsetOrEq(op2.B()));
   }
 }
 
@@ -553,7 +553,7 @@ bool ASTInterpreter::ViProjectSet(Cursor iter) {
   if (!childValue.has_value()) {
     return false;
   }
-  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Projection(iter->data.ToTuple()));
+  return SetCurrent(std::get<StructuredData>(childValue.value()).B().Projection(iter->data.ToTuple()));
 }
 
 bool ASTInterpreter::ViProjectTuple(Cursor iter) {
@@ -568,7 +568,7 @@ bool ASTInterpreter::ViProjectTuple(Cursor iter) {
   for (const auto index : indicies) {
     components.emplace_back(std::get<StructuredData>(childValue.value()).T().Component(index));
   }
-  return VisitAndReturn(Factory::Tuple(components));
+  return SetCurrent(Factory::Tuple(components));
 }
 
 bool ASTInterpreter::ViFilter(Cursor iter) {
@@ -578,7 +578,7 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
   }
   const auto& argument = std::get<StructuredData>(argumentValue.value());
   if (argument.B().IsEmpty()) {
-    return VisitAndReturn(Factory::EmptySet());
+    return SetCurrent(Factory::EmptySet());
   }
 
   const auto& indicies = iter->data.ToTuple();
@@ -590,7 +590,7 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
       return false;
     } 
     if (const auto val = std::get<StructuredData>(param.value()); val.B().IsEmpty()) {
-      return VisitAndReturn(Factory::EmptySet());
+      return SetCurrent(Factory::EmptySet());
     } else {
       params.emplace_back(val);
     }
@@ -609,7 +609,7 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
       result.ModifyB().AddElement(element);
     }
   }
-  return VisitAndReturn(std::move(result));
+  return SetCurrent(std::move(result));
 }
 
 bool ASTInterpreter::ViReduce(Cursor iter) {
@@ -617,7 +617,7 @@ bool ASTInterpreter::ViReduce(Cursor iter) {
   if (!childValue.has_value()) {
     return false;
   }
-  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Reduce());
+  return SetCurrent(std::get<StructuredData>(childValue.value()).B().Reduce());
 }
 
 bool ASTInterpreter::ViDebool(Cursor iter) {
@@ -630,7 +630,7 @@ bool ASTInterpreter::ViDebool(Cursor iter) {
     OnError(ValueEID::invalidDebool, iter->pos.start);
     return false;
   }
-  return VisitAndReturn(std::get<StructuredData>(childValue.value()).B().Debool());
+  return SetCurrent(std::get<StructuredData>(childValue.value()).B().Debool());
 }
 
 std::optional<ExpressionValue> ASTInterpreter::EvaluateChild(Cursor iter, const Index index) {

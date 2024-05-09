@@ -30,6 +30,24 @@ TEST_F(UTTypification, Basic) {
   EXPECT_TRUE(newBasic.IsElement());
   EXPECT_FALSE(newBasic.IsCollection());
   EXPECT_FALSE(newBasic.IsTuple());
+  EXPECT_FALSE(newBasic.IsAnyType());
+}
+
+TEST_F(UTTypification, EmptySet) {
+  auto empty = Typification::EmptySet();
+  EXPECT_EQ(empty, Typification::EmptySet());
+  EXPECT_FALSE(empty.IsElement());
+  EXPECT_FALSE(empty.IsTuple());
+  EXPECT_TRUE(empty.IsCollection());
+  EXPECT_FALSE(empty.IsAnyType());
+  EXPECT_EQ(empty.Structure(), StructureType::collection);
+
+  const auto& base = empty.B().Base();
+  EXPECT_TRUE(base.IsElement());
+  EXPECT_FALSE(base.IsCollection());
+  EXPECT_FALSE(base.IsCollection());
+  EXPECT_TRUE(base.IsAnyType());
+  EXPECT_EQ(base.Structure(), StructureType::basic);
 }
 
 TEST_F(UTTypification, Tuple) {
@@ -37,6 +55,7 @@ TEST_F(UTTypification, Tuple) {
   EXPECT_FALSE(tuple.IsElement());
   EXPECT_FALSE(tuple.IsCollection());
   EXPECT_TRUE(tuple.IsTuple());
+  EXPECT_FALSE(tuple.IsAnyType());
   EXPECT_EQ(tuple.T().Arity(), 2);
 
   tuple = Typification::Tuple({ basic });
@@ -74,6 +93,7 @@ TEST_F(UTTypification, Bool) {
   EXPECT_FALSE(sBool.IsElement());
   EXPECT_TRUE(sBool.IsCollection());
   EXPECT_FALSE(sBool.IsTuple());
+  EXPECT_FALSE(sBool.IsAnyType());
 }
 
 TEST_F(UTTypification, ElementTypification) {

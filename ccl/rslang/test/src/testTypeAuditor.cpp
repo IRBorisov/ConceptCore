@@ -227,6 +227,9 @@ TEST_F(UTTypeAuditor, ConstructorsCorrect) {
   SetupConstants();
 
   ExpectTypification(R"({X1, X1})", "BB(X1)"_t);
+  ExpectTypification(R"({{}, X1})", "BB(X1)"_t);
+  ExpectTypification(R"({X1, {}})", "BB(X1)"_t);
+  ExpectTypification(R"({{}})", "BB(R0)"_t);
   ExpectTypification(R"({1})", "B(Z)"_t);
   ExpectTypification(R"({1, card(X1)})", "B(Z)"_t);
   ExpectTypification(R"({S4, 1})", "B(C1)"_t);
@@ -245,6 +248,9 @@ TEST_F(UTTypeAuditor, ConstructorsCorrect) {
   ExpectTypification(R"(R{a \assign 1 | a \ls 10 | a \plus 1})", "Z"_t);
   ExpectTypification(R"(R{a \assign 1 | a \ls S4 | a \plus S4})", "C1"_t);
   ExpectTypification(R"(R{a \assign {} | a \union {S4}})", "B(C1)"_t);
+  ExpectTypification(R"(R{a \assign {} | Pr1(a) \eq Pr2(a) | a \union (X1*X1)})", "B(X1*X1)"_t);
+  ExpectTypification(R"(R{a \assign {} | a \union D{x \in X1 | x \eq x}})", "B(X1)"_t);
+  ExpectTypification(R"(R{a \assign {} | red(a) \eq {} | a \union {X1}})", "BB(X1)"_t);
 
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a})", "B(X1*X1)"_t);
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a; 1 \eq 1})", "B(X1*X1)"_t);
@@ -264,6 +270,8 @@ TEST_F(UTTypeAuditor, ConstructorsErrors) {
 
   ExpectError(R"(R{a \assign S1 | {a}})", SemanticEID::typesNotEqual, 17);
   ExpectError(R"(R{a \assign {} | a \union S4})", SemanticEID::invalidTypeOperation, 26);
+  ExpectError(R"(R{a \assign {} | Pr1(a) \eq Pr2(a) | a \union X1})", SemanticEID::invalidProjectionSet, 21);
+  ExpectError(R"(R{a \assign {} | red(a) \eq {} | a \union (X1*X1)})", SemanticEID::invalidReduce, 22);
   ExpectError(R"(\A a \in S1 R{(a1, a2) \assign a | a1} \eq a)", SemanticEID::typesNotEqual, 35);
 
   ExpectError(R"(I{(a, b) | a \from X1; b \assign {a}; a \noteq b})", SemanticEID::typesNotCompatible, 47);
@@ -327,10 +335,12 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   ExpectTypification(R"(B(X1))", "BB(X1)"_t);
   ExpectTypification(R"(X1*X1)", "B(X1*X1)"_t);
   ExpectTypification(R"(Pr1(S1))", "B(X1)"_t);
+  ExpectTypification(R"(Pr1({}))", "B(R0)"_t);
   ExpectTypification(R"(Fi1[X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](Z*X1))", "B(Z*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](C1*X1))", "B(C1*X1)"_t);
   ExpectTypification(R"(Pr1,2(S1))", "B(X1*X1)"_t);
+  ExpectTypification(R"(Pr1,2({}))", "B(R0)"_t);
   ExpectTypification(R"(bool(X1))", "BB(X1)"_t);
   ExpectTypification(R"(debool({X1}))", "B(X1)"_t);
   ExpectTypification(R"(red(S2))", "B(X1)"_t);
@@ -365,6 +375,8 @@ TEST_F(UTTypeAuditor, TypedOperationsErrors) {
 
 TEST_F(UTTypeAuditor, TypedFunctions) {
   ExpectTypification(R"(F1[X1, X1])", "B(X1)"_t);
+  ExpectTypification(R"(F1[{}, X1])", "B(X1)"_t);
+  ExpectTypification(R"(F1[X1, {}])", "B(X1)"_t);
   ExpectTypification(R"(F1[X1 \union X1, X1])", "B(X1)"_t);
   ExpectTypification(R"(F1[Pr1(S1), Pr2(S1)])", "B(X1)"_t);
 
@@ -410,6 +422,9 @@ TEST_F(UTTypeAuditor, TemplatedFunctions) {
   env.data["F2"].arguments = f2Args;
 
   ExpectTypification(R"(F2[B(X1), X1])", "BB(X1)"_t);
+  ExpectTypification(R"(F2[{}, X1])", "BB(X1)"_t);
+  ExpectTypification(R"(F2[B(X1), {}])", "BB(X1)"_t);
+  ExpectTypification(R"(F2[{}, {}])", "BB(R0)"_t);
   ExpectTypification(R"(F2[Z, 1])", "B(Z)"_t);
   ExpectTypification(R"(F2[Z, S4])", "B(C1)"_t);
   ExpectTypification(R"(F2[{S4}, 1])", "B(C1)"_t);

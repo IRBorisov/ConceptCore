@@ -50,7 +50,7 @@ bool IsEchelon(SyntaxTree::Cursor iter, const Index index) {
 }
 
 bool IsRadical(const std::string& globalName) {
-  return !empty(globalName) && globalName.at(0) == 'R';
+  return !empty(globalName) && globalName.at(0) == 'R' && globalName.at(1) != '0';
 }
 
 void MangleRadicals(const std::string& funcName, Typification& type) {
@@ -122,12 +122,11 @@ bool TypeEnv::AreCompatible(const Typification& type1, const Typification& type2
   } 
   
   const auto struct1 = type1.Structure();
-  const auto struct2 = type2.Structure();
-  
-  if (struct1 == rslang::StructureType::basic && type1.E().baseID == Typification::anyTypificationName) {
+  if (struct1 == rslang::StructureType::basic && type1.IsAnyType()) {
     return true;
   }
-  if (struct2 == rslang::StructureType::basic && type2.E().baseID == Typification::anyTypificationName) {
+  const auto struct2 = type2.Structure();
+  if (struct2 == rslang::StructureType::basic && type2.IsAnyType()) {
     return true;
   }
   if (struct1 != struct2) {
@@ -157,18 +156,17 @@ std::optional<Typification> TypeEnv::Merge(const Typification& type1, const Typi
   if (type1 == type2) {
     return type1;
   }
-  if (type1.Structure() != type2.Structure()) {
-    return std::nullopt;
-  }
 
   const auto struct1 = type1.Structure();
-  const auto struct2 = type2.Structure();
-
-  if (struct1 == rslang::StructureType::basic && type1.E().baseID == Typification::anyTypificationName) {
+  if (struct1 == rslang::StructureType::basic && type1.IsAnyType()) {
     return type2;
   }
-  if (struct2 == rslang::StructureType::basic && type2.E().baseID == Typification::anyTypificationName) {
+  const auto struct2 = type2.Structure();
+  if (struct2 == rslang::StructureType::basic && type2.IsAnyType()) {
     return type1;
+  }
+  if (struct1 != struct2) {
+    return std::nullopt;
   }
 
   switch (struct1) {
@@ -218,35 +216,41 @@ bool TypeEnv::CompareTemplated(
     if (!substitutes.contains(base)) {
       substitutes.insert({ base, value });
       return true;
+    } else {
+      auto mergeType = Merge(substitutes.at(base), value);
+      if (!mergeType.has_value()) {
+        return false;
+      }
+      substitutes.at(base) = std::move(mergeType.value());
+      return true;
     }
+  }
 
-    auto mergeType = Merge(substitutes.at(base), value);
-    if (!mergeType.has_value()) {
-      return false;
-    }
-    substitutes.at(base) = std::move(mergeType.value());
+  const auto valueStructure = value.Structure();
+  if (valueStructure == rslang::StructureType::basic && value.IsAnyType()) {
     return true;
-  } else if (arg.Structure() != value.Structure()) {
+  }
+  const auto argStructure = arg.Structure();
+  if (argStructure != valueStructure) {
     return false;
-  } else {
-    switch (arg.Structure()) {
-      default:
-      case rslang::StructureType::basic:
-        return CommonType(arg, value) != nullptr;
-      case rslang::StructureType::collection:
-        return CompareTemplated(substitutes, arg.B().Base(), value.B().Base());
-      case rslang::StructureType::tuple: {
-        if (arg.T().Arity() != value.T().Arity()) {
+  }
+  switch (argStructure) {
+    default:
+    case rslang::StructureType::basic:
+      return CommonType(arg, value) != nullptr;
+    case rslang::StructureType::collection:
+      return CompareTemplated(substitutes, arg.B().Base(), value.B().Base());
+    case rslang::StructureType::tuple: {
+      if (arg.T().Arity() != value.T().Arity()) {
+        return false;
+      }
+      const auto maxIndex = Typification::PR_START + arg.T().Arity();
+      for (auto index = Typification::PR_START; index < maxIndex; ++index) {
+        if (!CompareTemplated(substitutes, arg.T().Component(index), value.T().Component(index))) {
           return false;
         }
-        const auto maxIndex = Typification::PR_START + arg.T().Arity();
-        for (auto index = Typification::PR_START; index < maxIndex; ++index) {
-          if (!CompareTemplated(substitutes, arg.T().Component(index), value.T().Component(index))) {
-            return false;
-          }
-        }
-        return true;
       }
+      return true;
     }
   }
 }
@@ -313,18 +317,18 @@ bool TypeAuditor::ViGlobalDefinition(Cursor iter) {
     if (!type.IsCollection()) {
       return false;
     }
-    return VisitAndReturn(type.B().Base());
+    return SetCurrent(type.B().Base());
   } else {
     assert(iter->id == TokenID::PUNC_DEFINE);
     if (childrenCount == 1) {
-      return VisitAndReturn(Typification{ iter(0).data.ToText() }.ApplyBool());
+      return SetCurrent(Typification{ iter(0).data.ToText() }.ApplyBool());
     } 
     
     const auto type = ChildType(iter, 1);
     if (!type.has_value()) {
         return false;
     }
-    return VisitAndReturn(type.value());
+    return SetCurrent(type.value());
   }
 }
 
@@ -344,7 +348,7 @@ bool TypeAuditor::ViFunctionDefinition(Cursor iter) {
   if (!type.has_value()) {
     return false;
   }
-  return VisitAndReturn(type.value());
+  return SetCurrent(type.value());
 }
 
 bool TypeAuditor::ViFunctionCall(Cursor iter) {
@@ -363,14 +367,14 @@ bool TypeAuditor::ViFunctionCall(Cursor iter) {
     return false;
   }
   if (!std::holds_alternative<Typification>(*funcType)) {
-    return VisitAndReturn(*funcType);
+    return SetCurrent(*funcType);
   } else {
     Typification fixedType = std::get<Typification>(*funcType);
     MangleRadicals(funcName, fixedType);
     if (!empty(substitutes.value())) {
       fixedType.SubstituteBase(substitutes.value());
     }
-    return VisitAndReturn(fixedType);
+    return SetCurrent(fixedType);
   }
 }
 
@@ -426,7 +430,7 @@ bool TypeAuditor::ViGlobal(Cursor iter) {
       );
       return false;
     }
-    return VisitAndReturn(Typification(globalName).ApplyBool());
+    return SetCurrent(Typification(globalName).ApplyBool());
   } else {
     if (env.context.FunctionArgsFor(globalName) != nullptr) {
       OnError(
@@ -445,25 +449,25 @@ bool TypeAuditor::ViGlobal(Cursor iter) {
       );
       return false;
     }
-    return VisitAndReturn(*type);
+    return SetCurrent(*type);
   }
 }
 
 bool TypeAuditor::ViLocal(Cursor iter) {
   const auto& localName = iter->data.ToText();
   if (isLocalDeclaration || isArgDeclaration) {
-    return AddLocalVar(localName, std::get<Typification>(currentType), iter->pos.start);
+    return AddLocalVariable(localName, std::get<Typification>(currentType), iter->pos.start);
   } else {
     const auto* local = GetLocalTypification(localName, iter->pos.start);
     if (local == nullptr) {
       return false;
     }
-    return VisitAndReturn(*local);
+    return SetCurrent(*local);
   }
 }
 
 bool TypeAuditor::ViEmptySet(Cursor /*iter*/) {
-  return VisitAndReturn(Typification::EmptySet());
+  return SetCurrent(Typification::EmptySet());
 }
 
 bool TypeAuditor::ViLocalBind(Cursor iter) {
@@ -479,7 +483,7 @@ bool TypeAuditor::ViLocalBind(Cursor iter) {
       return false;
     }
   }
-  return VisitAndReturn(type);
+  return SetCurrent(type);
 }
 
 bool TypeAuditor::ViArgument(Cursor iter) {
@@ -489,12 +493,12 @@ bool TypeAuditor::ViArgument(Cursor iter) {
   }
   const auto guard{ isArgDeclaration.CreateGuard() };
   currentType = domain.value();
-  return VisitChild(iter, 0) && VisitAndReturn(LogicT{});
+  return VisitChild(iter, 0) && SetCurrent(LogicT{});
 }
 
 bool TypeAuditor::ViCard(Cursor iter) {
   return ChildTypeDebool(iter, 0, SemanticEID::invalidCard).has_value()
-    && VisitAndReturn(Typification::Integer());
+    && SetCurrent(Typification::Integer());
 }
 
 bool TypeAuditor::ViArithmetic(Cursor iter) {
@@ -538,7 +542,7 @@ bool TypeAuditor::ViArithmetic(Cursor iter) {
     );
     return false;
   }
-  return VisitAndReturn(result.value());
+  return SetCurrent(result.value());
 }
 
 bool TypeAuditor::ViOrdering(Cursor iter) {
@@ -581,7 +585,7 @@ bool TypeAuditor::ViOrdering(Cursor iter) {
     );
     return false;
   }
-  return VisitAndReturn(LogicT{});
+  return SetCurrent(LogicT{});
 }
 
 bool TypeAuditor::ViQuantifier(Cursor iter) {
@@ -597,7 +601,7 @@ bool TypeAuditor::ViQuantifier(Cursor iter) {
   }
 
   EndScope(iter->pos.start);
-  return VisitAndReturn(LogicT{});
+  return SetCurrent(LogicT{});
 }
 
 bool TypeAuditor::ViEquals(Cursor iter) {
@@ -622,7 +626,7 @@ bool TypeAuditor::ViEquals(Cursor iter) {
     );
     return false;
   } 
-  return VisitAndReturn(LogicT{});
+  return SetCurrent(LogicT{});
 }
 
 bool TypeAuditor::ViTypedPredicate(Cursor iter) {
@@ -656,7 +660,7 @@ bool TypeAuditor::ViTypedPredicate(Cursor iter) {
     }
     return false;
   }
-  return VisitAndReturn(LogicT{});
+  return SetCurrent(LogicT{});
 }
 
 bool TypeAuditor::ViDeclarative(Cursor iter) {
@@ -672,7 +676,7 @@ bool TypeAuditor::ViDeclarative(Cursor iter) {
   }
   
   EndScope(iter->pos.start);
-  return VisitAndReturn(domain->ApplyBool());
+  return SetCurrent(domain->ApplyBool());
 }
 
 bool TypeAuditor::ViImperative(Cursor iter) {
@@ -690,7 +694,7 @@ bool TypeAuditor::ViImperative(Cursor iter) {
   }
 
   EndScope(iter->pos.start);
-  return VisitAndReturn(std::get<Typification>(type.value()).Bool());
+  return SetCurrent(std::get<Typification>(type.value()).Bool());
 }
 
 bool TypeAuditor::ViImpDeclare(Cursor iter) {
@@ -711,22 +715,19 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
   auto initType = ChildType(iter, 1);
   if (!initType.has_value()) {
     return false;
-  } else if (!VisitChildDeclaration(iter, 0, std::get<Typification>(initType.value()))) {
+  } 
+  if (!VisitChildDeclaration(iter, 0, std::get<Typification>(initType.value()))) {
     return false;
   }
 
-  Index iterationIndex{ 2 };
-  if (iter->id == TokenID::NT_RECURSIVE_FULL) {
-    iterationIndex = 3;
-    if (!VisitChild(iter, 2)) {
-      return false;
-    }
-  }
+  const bool isFull = iter->id == TokenID::NT_RECURSIVE_FULL;
+  Index iterationIndex{ isFull ? 3 : 2 };
 
   const auto iterationType = ChildType(iter, iterationIndex);
   if (!iterationType.has_value()) {
     return false;
-  } else if (!env.AreCompatible(iterationType.value(), initType.value())) {
+  } 
+  if (!env.AreCompatible(iterationType.value(), initType.value())) {
     OnError(
       SemanticEID::typesNotEqual,
       iter(iterationIndex).pos.start, 
@@ -736,8 +737,25 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
     return false;
   }
 
+  { 
+    const auto guard = noWarnings.CreateGuard();
+    ClearLocalVariables();
+    if (!VisitChildDeclaration(iter, 0, std::get<Typification>(iterationType.value()))) {
+      return false;
+    }
+    if (!VisitChild(iter, iterationIndex)) {
+      return false;
+    }
+  }
+
+  if (isFull) {
+    if (!VisitChild(iter, 2)) {
+      return false;
+    }
+  }
+
   EndScope(iter->pos.start);
-  return VisitAndReturn(iterationType.value());
+  return SetCurrent(iterationType.value());
 }
 
 bool TypeAuditor::ViDecart(Cursor iter) {
@@ -750,7 +768,7 @@ bool TypeAuditor::ViDecart(Cursor iter) {
       factors.emplace_back(type.value());
     }
   }
-  return VisitAndReturn(Typification::Tuple(factors).ApplyBool());
+  return SetCurrent(Typification::Tuple(factors).ApplyBool());
 }
 
 bool TypeAuditor::ViBoolean(Cursor iter) {
@@ -758,7 +776,7 @@ bool TypeAuditor::ViBoolean(Cursor iter) {
   if (!type.has_value()) {
     return false;
   }
-  return VisitAndReturn(type->ApplyBool().ApplyBool());
+  return SetCurrent(type->ApplyBool().ApplyBool());
 }
 
 bool TypeAuditor::ViTuple(Cursor iter) {
@@ -770,7 +788,7 @@ bool TypeAuditor::ViTuple(Cursor iter) {
     }
     components.emplace_back(std::get<Typification>(type.value()));
   }
-  return VisitAndReturn(Typification::Tuple(components));
+  return SetCurrent(Typification::Tuple(components));
 }
 
 bool TypeAuditor::ViSetEnum(Cursor iter) {
@@ -797,7 +815,7 @@ bool TypeAuditor::ViSetEnum(Cursor iter) {
     }
     type = std::move(merge.value());
   }
-  return VisitAndReturn(type.Bool());
+  return SetCurrent(type.Bool());
 }
 
 bool TypeAuditor::ViDebool(Cursor iter) {
@@ -805,7 +823,7 @@ bool TypeAuditor::ViDebool(Cursor iter) {
   if (!type.has_value()) {
     return false;
   }
-  return VisitAndReturn(type.value());
+  return SetCurrent(type.value());
 }
 
 bool TypeAuditor::ViTypedBinary(Cursor iter) {
@@ -829,20 +847,24 @@ bool TypeAuditor::ViTypedBinary(Cursor iter) {
     );
     return false;
   }
-  return VisitAndReturn(result.value().Bool());
+  return SetCurrent(result.value().Bool());
 }
 
 bool TypeAuditor::ViProjectSet(Cursor iter) {
   // T(Pri(a)) = B(Pi(D(T(a))))
-  const auto baseType = ChildTypeDebool(iter, 0, SemanticEID::invalidProjectionSet);
-  if (!baseType.has_value()) {
+  const auto maybeArgument = ChildTypeDebool(iter, 0, SemanticEID::invalidProjectionSet);
+  if (!maybeArgument.has_value()) {
     return false;
   }
-  if (!baseType->IsTuple()) {
+  const auto& argument = maybeArgument.value();
+  if (argument.IsAnyType()) {
+    return SetCurrent(Typification::EmptySet());
+  }
+  if (!argument.IsTuple()) {
     OnError(
       SemanticEID::invalidProjectionSet,
       iter(0).pos.start,
-      { iter->ToString(), baseType->ToString() }
+      { iter->ToString(), argument.ToString() }
     );
     return false;
   }
@@ -851,30 +873,36 @@ bool TypeAuditor::ViProjectSet(Cursor iter) {
   std::vector<Typification> components{};
   components.reserve(size(indicies));
   for (const auto index : indicies) {
-    if (!baseType->T().TestIndex(index)) {
+    if (!argument.T().TestIndex(index)) {
       OnError(
         SemanticEID::invalidProjectionSet,
         iter(0).pos.start,
-        { iter->ToString(), baseType->ToString() }
+        { iter->ToString(), argument.ToString() }
       );
       return false;
     } else {
-      components.emplace_back(baseType->T().Component(index));
+      components.emplace_back(argument.T().Component(index));
     }
   }
-  currentType = Typification::Tuple(components).ApplyBool();
-  return true;
+  return SetCurrent(Typification::Tuple(components).ApplyBool());
 }
 
 bool TypeAuditor::ViProjectTuple(Cursor iter) {
   // T(pri(a)) = Pi(T(a))
-  const auto baseType = ChildType(iter, 0);
-  if (!baseType.has_value()) {
+  const auto maybeArgument = ChildType(iter, 0);
+  if (!maybeArgument.has_value()) {
     return false;
   }
-  const auto& base = std::get<Typification>(baseType.value());
-  if (!base.IsTuple()) {
-    OnError(SemanticEID::invalidProjectionTuple, iter(0).pos.start, { iter->ToString(), base.ToString() });
+  const auto& argument = std::get<Typification>(maybeArgument.value());
+  if (argument.IsAnyType()) {
+    return SetCurrent(argument);
+  }
+  if (!argument.IsTuple()) {
+    OnError(
+      SemanticEID::invalidProjectionTuple,
+      iter(0).pos.start,
+      { iter->ToString(), argument.ToString() }
+    );
     return false;
   }
   
@@ -882,39 +910,52 @@ bool TypeAuditor::ViProjectTuple(Cursor iter) {
   std::vector<Typification> components{};
   components.reserve(size(indicies));
   for (const auto index : indicies) {
-    if (!base.T().TestIndex(index)) {
-      OnError(SemanticEID::invalidProjectionTuple, iter(0).pos.start, { iter->ToString(), base.ToString() });
+    if (!argument.T().TestIndex(index)) {
+      OnError(
+        SemanticEID::invalidProjectionTuple,
+        iter(0).pos.start,
+        { iter->ToString(), argument.ToString() }
+      );
       return false;
     } else {
-      components.emplace_back(base.T().Component(index));
+      components.emplace_back(argument.T().Component(index));
     }
   }
-  return VisitAndReturn(Typification::Tuple(components));
+  return SetCurrent(Typification::Tuple(components));
 }
 
 bool TypeAuditor::ViFilter(Cursor iter) {
-  const auto baseType = ChildType(iter, static_cast<Index>(iter.ChildrenCount() - 1));
-  if (!baseType.has_value()) {
-    return false;
-  } 
-  const auto& base = std::get<Typification>(baseType.value());
-  if (!base.IsCollection() || !base.B().Base().IsTuple()) {
-    OnError(SemanticEID::invalidFilterArgumentType,
-            iter(static_cast<Index>(iter.ChildrenCount() - 1)).pos.start,
-            { iter->ToString(), base.ToString() });
-    return false;
-  }
-
   const auto& indicies = iter->data.ToTuple();
   if (ssize(indicies) + 1 != iter.ChildrenCount()) {
     OnError(SemanticEID::invalidFilterArity, iter->pos.start);
     return false;
   }
+
+  const auto maybeArgument = ChildType(iter, static_cast<Index>(iter.ChildrenCount() - 1));
+  if (!maybeArgument.has_value()) {
+    return false;
+  } 
+  const auto& argument = std::get<Typification>(maybeArgument.value());
+  if (argument.IsAnyType() || (argument.IsCollection() && argument.B().Base().IsAnyType())) {
+    return SetCurrent(Typification::EmptySet());
+  }
+  if (!argument.IsCollection() || !argument.B().Base().IsTuple()) {
+    OnError(
+      SemanticEID::invalidFilterArgumentType,
+      iter(static_cast<Index>(iter.ChildrenCount() - 1)).pos.start,
+      { iter->ToString(), argument.ToString() }
+    );
+    return false;
+  }
+
   Index child{ 0 };
   for (const auto index : indicies) {
-    if (!base.B().Base().T().TestIndex(index)) {
-      OnError(SemanticEID::invalidFilterArgumentType, iter(static_cast<Index>(iter.ChildrenCount() - 1)).pos.start, 
-              { iter->ToString(), base.ToString() });
+    if (!argument.B().Base().T().TestIndex(index)) {
+      OnError(
+        SemanticEID::invalidFilterArgumentType,
+        iter(static_cast<Index>(iter.ChildrenCount() - 1)).pos.start,
+        { iter->ToString(), argument.ToString() }
+      );
       return false;
     } 
     const auto param = ChildType(iter, child);
@@ -923,50 +964,56 @@ bool TypeAuditor::ViFilter(Cursor iter) {
     }
     const auto& paramType = std::get<Typification>(param.value());
     if (!paramType.IsCollection() || 
-        !env.AreCompatible(base.B().Base().T().Component(index), paramType.B().Base())) {
-      OnError(SemanticEID::typesNotEqual, iter(child).pos.start,
-              base.B().Base().T().Component(index).Bool(), paramType);
+        !env.AreCompatible(argument.B().Base().T().Component(index), paramType.B().Base())) {
+      OnError(
+        SemanticEID::typesNotEqual,
+        iter(child).pos.start,
+        argument.B().Base().T().Component(index).Bool(), paramType
+      );
       return false;
     }
     ++child;
   }
-  return VisitAndReturn(baseType.value());
+  return SetCurrent(maybeArgument.value());
 }
 
 bool TypeAuditor::ViReduce(Cursor iter) {
   // T(red(a)) = B(DD(T(a)))
-  const auto baseType = ChildType(iter, 0);
-  if (!baseType.has_value()) {
+  const auto maybeArgument = ChildType(iter, 0);
+  if (!maybeArgument.has_value()) {
     return false;
   }
-  const auto& base = std::get<Typification>(baseType.value());
-  if (!base.IsCollection() || !base.B().Base().IsCollection()) {
+  const auto& argument = std::get<Typification>(maybeArgument.value());
+  if (argument.IsAnyType() || (argument.IsCollection() && argument.B().Base().IsAnyType())) {
+    return SetCurrent(Typification::EmptySet());
+  }
+  if (!argument.IsCollection() || !argument.B().Base().IsCollection()) {
     OnError(
       SemanticEID::invalidReduce,
       iter(0).pos.start + 1,
-      base.ToString()
+      argument.ToString()
     );
     return false;
   }
-  return VisitAndReturn(base.B().Base());
+  return SetCurrent(argument.B().Base());
 }
 
-bool TypeAuditor::VisitAndReturn(ExpressionType type) noexcept {
+bool TypeAuditor::SetCurrent(ExpressionType type) noexcept {
   currentType = std::move(type);
   return true;
 }
 
-bool TypeAuditor::VisitAllAndReturn(Cursor iter, const ExpressionType& type) {
-  return VisitAllChildren(iter) && VisitAndReturn(type);
+bool TypeAuditor::VisitAllAndSetCurrent(Cursor iter, const ExpressionType& type) {
+  return VisitAllChildren(iter) && SetCurrent(type);
 }
 
 bool TypeAuditor::VisitChildDeclaration(const Cursor& iter, const Index index, const Typification& domain) {
   currentType = domain;
-  if (const auto guard = isLocalDeclaration.CreateGuard(); 
-      !VisitChild(iter, index)) {
+  const auto guard = isLocalDeclaration.CreateGuard();
+  if (!VisitChild(iter, index)) {
     return false;
   }
-  return VisitAndReturn(LogicT{});
+  return SetCurrent(LogicT{});
 }
 
 std::optional<ExpressionType> TypeAuditor::ChildType(Cursor iter, const Index index) {
@@ -984,19 +1031,23 @@ std::optional<ExpressionType> TypeAuditor::ChildType(Cursor iter, const Index in
 }
 
 std::optional<Typification> TypeAuditor::ChildTypeDebool(Cursor iter, const Index index, const SemanticEID eid) {
-  const auto result = ChildType(iter, index);
-  if (!result.has_value() || !std::holds_alternative<Typification>(result.value())) {
+  const auto maybeResult = ChildType(iter, index);
+  if (!maybeResult.has_value() || !std::holds_alternative<Typification>(maybeResult.value())) {
     return std::nullopt;
   }
-  if (!std::get<Typification>(result.value()).IsCollection()) {
+  const auto& result = std::get<Typification>(maybeResult.value());
+  if (result.IsAnyType()) {
+    return result;
+  }
+  if (!result.IsCollection()) {
     OnError(
       eid,
       iter(index).pos.start,
-      ToString(result.value())
+      ToString(maybeResult.value())
     );
     return std::nullopt;
   }
-  return std::get<Typification>(result.value()).B().Base();
+  return result.B().Base();
 }
 
 const Typification* TypeAuditor::GetLocalTypification(const std::string& name, const StrPos pos) {
@@ -1030,7 +1081,7 @@ void TypeAuditor::EndScope(const StrPos pos) {
     --var.level;
     if (var.level < 0 && var.enabled) {
       var.enabled = false;
-      if (var.useCount == 0) {
+      if (var.useCount == 0 && !noWarnings) {
         OnError(
           SemanticEID::localNotUsed,
           pos,
@@ -1041,9 +1092,12 @@ void TypeAuditor::EndScope(const StrPos pos) {
   }
 }
 
-bool TypeAuditor::AddLocalVar(const std::string& name, const Typification& type, const StrPos pos) {
-  auto varIter = std::find_if(begin(localVars), end(localVars),
-                              [&](const auto& data) noexcept { return data.arg.name == name; });
+bool TypeAuditor::AddLocalVariable(const std::string& name, const Typification& type, const StrPos pos) {
+  auto varIter = std::find_if(
+    begin(localVars),
+    end(localVars),
+    [&](const auto& data) noexcept { return data.arg.name == name; }
+  );
   if (varIter != end(localVars)) {
     if (varIter->enabled) {
       OnError(
@@ -1053,16 +1107,17 @@ bool TypeAuditor::AddLocalVar(const std::string& name, const Typification& type,
       );
       return false;
     } else {
-      OnError(
-        SemanticEID::localDoubleDeclare,
-        pos,
-        name
-      );
+      if (!noWarnings) {
+        OnError(
+          SemanticEID::localDoubleDeclare,
+          pos,
+          name
+        );
+      }
       varIter->arg.type = type;
       varIter->enabled = true;
       varIter->level = 0;
-      varIter->useCount = 0;
-      return true;
+       return true;
     }
   } else {
     localVars.emplace_back(LocalData{ TypedID{name, type}, 0, 0, true });
@@ -1071,6 +1126,11 @@ bool TypeAuditor::AddLocalVar(const std::string& name, const Typification& type,
     }
     return true;
   }
+}
+
+
+void TypeAuditor::ClearLocalVariables() {
+  std::erase_if(localVars, [&](const auto& data) noexcept { return data.level <= 0; });
 }
 
 } // namespace ccl::rslang

@@ -37,13 +37,13 @@ void ValueAuditor::Clear() noexcept {
   current = ValueClass::invalid;
 }
 
-bool ValueAuditor::VisitAndReturn(const ValueClass type) noexcept {
+bool ValueAuditor::SetCurrent(const ValueClass type) noexcept {
   current = type;
   return true;
 }
 
-bool ValueAuditor::VisitAllAndReturn(Cursor iter, const ValueClass type) {
-  return VisitAllChildren(iter) && VisitAndReturn(type);
+bool ValueAuditor::VisitAllAndSetCurrent(Cursor iter, const ValueClass type) {
+  return VisitAllChildren(iter) && SetCurrent(type);
 }
 
 bool ValueAuditor::AssertChildIsValue(Cursor iter, const Index index) {
@@ -68,9 +68,9 @@ bool ValueAuditor::AssertAllValues(Cursor iter) {
 
 bool ValueAuditor::ViGlobalDefinition(Cursor iter) {
   if (iter->id == TokenID::PUNC_STRUCT) {
-    return VisitChild(iter, 1) && VisitAndReturn(ValueClass::value);
+    return VisitChild(iter, 1) && SetCurrent(ValueClass::value);
   } else if (iter.ChildrenCount() == 1) {
-    return VisitAndReturn(ValueClass::value);
+    return SetCurrent(ValueClass::value);
   } else {
     return VisitChild(iter, 1);
   }
@@ -133,7 +133,7 @@ bool ValueAuditor::RunCheckOnFunc(
 bool ValueAuditor::ViGlobal(Cursor iter) {
   const auto& globalName = iter->data.ToText();
   if (iter->id == TokenID::ID_RADICAL) {
-    return VisitAndReturn(ValueClass::value);
+    return SetCurrent(ValueClass::value);
   } else {
     const auto type = globalClass(globalName);
     if (type == ValueClass::invalid) {
@@ -148,9 +148,9 @@ bool ValueAuditor::ViGlobal(Cursor iter) {
 bool ValueAuditor::ViLocal(Cursor iter) {
   const auto& localName = iter->data.ToText();
   if (std::find(begin(localProps), end(localProps), localName) == end(localProps)) {
-    return VisitAndReturn(ValueClass::value);
+    return SetCurrent(ValueClass::value);
   } else {
-    return VisitAndReturn(ValueClass::props);
+    return SetCurrent(ValueClass::props);
   }
 }
 
@@ -195,11 +195,11 @@ bool ValueAuditor::ViDecart(Cursor iter) {
       type = current;
     }
   }
-  return VisitAndReturn(type);
+  return SetCurrent(type);
 }
 
 bool ValueAuditor::ViBoolean(Cursor iter) {
-  return VisitChild(iter, 0) && VisitAndReturn(ValueClass::props);
+  return VisitChild(iter, 0) && SetCurrent(ValueClass::props);
 }
 
 bool ValueAuditor::ViTypedBinary(Cursor iter) {
@@ -214,9 +214,9 @@ bool ValueAuditor::ViTypedBinary(Cursor iter) {
   const auto secondValue = current == ValueClass::value;
 
   if (CombineOperationValues(iter->id, firstValue, secondValue)) {
-    return VisitAndReturn(ValueClass::value);
+    return SetCurrent(ValueClass::value);
   } else {
-    return VisitAndReturn(ValueClass::props);
+    return SetCurrent(ValueClass::props);
   }
 }
 

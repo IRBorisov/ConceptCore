@@ -40,23 +40,23 @@ protected:
 
   bool ViGlobal(Cursor iter);
   bool ViLocal(Cursor iter);
-  bool ViInteger(Cursor /*iter*/) noexcept { return VisitAndReturn(ValueClass::value); }
-  bool ViIntegerSet(Cursor /*iter*/) noexcept { return VisitAndReturn(ValueClass::props); }
-  bool ViEmptySet(Cursor /*iter*/) noexcept { return VisitAndReturn(ValueClass::value); }
+  bool ViInteger(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::value); }
+  bool ViIntegerSet(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::props); }
+  bool ViEmptySet(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::value); }
 
-  bool ViLocalBind(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
-  bool ViLocalEnum(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
+  bool ViLocalBind(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
+  bool ViLocalEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViArgumentsEnum(Cursor iter) { return VisitAllChildren(iter); }
   bool ViArgument(Cursor iter) { return VisitAllChildren(iter); }
 
-  bool ViArithmetic(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
+  bool ViArithmetic(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViCard(Cursor iter) { return AssertChildIsValue(iter, 0); }
 
   bool ViQuantifier(Cursor iter);
-  bool ViNegation(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
-  bool ViLogicBinary(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
+  bool ViNegation(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
+  bool ViLogicBinary(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViEquals(Cursor iter) { return AssertAllValues(iter); }
-  bool ViOrdering(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
+  bool ViOrdering(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViTypedPredicate(Cursor iter);
 
   bool ViDecart(Cursor iter);
@@ -66,7 +66,7 @@ protected:
   bool ViImperative(Cursor iter);
   bool ViImpDeclare(Cursor iter) { return AssertChildIsValue(iter, 1); }
   bool ViImpAssign(Cursor iter) { return AssertChildIsValue(iter, 1); }
-  bool ViImpCheck(Cursor iter) { return VisitAllAndReturn(iter, ValueClass::value); }
+  bool ViImpCheck(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViRecursion(Cursor iter) { return AssertAllValues(iter); }
 
   bool ViTuple(Cursor iter) { return AssertAllValues(iter); }
@@ -82,8 +82,8 @@ protected:
 
 private:
   void Clear() noexcept;
-  [[nodiscard]] bool VisitAndReturn(ValueClass type) noexcept;
-  [[nodiscard]] bool VisitAllAndReturn(Cursor iter, ValueClass type);
+  [[nodiscard]] bool SetCurrent(ValueClass type) noexcept;
+  [[nodiscard]] bool VisitAllAndSetCurrent(Cursor iter, ValueClass type);
 
   [[nodiscard]] bool AssertAllValues(Cursor iter);
   [[nodiscard]] bool AssertChildIsValue(Cursor iter, Index index);
