@@ -24,7 +24,7 @@ bool ASTInterpreter::NameCollector::MergeChildren(Cursor iter) {
   return true;
 }
 
-bool ASTInterpreter::NameCollector::ViGlobalDefinition(Cursor iter) {
+bool ASTInterpreter::NameCollector::ViGlobalDeclaration(Cursor iter) {
   if (iter->id == TokenID::PUNC_STRUCT) {
     return false; // TODO: specify error
   }

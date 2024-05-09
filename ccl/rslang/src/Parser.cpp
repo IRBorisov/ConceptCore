@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ccl/rslang/Parser.h"
 
 namespace ccl::rslang {

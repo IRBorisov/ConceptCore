@@ -50,19 +50,20 @@ public:
 protected:
   bool VisitDefault(Cursor /*iter*/) noexcept { return false; } // NOLINT(readability-convert-member-functions-to-static)
 
-  bool ViGlobalDefinition(Cursor iter);
+  bool ViGlobalDeclaration(Cursor iter);
 
   // bool ViFunctionDefinition(Cursor iter)
   // bool ViFunctionCall(Cursor iter);
 
   bool ViGlobal(Cursor iter) { return ViLocal(iter); }
+  // bool ViRadical(Cursor iter);
   bool ViLocal(Cursor iter);
   bool ViInteger(Cursor /*iter*/);
   bool ViIntegerSet(Cursor /*iter*/);
   bool ViEmptySet(Cursor iter);
 
-  //bool ViLocalBind(Cursor iter);
-  //bool ViLocalEnum(Cursor iter);
+  //bool ViTupleDeclaration(Cursor iter);
+  //bool ViEnumDeclaration(Cursor iter);
   //bool ViArgumentsEnum(Cursor iter);
   //bool ViArgument(Cursor iter);
 
@@ -73,8 +74,8 @@ protected:
   bool ViNegation(Cursor iter);
   bool ViLogicBinary(Cursor iter);
   bool ViEquals(Cursor iter);
-  bool ViOrdering(Cursor iter);
-  bool ViTypedPredicate(Cursor iter) { return ViTypedBinary(iter); }
+  bool ViIntegerPredicate(Cursor iter);
+  bool ViSetexprPredicate(Cursor iter) { return ViSetexprBinary(iter); }
 
   bool ViDecart(Cursor iter);
   bool ViBoolean(Cursor iter);
@@ -87,11 +88,11 @@ protected:
   bool ViRecursion(Cursor iter);
 
   bool ViTuple(Cursor iter);
-  bool ViSetEnum(Cursor iter);
+  bool ViEnumeration(Cursor iter);
   bool ViBool(Cursor iter);
   bool ViDebool(Cursor iter);
 
-  bool ViTypedBinary(Cursor iter);
+  bool ViSetexprBinary(Cursor iter);
   bool ViProjectSet(Cursor iter);
   bool ViProjectTuple(Cursor iter);
   bool ViFilter(Cursor iter);

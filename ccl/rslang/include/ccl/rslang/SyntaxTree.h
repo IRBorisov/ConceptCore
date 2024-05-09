@@ -143,14 +143,21 @@ public:
       case TokenID::PUNC_DEFINE:
       case TokenID::PUNC_STRUCT:
         assert(ChildrenCount() != 0);
-        return visitor.ViGlobalDefinition(*this);
+        return visitor.ViGlobalDeclaration(*this);
 
       case TokenID::ID_GLOBAL:
       case TokenID::ID_FUNCTION:
       case TokenID::ID_PREDICATE:
-      case TokenID::ID_RADICAL:
         assert(ChildrenCount() == 0);
         return visitor.ViGlobal(*this);
+
+      case TokenID::ID_LOCAL:
+        assert(ChildrenCount() == 0);
+        return visitor.ViLocal(*this);
+
+      case TokenID::ID_RADICAL:
+        assert(ChildrenCount() == 0);
+        return visitor.ViRadical(*this);
 
       case TokenID::NT_FUNC_DEFINITION:
         assert(ChildrenCount() == 2);
@@ -159,14 +166,9 @@ public:
         assert(ChildrenCount() > 1);
         return visitor.ViFunctionCall(*this);
 
-      case TokenID::ID_LOCAL:
-        assert(ChildrenCount() == 0);
-        return visitor.ViLocal(*this);
-
       case TokenID::LIT_INTSET:
         assert(ChildrenCount() == 0);
         return visitor.ViIntegerSet(*this);
-
       case TokenID::LIT_INTEGER:
         assert(ChildrenCount() == 0);
         return visitor.ViInteger(*this);
@@ -176,31 +178,15 @@ public:
 
       case TokenID::NT_TUPLE_DECL:
         assert(ChildrenCount() > 1);
-        return visitor.ViLocalBind(*this);
+        return visitor.ViTupleDeclaration(*this);
       case TokenID::NT_ENUM_DECL:
-        return visitor.ViLocalEnum(*this);
+        return visitor.ViEnumDeclaration(*this);
       case TokenID::NT_ARGUMENTS:
         assert(ChildrenCount() > 0);
         return visitor.ViArgumentsEnum(*this);
       case TokenID::NT_ARG_DECL:
         assert(ChildrenCount() == 2);
         return visitor.ViArgument(*this);
-
-      case TokenID::NT_DECLARATIVE_EXPR:
-        assert(ChildrenCount() == 3);
-        return visitor.ViDeclarative(*this);
-      case TokenID::NT_IMPERATIVE_EXPR:
-        assert(ChildrenCount() > 1);
-        return visitor.ViImperative(*this);
-      case TokenID::NT_IMP_DECLARE:
-        assert(ChildrenCount() == 2);
-        return visitor.ViImpDeclare(*this);
-      case TokenID::NT_IMP_ASSIGN:
-        assert(ChildrenCount() == 2);
-        return visitor.ViImpAssign(*this);
-      case TokenID::NT_IMP_LOGIC:
-        assert(ChildrenCount() == 1);
-        return visitor.ViImpCheck(*this);
 
       case TokenID::PLUS:
       case TokenID::MINUS:
@@ -236,7 +222,7 @@ public:
       case TokenID::GREATER_OR_EQ:
       case TokenID::LESSER_OR_EQ:
         assert(ChildrenCount() == 2);
-        return visitor.ViOrdering(*this);
+        return visitor.ViIntegerPredicate(*this);
 
       case TokenID::IN:
       case TokenID::NOTIN:
@@ -244,7 +230,23 @@ public:
       case TokenID::SUBSET_OR_EQ:
       case TokenID::NOTSUBSET:
         assert(ChildrenCount() == 2);
-        return visitor.ViTypedPredicate(*this);
+        return visitor.ViSetexprPredicate(*this);
+
+      case TokenID::NT_DECLARATIVE_EXPR:
+        assert(ChildrenCount() == 3);
+        return visitor.ViDeclarative(*this);
+      case TokenID::NT_IMPERATIVE_EXPR:
+        assert(ChildrenCount() > 1);
+        return visitor.ViImperative(*this);
+      case TokenID::NT_IMP_DECLARE:
+        assert(ChildrenCount() == 2);
+        return visitor.ViImpDeclare(*this);
+      case TokenID::NT_IMP_ASSIGN:
+        assert(ChildrenCount() == 2);
+        return visitor.ViImpAssign(*this);
+      case TokenID::NT_IMP_LOGIC:
+        assert(ChildrenCount() == 1);
+        return visitor.ViImpCheck(*this);
 
       case TokenID::DECART:
         assert(ChildrenCount() > 1);
@@ -264,7 +266,7 @@ public:
         assert(ChildrenCount() > 1);
         return visitor.ViTuple(*this);
       case TokenID::NT_ENUMERATION:
-        return visitor.ViSetEnum(*this);
+        return visitor.ViEnumeration(*this);
       case TokenID::BOOL:
         assert(ChildrenCount() == 1);
         return visitor.ViBool(*this);
@@ -277,7 +279,7 @@ public:
       case TokenID::SET_MINUS:
       case TokenID::SYMMINUS:
         assert(ChildrenCount() == 2);
-        return visitor.ViTypedBinary(*this);
+        return visitor.ViSetexprBinary(*this);
 
       case TokenID::BIGPR:
         assert(ChildrenCount() == 1);
@@ -319,19 +321,20 @@ protected:
   }
 
 private:
-  bool ViGlobalDefinition(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViGlobalDeclaration(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViFunctionDefinition(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViFunctionCall(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViGlobal(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViRadical(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViLocal(Cursor iter)  { return this->BaseT().VisitDefault(iter); }
   bool ViInteger(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViIntegerSet(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViEmptySet(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
-  bool ViLocalBind(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViLocalEnum(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViTupleDeclaration(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViEnumDeclaration(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViArgumentsEnum(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViArgument(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
@@ -342,8 +345,8 @@ private:
   bool ViNegation(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViLogicBinary(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViEquals(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViOrdering(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViTypedPredicate(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViIntegerPredicate(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViSetexprPredicate(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViDeclarative(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViImperative(Cursor iter) { return this->BaseT().VisitDefault(iter); }
@@ -356,11 +359,11 @@ private:
   bool ViBoolean(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViTuple(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViSetEnum(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViEnumeration(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViBool(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViDebool(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
-  bool ViTypedBinary(Cursor iter)  { return this->BaseT().VisitDefault(iter); }
+  bool ViSetexprBinary(Cursor iter)  { return this->BaseT().VisitDefault(iter); }
   bool ViProjectSet(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViProjectTuple(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViFilter(Cursor iter) { return this->BaseT().VisitDefault(iter); }

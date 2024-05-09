@@ -590,7 +590,7 @@ namespace ccl { namespace rslang { namespace detail {
 #line 591 "RSParserImpl.cpp"
     break;
 
-  case 4: // expression: function_decl
+  case 4: // expression: function_definition
 #line 264 "RSParserImpl.y"
                                             { state->FinalizeExpression(yystack_[0].value); }
 #line 597 "RSParserImpl.cpp"
@@ -614,338 +614,344 @@ namespace ccl { namespace rslang { namespace detail {
 #line 615 "RSParserImpl.cpp"
     break;
 
-  case 8: // global_declaration: function_name DEFINE function_decl
+  case 8: // global_declaration: FUNCTION DEFINE function_definition
 #line 271 "RSParserImpl.y"
                                             { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 621 "RSParserImpl.cpp"
     break;
 
-  case 13: // function_decl: LS arguments RS logic_or_setexpr
-#line 284 "RSParserImpl.y"
-                                            { yylhs.value = FunctionDeclaration(yystack_[3].value, yystack_[2].value, yystack_[0].value); }
+  case 9: // global_declaration: PREDICATE DEFINE function_definition
+#line 272 "RSParserImpl.y"
+                                                { state->FinalizeCstExpression(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 627 "RSParserImpl.cpp"
     break;
 
-  case 14: // function_decl: LS error
-#line 285 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+  case 12: // function_definition: LS arguments RS logic_or_setexpr
+#line 281 "RSParserImpl.y"
+                                            { yylhs.value = FunctionDeclaration(yystack_[3].value, yystack_[2].value, yystack_[0].value); }
 #line 633 "RSParserImpl.cpp"
     break;
 
-  case 15: // arguments: declaration
-#line 290 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::NT_ARGUMENTS, yystack_[0].value); }
+  case 13: // function_definition: LS error
+#line 282 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
 #line 639 "RSParserImpl.cpp"
     break;
 
-  case 16: // arguments: arguments COMMA declaration
-#line 291 "RSParserImpl.y"
-                                            { yylhs.value = Enumeration(TokenID::NT_ARGUMENTS, yystack_[2].value, yystack_[0].value); }
+  case 14: // arguments: declaration
+#line 287 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_ARGUMENTS, yystack_[0].value); }
 #line 645 "RSParserImpl.cpp"
     break;
 
-  case 17: // arguments: arguments COMMA error
-#line 292 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+  case 15: // arguments: arguments COMMA declaration
+#line 288 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::NT_ARGUMENTS, yystack_[2].value, yystack_[0].value); }
 #line 651 "RSParserImpl.cpp"
     break;
 
-  case 18: // declaration: LOCAL IN setexpr
-#line 295 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::NT_ARG_DECL, yystack_[2].value, yystack_[0].value); }
+  case 16: // arguments: arguments COMMA error
+#line 289 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
 #line 657 "RSParserImpl.cpp"
     break;
 
-  case 19: // declaration: LOCAL error
-#line 296 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
+  case 17: // declaration: LOCAL IN setexpr
+#line 292 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_ARG_DECL, yystack_[2].value, yystack_[0].value); }
 #line 663 "RSParserImpl.cpp"
     break;
 
-  case 21: // variable: LP var_enum RPE
-#line 301 "RSParserImpl.y"
-                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE_DECL, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 18: // declaration: LOCAL error
+#line 293 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
 #line 669 "RSParserImpl.cpp"
     break;
 
-  case 22: // var_enum: var_all COMMA var_all
-#line 304 "RSParserImpl.y"
-                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+  case 20: // variable: LP var_enum RPE
+#line 298 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE_DECL, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 675 "RSParserImpl.cpp"
     break;
 
-  case 23: // var_enum: var_all COMMA error
-#line 305 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+  case 21: // var_enum: var_all COMMA var_all
+#line 301 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
 #line 681 "RSParserImpl.cpp"
     break;
 
-  case 31: // logic_par: LP logic_binary RPE
-#line 323 "RSParserImpl.y"
-                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 22: // var_enum: var_all COMMA error
+#line 302 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
 #line 687 "RSParserImpl.cpp"
     break;
 
-  case 32: // logic_par: LP logic_predicates RPE
-#line 324 "RSParserImpl.y"
+  case 30: // logic_par: LP logic_binary RPE
+#line 320 "RSParserImpl.y"
                                             { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 693 "RSParserImpl.cpp"
     break;
 
-  case 33: // logic_predicates: setexpr binary_predicate setexpr
-#line 328 "RSParserImpl.y"
-                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 31: // logic_par: LP logic_predicates RPE
+#line 321 "RSParserImpl.y"
+                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 699 "RSParserImpl.cpp"
     break;
 
-  case 45: // logic_unary: NOT logic_no_binary
-#line 345 "RSParserImpl.y"
-                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value);}
+  case 32: // logic_predicates: setexpr binary_predicate setexpr
+#line 325 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 705 "RSParserImpl.cpp"
     break;
 
-  case 46: // logic_unary: quantifier quant_var IN setexpr logic_no_binary
-#line 346 "RSParserImpl.y"
-                                                      { yylhs.value = Quantifier(yystack_[4].value, yystack_[3].value, yystack_[1].value, yystack_[0].value);}
+  case 44: // logic_unary: NOT logic_no_binary
+#line 342 "RSParserImpl.y"
+                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value);}
 #line 711 "RSParserImpl.cpp"
     break;
 
-  case 47: // logic_unary: quantifier error
-#line 347 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
+  case 45: // logic_unary: quantifier quant_var IN setexpr logic_no_binary
+#line 343 "RSParserImpl.y"
+                                                      { yylhs.value = Quantifier(yystack_[4].value, yystack_[3].value, yystack_[1].value, yystack_[0].value);}
 #line 717 "RSParserImpl.cpp"
     break;
 
-  case 48: // logic_unary: PREDICATE LS setexpr_enum RS
-#line 348 "RSParserImpl.y"
-                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 46: // logic_unary: quantifier error
+#line 344 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
 #line 723 "RSParserImpl.cpp"
     break;
 
-  case 56: // quant_var: LP error
-#line 362 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
+  case 47: // logic_unary: PREDICATE LS setexpr_enum RS
+#line 345 "RSParserImpl.y"
+                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 729 "RSParserImpl.cpp"
     break;
 
-  case 57: // quant_var_enum: quant_var COMMA quant_var
-#line 365 "RSParserImpl.y"
-                                            { yylhs.value = Enumeration(TokenID::NT_ENUM_DECL, yystack_[2].value, yystack_[0].value); }
+  case 55: // quant_var: LP error
+#line 359 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::invalidQuantifier); YYABORT; }
 #line 735 "RSParserImpl.cpp"
     break;
 
-  case 58: // quant_var_enum: quant_var COMMA error
-#line 366 "RSParserImpl.y"
-                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
+  case 56: // quant_var_enum: quant_var COMMA quant_var
+#line 362 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::NT_ENUM_DECL, yystack_[2].value, yystack_[0].value); }
 #line 741 "RSParserImpl.cpp"
     break;
 
-  case 59: // logic_binary: logic_all EQUIVALENT logic_all
-#line 370 "RSParserImpl.y"
-                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 57: // quant_var_enum: quant_var COMMA error
+#line 363 "RSParserImpl.y"
+                                            { state->OnError(ParseEID::expectedLocal); YYABORT; }
 #line 747 "RSParserImpl.cpp"
     break;
 
-  case 60: // logic_binary: logic_all IMPLICATION logic_all
-#line 371 "RSParserImpl.y"
+  case 58: // logic_binary: logic_all EQUIVALENT logic_all
+#line 367 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 753 "RSParserImpl.cpp"
     break;
 
-  case 61: // logic_binary: logic_all OR logic_all
-#line 372 "RSParserImpl.y"
+  case 59: // logic_binary: logic_all IMPLICATION logic_all
+#line 368 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 759 "RSParserImpl.cpp"
     break;
 
-  case 62: // logic_binary: logic_all AND logic_all
-#line 373 "RSParserImpl.y"
+  case 60: // logic_binary: logic_all OR logic_all
+#line 369 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 765 "RSParserImpl.cpp"
     break;
 
-  case 67: // setexpr: FUNCTION LS setexpr_enum RS
-#line 383 "RSParserImpl.y"
-                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 61: // logic_binary: logic_all AND logic_all
+#line 370 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 771 "RSParserImpl.cpp"
     break;
 
-  case 68: // setexpr: operation_name LP setexpr RPE
-#line 384 "RSParserImpl.y"
-                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 66: // setexpr: FUNCTION LS setexpr_enum RS
+#line 380 "RSParserImpl.y"
+                                            { yylhs.value = FunctionCall(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 777 "RSParserImpl.cpp"
     break;
 
-  case 75: // setexpr_enum: setexpr
-#line 395 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
+  case 67: // setexpr: text_function LP setexpr RPE
+#line 381 "RSParserImpl.y"
+                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 783 "RSParserImpl.cpp"
     break;
 
-  case 77: // setexpr_enum_min2: setexpr_enum COMMA setexpr
-#line 399 "RSParserImpl.y"
-                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+  case 74: // setexpr_enum: setexpr
+#line 392 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
 #line 789 "RSParserImpl.cpp"
     break;
 
-  case 85: // setexpr_binary: setexpr PLUS setexpr
-#line 416 "RSParserImpl.y"
-                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 76: // setexpr_enum_min2: setexpr_enum COMMA setexpr
+#line 396 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
 #line 795 "RSParserImpl.cpp"
     break;
 
-  case 86: // setexpr_binary: setexpr MINUS setexpr
-#line 417 "RSParserImpl.y"
+  case 85: // setexpr_binary: setexpr PLUS setexpr
+#line 414 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 801 "RSParserImpl.cpp"
     break;
 
-  case 87: // setexpr_binary: setexpr MULTIPLY setexpr
-#line 418 "RSParserImpl.y"
+  case 86: // setexpr_binary: setexpr MINUS setexpr
+#line 415 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 807 "RSParserImpl.cpp"
     break;
 
-  case 88: // setexpr_binary: setexpr UNION setexpr
-#line 419 "RSParserImpl.y"
+  case 87: // setexpr_binary: setexpr MULTIPLY setexpr
+#line 416 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 813 "RSParserImpl.cpp"
     break;
 
-  case 89: // setexpr_binary: setexpr SET_MINUS setexpr
-#line 420 "RSParserImpl.y"
+  case 88: // setexpr_binary: setexpr UNION setexpr
+#line 417 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 819 "RSParserImpl.cpp"
     break;
 
-  case 90: // setexpr_binary: setexpr SYMMINUS setexpr
-#line 421 "RSParserImpl.y"
+  case 89: // setexpr_binary: setexpr SET_MINUS setexpr
+#line 418 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 825 "RSParserImpl.cpp"
     break;
 
-  case 91: // setexpr_binary: setexpr INTERSECTION setexpr
-#line 422 "RSParserImpl.y"
+  case 90: // setexpr_binary: setexpr SYMMINUS setexpr
+#line 419 "RSParserImpl.y"
                                             { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 831 "RSParserImpl.cpp"
     break;
 
-  case 92: // setexpr_binary: setexpr DECART setexpr
-#line 423 "RSParserImpl.y"
-                                            { yylhs.value = Decartian(yystack_[2].value, yystack_[1].value, yystack_[0].value);}
+  case 91: // setexpr_binary: setexpr INTERSECTION setexpr
+#line 420 "RSParserImpl.y"
+                                            { yylhs.value = BinaryOperation(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 837 "RSParserImpl.cpp"
     break;
 
-  case 93: // setexpr_binary: LP setexpr_binary RPE
-#line 424 "RSParserImpl.y"
-                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 92: // setexpr_binary: setexpr DECART setexpr
+#line 421 "RSParserImpl.y"
+                                            { yylhs.value = Decartian(yystack_[2].value, yystack_[1].value, yystack_[0].value);}
 #line 843 "RSParserImpl.cpp"
     break;
 
-  case 101: // enumeration: LC setexpr_enum RC
-#line 437 "RSParserImpl.y"
-                                            { yylhs.value = ReplaceBrackets(TokenID::NT_ENUMERATION, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 93: // setexpr_binary: LP setexpr_binary RPE
+#line 422 "RSParserImpl.y"
+                                            { yylhs.value = RemoveBrackets(yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 849 "RSParserImpl.cpp"
     break;
 
-  case 102: // tuple: LP setexpr_enum_min2 RPE
-#line 440 "RSParserImpl.y"
-                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
+  case 101: // enumeration: LC setexpr_enum RC
+#line 435 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_ENUMERATION, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 855 "RSParserImpl.cpp"
     break;
 
-  case 103: // boolean: BOOLEAN LP setexpr RPE
-#line 443 "RSParserImpl.y"
-                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 102: // tuple: LP setexpr_enum_min2 RPE
+#line 438 "RSParserImpl.y"
+                                            { yylhs.value = ReplaceBrackets(TokenID::NT_TUPLE, yystack_[2].value, yystack_[1].value, yystack_[0].value); }
 #line 861 "RSParserImpl.cpp"
     break;
 
-  case 104: // boolean: BOOLEAN boolean
-#line 444 "RSParserImpl.y"
-                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value); }
+  case 103: // boolean: BOOLEAN LP setexpr RPE
+#line 441 "RSParserImpl.y"
+                                            { yylhs.value = TextOperator(yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 867 "RSParserImpl.cpp"
     break;
 
-  case 105: // filter_expression: FILTER LS setexpr_enum RS LP setexpr RPE
-#line 447 "RSParserImpl.y"
-                                               { yylhs.value = FilterCall(yystack_[6].value, yystack_[4].value, yystack_[1].value, yystack_[0].value); }
+  case 104: // boolean: BOOLEAN boolean
+#line 442 "RSParserImpl.y"
+                                            { yylhs.value = UnaryOperation(yystack_[1].value, yystack_[0].value); }
 #line 873 "RSParserImpl.cpp"
     break;
 
-  case 106: // declarative: LC LOCAL IN setexpr BAR logic RCE
-#line 451 "RSParserImpl.y"
-                                            { yylhs.value = TermDeclaration(yystack_[6].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 105: // filter_expression: FILTER LS setexpr_enum RS LP setexpr RPE
+#line 445 "RSParserImpl.y"
+                                               { yylhs.value = FilterCall(yystack_[6].value, yystack_[4].value, yystack_[1].value, yystack_[0].value); }
 #line 879 "RSParserImpl.cpp"
     break;
 
-  case 107: // declarative: DECLARATIVE LC variable IN setexpr BAR logic RCE
-#line 452 "RSParserImpl.y"
-                                                       { yylhs.value = TermDeclaration(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 106: // declarative: LC LOCAL IN setexpr BAR logic RCE
+#line 449 "RSParserImpl.y"
+                                            { yylhs.value = TermDeclaration(yystack_[6].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 885 "RSParserImpl.cpp"
     break;
 
-  case 108: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR logic BAR setexpr RCE
-#line 455 "RSParserImpl.y"
-                                                                     { yylhs.value = FullRecursion(yystack_[9].value, yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 107: // declarative: DECLARATIVE LC variable IN setexpr BAR logic RCE
+#line 450 "RSParserImpl.y"
+                                                       { yylhs.value = TermDeclaration(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 891 "RSParserImpl.cpp"
     break;
 
-  case 109: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR setexpr RCE
-#line 456 "RSParserImpl.y"
-                                                           { yylhs.value = ShortRecursion(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 108: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR logic BAR setexpr RCE
+#line 453 "RSParserImpl.y"
+                                                                     { yylhs.value = FullRecursion(yystack_[9].value, yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 897 "RSParserImpl.cpp"
     break;
 
-  case 110: // imperative: IMPERATIVE LC setexpr BAR imp_blocks RCE
-#line 459 "RSParserImpl.y"
-                                               { yylhs.value = Imperative(yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
+  case 109: // recursion: RECURSIVE LC variable ASSIGN setexpr BAR setexpr RCE
+#line 454 "RSParserImpl.y"
+                                                           { yylhs.value = ShortRecursion(yystack_[7].value, yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 903 "RSParserImpl.cpp"
     break;
 
-  case 111: // imp_blocks: imp_block
-#line 462 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
+  case 110: // imperative: IMPERATIVE LC setexpr BAR imp_blocks RCE
+#line 457 "RSParserImpl.y"
+                                               { yylhs.value = Imperative(yystack_[5].value, yystack_[3].value, yystack_[1].value, yystack_[0].value); }
 #line 909 "RSParserImpl.cpp"
     break;
 
-  case 112: // imp_blocks: imp_blocks SEMICOLON imp_blocks
-#line 463 "RSParserImpl.y"
-                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
+  case 111: // imp_blocks: imp_block
+#line 460 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::INTERRUPT, yystack_[0].value); }
 #line 915 "RSParserImpl.cpp"
     break;
 
-  case 113: // imp_block: LOCAL ITERATE setexpr
-#line 466 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::NT_IMP_DECLARE, yystack_[2].value, yystack_[0].value); }
+  case 112: // imp_blocks: imp_blocks SEMICOLON imp_blocks
+#line 461 "RSParserImpl.y"
+                                            { yylhs.value = Enumeration(TokenID::INTERRUPT, yystack_[2].value, yystack_[0].value); }
 #line 921 "RSParserImpl.cpp"
     break;
 
-  case 114: // imp_block: LOCAL ASSIGN setexpr
-#line 467 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::NT_IMP_ASSIGN, yystack_[2].value, yystack_[0].value); }
+  case 113: // imp_block: LOCAL ITERATE setexpr
+#line 464 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_DECLARE, yystack_[2].value, yystack_[0].value); }
 #line 927 "RSParserImpl.cpp"
     break;
 
-  case 115: // imp_block: logic
-#line 468 "RSParserImpl.y"
-                                            { yylhs.value = AddNode(TokenID::NT_IMP_LOGIC, yystack_[0].value); }
+  case 114: // imp_block: LOCAL ASSIGN setexpr
+#line 465 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_ASSIGN, yystack_[2].value, yystack_[0].value); }
 #line 933 "RSParserImpl.cpp"
     break;
 
-  case 117: // RPE: error
-#line 475 "RSParserImpl.y"
-            { state->OnError(ParseEID::missingParenthesis); YYABORT; }
+  case 115: // imp_block: logic
+#line 466 "RSParserImpl.y"
+                                            { yylhs.value = AddNode(TokenID::NT_IMP_LOGIC, yystack_[0].value); }
 #line 939 "RSParserImpl.cpp"
     break;
 
-  case 119: // RCE: error
-#line 479 "RSParserImpl.y"
-            { state->OnError(ParseEID::missingCurlyBrace); YYABORT; }
+  case 117: // RPE: error
+#line 473 "RSParserImpl.y"
+            { state->OnError(ParseEID::missingParenthesis); YYABORT; }
 #line 945 "RSParserImpl.cpp"
     break;
 
+  case 119: // RCE: error
+#line 477 "RSParserImpl.y"
+            { state->OnError(ParseEID::missingCurlyBrace); YYABORT; }
+#line 951 "RSParserImpl.cpp"
+    break;
 
-#line 949 "RSParserImpl.cpp"
+
+#line 955 "RSParserImpl.cpp"
 
             default:
               break;
@@ -1290,210 +1296,220 @@ namespace ccl { namespace rslang { namespace detail {
   }
 
 
-  const signed char RSParserImpl::yypact_ninf_ = -58;
+  const signed char RSParserImpl::yypact_ninf_ = -115;
 
   const signed char RSParserImpl::yytable_ninf_ = -116;
 
   const short
   RSParserImpl::yypact_[] =
   {
-     236,   -58,   111,   -34,   -17,   -58,   -58,   -58,   -58,   -58,
-     -58,   342,    82,   -58,   -58,    25,   -58,   -58,   -58,   -58,
-      46,    56,    75,   342,   414,     9,    60,   -58,    85,   -58,
-     -58,   137,   224,   -58,   -58,   -58,    79,   -58,   553,   118,
-     -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,
-     -58,   342,   466,   466,   466,   -58,   -58,   -58,   -58,   -58,
-     -58,   553,   466,   -58,   466,    35,    35,   466,   -58,    70,
-     101,   553,   121,    17,   202,   157,   -58,   466,   175,    24,
-     -58,   -58,    10,    63,   -58,   -58,    97,   342,   342,   342,
-     342,   -58,   -58,   100,   -58,   -19,   -58,   466,   466,   466,
-     -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,   -58,
-     -58,   466,   466,   466,   466,   466,   466,   466,   -58,   175,
-     126,   203,   129,   206,    35,   163,   144,   489,   -58,   -58,
-     -58,   -58,   466,   -58,   -58,   466,   -58,   -58,   466,   342,
-      89,   -58,   120,   241,   176,   -58,   -58,   -58,    19,   146,
-     466,   148,   143,   143,   190,   -58,   -58,   -58,   -58,   -58,
-     175,   129,   -58,   -58,   -58,   207,   466,   466,   394,   175,
-     503,   175,   -58,   -58,   -58,   -58,   154,   290,   -58,   -58,
-     -58,   466,   516,   521,   123,     6,     8,   -58,   342,   -58,
-     -58,   -58,   -58,   129,   342,   342,   466,   466,   -58,   -58,
-     394,   -58,    33,   -58,    33,   169,    14,   175,   175,   -58,
-     -58,   -58,   466,   -58,    73,   -58
+     289,  -115,    83,   -21,     1,  -115,  -115,  -115,  -115,  -115,
+    -115,   395,     8,  -115,  -115,   -20,  -115,  -115,  -115,  -115,
+     -36,    -2,    42,   395,   467,    36,    46,  -115,  -115,  -115,
+      61,   161,  -115,  -115,  -115,    25,  -115,   604,    30,  -115,
+    -115,  -115,  -115,  -115,  -115,  -115,  -115,  -115,  -115,  -115,
+     395,   519,    65,   519,    65,   519,  -115,    71,    78,  -115,
+    -115,  -115,  -115,   604,   519,  -115,   519,    22,    22,   519,
+    -115,   100,   135,   604,    81,    12,   204,   140,  -115,   519,
+     326,   -38,  -115,  -115,    21,    -1,  -115,  -115,   395,   395,
+     395,   395,  -115,  -115,    28,  -115,   -12,  -115,   519,   519,
+     519,  -115,  -115,  -115,  -115,  -115,  -115,  -115,  -115,  -115,
+    -115,  -115,   519,   519,   519,   519,   519,   519,   519,  -115,
+     326,  -115,    26,  -115,    86,   143,   123,    22,   145,   107,
+     215,  -115,  -115,  -115,  -115,   519,  -115,  -115,   519,  -115,
+    -115,   519,   395,    92,    80,   177,   155,  -115,  -115,  -115,
+      19,   134,   519,    29,   115,   115,   130,  -115,  -115,  -115,
+    -115,  -115,   326,   143,  -115,  -115,  -115,   152,   519,   519,
+     447,   326,   542,   326,  -115,  -115,  -115,  -115,    37,   343,
+    -115,  -115,  -115,   519,   556,   569,   157,     7,    15,  -115,
+     395,  -115,  -115,  -115,  -115,   143,   395,   395,   519,   519,
+    -115,  -115,   447,  -115,    18,  -115,    18,   137,   253,   326,
+     326,  -115,  -115,  -115,   519,  -115,    75,  -115
   };
 
   const signed char
   RSParserImpl::yydefact_[] =
   {
-       0,    84,    81,     9,    10,    83,    78,    80,    79,    52,
-      53,     0,     0,    72,    73,     0,    74,    69,    70,    71,
-       0,     0,     0,     0,     0,     0,     0,     2,    82,     3,
-       4,    29,     0,    30,    26,    27,     0,    28,    12,     0,
-      63,    64,    65,    66,    94,    95,    96,    97,    98,   100,
-      99,     5,     0,     0,     0,    81,    82,    51,    49,    50,
-      45,     0,     0,   104,     0,     0,     0,     0,    29,     0,
-       0,    75,     0,     0,     0,    84,    10,     0,    75,     0,
-      76,    14,     0,     0,    15,     1,     0,     0,     0,     0,
-       0,    47,    20,     0,    54,     0,    55,     0,     0,     0,
-      41,    42,    43,    44,    40,    39,    34,    35,    36,    37,
-      38,     0,     0,     0,     0,     0,     0,     0,     7,     6,
-       0,     0,     0,     0,     0,     0,     0,     0,   117,   116,
-      32,    31,     0,   102,    93,     0,   101,    19,     0,     0,
-       0,     8,    59,    60,    61,    62,    56,    24,     0,     0,
-       0,     0,    85,    86,    87,    92,    88,    91,    89,    90,
-      33,     0,    67,    48,   103,     0,     0,     0,     0,    77,
-       0,    18,    13,    17,    16,    21,     0,     0,    58,    57,
-      68,     0,     0,     0,    84,    29,     0,   111,     0,    23,
-      25,    22,    46,     0,     0,     0,     0,     0,   119,   118,
-       0,   110,     0,   105,     0,    29,     0,   114,   113,   112,
-     106,   107,     0,   109,     0,   108
+       0,    83,    80,    81,    82,    84,    77,    79,    78,    51,
+      52,     0,     0,    71,    72,     0,    73,    68,    69,    70,
+       0,     0,     0,     0,     0,     0,     0,     2,     3,     4,
+      28,     0,    29,    25,    26,     0,    27,    11,     0,    62,
+      63,    64,    65,    94,    95,    96,    97,    98,   100,    99,
+       5,     0,     0,     0,     0,     0,    80,    81,    82,    50,
+      48,    49,    44,     0,     0,   104,     0,     0,     0,     0,
+      28,     0,     0,    74,     0,     0,     0,    83,    82,     0,
+      74,     0,    75,    13,     0,     0,    14,     1,     0,     0,
+       0,     0,    46,    19,     0,    53,     0,    54,     0,     0,
+       0,    40,    41,    42,    43,    39,    38,    33,    34,    35,
+      36,    37,     0,     0,     0,     0,     0,     0,     0,     7,
+       6,     8,     0,     9,     0,     0,     0,     0,     0,     0,
+       0,   117,   116,    31,    30,     0,   102,    93,     0,   101,
+      18,     0,     0,     0,    58,    59,    60,    61,    55,    23,
+       0,     0,     0,     0,    85,    86,    87,    92,    88,    91,
+      89,    90,    32,     0,    66,    47,   103,     0,     0,     0,
+       0,    76,     0,    17,    12,    16,    15,    20,     0,     0,
+      57,    56,    67,     0,     0,     0,    83,    28,     0,   111,
+       0,    22,    24,    21,    45,     0,     0,     0,     0,     0,
+     119,   118,     0,   110,     0,   105,     0,    28,     0,   114,
+     113,   112,   106,   107,     0,   109,     0,   108
   };
 
   const short
   RSParserImpl::yypgoto_[] =
   {
-     -58,   -58,   -58,   228,   -50,   178,   -58,   128,   -30,    93,
-      95,     4,   164,    -8,    -9,   -58,    -6,   107,   -58,   119,
-     -58,   249,     0,   -58,    94,    -4,   -58,   -58,    -2,   -58,
-     -58,   -58,   273,   -58,   -58,   -58,   -58,    86,   -58,   -57,
-     -13
+    -115,  -115,  -115,   -39,    85,  -115,    66,   -34,    32,    33,
+       4,   101,    -8,    -9,  -115,    -6,    34,  -115,    59,  -115,
+     201,     0,  -115,    67,   -16,  -115,  -115,   -11,  -115,  -115,
+    -115,   213,  -115,  -115,  -115,  -115,    27,  -115,   -66,  -114
   };
 
   const short
   RSParserImpl::yydefgoto_[] =
   {
-      -1,    26,    27,    56,    29,    30,    83,    84,   147,   148,
-     149,    68,    32,    33,    34,   116,    35,    60,    36,    95,
-      96,    37,    61,    39,    72,    80,    40,    41,    42,    43,
-      44,    45,    46,    47,    48,    49,    50,   186,   187,   130,
-     201
+      -1,    26,    27,    28,    29,    85,    86,   149,   150,   151,
+      70,    31,    32,    33,   117,    34,    62,    35,    96,    97,
+      36,    63,    38,    74,    82,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,   188,   189,   133,   203
   };
 
   const short
   RSParserImpl::yytable_[] =
   {
-      38,   118,    58,    57,    31,    59,    94,  -115,   150,   198,
-      81,   137,    82,   131,    69,   198,   133,   134,   128,    73,
-     128,    74,    53,    71,    78,    97,    98,    99,   100,   101,
-     102,   103,   104,   105,   198,   125,   126,   138,    92,    54,
-     151,   106,   107,   108,   109,   110,   111,   112,   113,   114,
-     115,    38,   119,    78,    78,    31,   -29,   -29,   -29,   -29,
-      85,  -115,   122,   199,    78,   164,  -115,   127,   200,   199,
-     129,   128,   129,    73,   198,    74,   -76,    78,   -25,   136,
-      91,    64,    92,   132,    97,    98,    99,   124,   199,   172,
-     173,   175,    82,   -26,   -26,   -26,   -26,   152,   153,   154,
-      65,   146,   128,    92,   180,   111,   112,   113,   114,   115,
-      66,   155,   156,   157,   158,   159,   160,   161,    79,    12,
-     139,    94,   140,   129,   -28,   -28,   -28,   -28,   199,    67,
-     128,    93,   169,    86,    62,   170,   203,   -11,   171,    38,
-      97,    98,    99,    31,    88,    89,    90,   120,   121,   178,
-     177,    92,   124,    25,   129,   189,    99,    92,   123,    51,
-      52,   111,   112,   113,   114,   115,   182,   183,    58,    57,
-     117,    59,   185,   196,   197,   111,   112,   113,   114,   115,
-     132,   193,   129,   162,   135,   132,    97,    98,    99,   210,
-     166,   211,   202,   213,   167,   206,   207,   208,   204,   205,
-      93,   215,    90,   128,   185,   176,   124,   111,   112,   113,
-     114,   115,   214,   -65,   -65,   -65,   -65,   -65,   -65,   -65,
-     -65,   -65,   111,   112,   113,   114,   115,   212,    28,   -65,
-     -65,   -65,   -65,   -65,   -65,   -65,   -65,   -65,   -65,     1,
-       2,     3,     4,     5,     6,     7,     8,    87,    88,    89,
-      90,   142,   143,   144,   145,   129,     9,    10,    11,   181,
-     163,   -65,   132,   165,   141,   132,    89,    90,   174,   190,
-     179,   191,    70,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,   192,    63,   209,     0,    23,     0,
-      24,     0,    25,     1,    55,     3,     4,     5,     6,     7,
-       8,    97,    98,    99,     0,     0,     0,     0,     0,     0,
-       9,    10,    11,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,   111,   112,   113,   114,   115,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,     0,     0,
-       0,     0,    23,     0,    24,     1,    55,     3,     4,     5,
-       6,     7,     8,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     9,    10,    11,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    12,
-      13,    14,    15,    16,    17,    18,    19,    20,    21,    22,
-       0,     0,     0,     0,    23,     0,    24,   184,    55,     3,
-       4,     5,     6,     7,     8,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     9,    10,    11,    75,    55,     3,
-      76,     5,     6,     7,     8,     0,     0,     0,     0,     0,
-       0,    12,    13,    14,    15,    16,    17,    18,    19,    20,
-      21,    22,     0,     0,     0,     0,    23,     0,    24,     0,
-       0,    12,    13,    14,    15,    16,    17,    18,    19,    20,
-      21,    22,     0,     0,     0,     0,    77,     0,    24,     1,
-      55,     3,    76,     5,     6,     7,     8,     0,     0,     0,
+      37,    95,    60,    59,    30,    61,   134,    75,  -115,   136,
+     137,   119,    76,   131,    71,   152,   200,   139,    67,   200,
+     131,   135,   140,    73,    80,    93,    92,    52,    93,   148,
+     180,    93,    93,   128,   129,    53,    66,    83,   191,    84,
+      93,   -28,   -28,   -28,   -28,    12,    87,   153,   141,    54,
+      37,   120,    68,    80,    30,    80,   142,    55,   143,   166,
+      64,   -10,  -115,    75,   125,   132,    80,  -115,    76,   130,
+     201,   -75,   132,   201,   127,   202,   200,    94,   -24,    80,
+     127,    94,   118,   164,   177,   135,    98,    99,   100,   127,
+     212,    81,   213,   175,   215,    84,    69,   182,   154,   155,
+     156,   131,   217,   174,    89,    90,    91,   112,   113,   114,
+     115,   116,   157,   158,   159,   160,   161,   162,   163,    95,
+     122,    25,   124,   -25,   -25,   -25,   -25,    53,   100,   205,
+     201,    50,    51,   126,    55,   171,   131,   121,   172,   123,
+     135,   173,    37,   165,   131,   135,    30,   112,   113,   114,
+     115,   116,   179,   132,    98,    99,   100,   169,   -27,   -27,
+     -27,   -27,   112,   113,   114,   115,   116,   138,   184,   185,
+      60,    59,   168,    61,   187,   112,   113,   114,   115,   116,
+     167,    91,   135,   195,    88,    89,    90,    91,   132,   144,
+     145,   146,   147,   178,   204,   214,   132,   208,   209,   210,
+     206,   207,    90,    91,   183,   131,   187,   198,   199,   176,
+     192,   193,   181,   194,   216,   -64,   -64,   -64,   -64,   -64,
+     -64,   -64,   -64,   -64,    72,    65,    98,    99,   100,   211,
+       0,   -64,   -64,   -64,   -64,   -64,   -64,   -64,   -64,   -64,
+     -64,     0,     0,     0,     0,     0,     0,   112,   113,   114,
+     115,   116,     0,     0,   200,     0,     0,   132,     0,     0,
+       0,     0,     0,   -64,    98,    99,   100,   101,   102,   103,
+     104,   105,   106,   170,     0,     0,     0,     0,     0,     0,
+     107,   108,   109,   110,   111,   112,   113,   114,   115,   116,
+       0,     0,     1,     2,     3,     4,     5,     6,     7,     8,
+       0,     0,     0,     0,     0,     0,     0,     0,   201,     9,
+      10,    11,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,    98,    99,   100,
+       0,    23,     0,    24,     0,    25,     1,    56,    57,    58,
+       5,     6,     7,     8,    98,    99,   100,     0,   112,   113,
+     114,   115,   116,     9,    10,    11,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,   112,   113,   114,   115,   116,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,     0,     0,     0,     0,    23,     0,    24,     1,    56,
+      57,    58,     5,     6,     7,     8,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     9,    10,    11,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,     0,     0,     0,     0,    23,     0,    24,
+     186,    56,    57,    58,     5,     6,     7,     8,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     9,    10,    11,
+      77,    56,    57,    78,     5,     6,     7,     8,     0,     0,
+       0,     0,     0,     0,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,     0,     0,     0,     0,    23,
+       0,    24,     0,     0,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,     0,     0,     0,     0,    79,
+       0,    24,     1,    56,    57,    78,     5,     6,     7,     8,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      97,    98,    99,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    97,    98,    99,     0,    77,     0,
-      24,   111,   112,   113,   114,   115,     0,    97,    98,    99,
-       0,     0,    97,    98,    99,   111,   112,   113,   114,   115,
-       0,     0,     0,     0,     0,     0,     0,   168,   111,   112,
-     113,   114,   115,   111,   112,   113,   114,   115,     0,     0,
-       0,   188,     0,     0,    97,    98,    99,   100,   101,   102,
-     103,   104,   105,     0,   194,     0,     0,     0,     0,   195,
-     106,   107,   108,   109,   110,   111,   112,   113,   114,   115
+       0,     0,     0,    98,    99,   100,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,    98,    99,   100,
+       0,    79,     0,    24,   112,   113,   114,   115,   116,     0,
+      98,    99,   100,     0,     0,     0,     0,     0,   112,   113,
+     114,   115,   116,     0,     0,     0,     0,     0,     0,     0,
+     190,   112,   113,   114,   115,   116,     0,     0,     0,     0,
+       0,     0,     0,     0,   196,    98,    99,   100,   101,   102,
+     103,   104,   105,   106,     0,     0,     0,   197,     0,     0,
+       0,   107,   108,   109,   110,   111,   112,   113,   114,   115,
+     116
   };
 
   const short
   RSParserImpl::yycheck_[] =
   {
-       0,    51,    11,    11,     0,    11,    36,     1,    27,     1,
-       1,     1,     3,    70,    23,     1,    73,    74,     1,    23,
-       1,    23,    56,    23,    24,    11,    12,    13,    14,    15,
-      16,    17,    18,    19,     1,    65,    66,    27,     3,    56,
-      59,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-      36,    51,    52,    53,    54,    51,    23,    24,    25,    26,
-       0,    55,    62,    55,    64,   122,    60,    67,    60,    55,
-      53,     1,    53,    77,     1,    77,    59,    77,    59,    55,
-       1,    56,     3,    59,    11,    12,    13,    52,    55,   139,
-       1,   148,     3,    23,    24,    25,    26,    97,    98,    99,
-      54,     1,     1,     3,   161,    32,    33,    34,    35,    36,
-      54,   111,   112,   113,   114,   115,   116,   117,    24,    37,
-      57,   151,    59,    53,    23,    24,    25,    26,    55,    54,
-       1,    52,   132,    48,    52,   135,   193,     0,   138,   139,
-      11,    12,    13,   139,    24,    25,    26,    53,    54,     1,
-     150,     3,    52,    56,    53,     1,    13,     3,    64,    48,
-      49,    32,    33,    34,    35,    36,   166,   167,   177,   177,
-      52,   177,   168,    50,    51,    32,    33,    34,    35,    36,
-      59,   181,    53,    57,    27,    59,    11,    12,    13,   202,
-      27,   204,   188,   206,    50,   195,   196,   197,   194,   195,
-      52,   214,    26,     1,   200,    59,    52,    32,    33,    34,
-      35,    36,   212,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    32,    33,    34,    35,    36,    58,     0,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,     3,
-       4,     5,     6,     7,     8,     9,    10,    23,    24,    25,
-      26,    87,    88,    89,    90,    53,    20,    21,    22,    52,
-      57,    59,    59,    57,    86,    59,    25,    26,   140,   176,
-     151,   176,    23,    37,    38,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,   177,    12,   200,    -1,    52,    -1,
-      54,    -1,    56,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    -1,    -1,    -1,    -1,    -1,    -1,
-      20,    21,    22,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,    47,    -1,    -1,
-      -1,    -1,    52,    -1,    54,     3,     4,     5,     6,     7,
-       8,     9,    10,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    20,    21,    22,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      -1,    -1,    -1,    -1,    52,    -1,    54,     3,     4,     5,
-       6,     7,     8,     9,    10,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    20,    21,    22,     3,     4,     5,
-       6,     7,     8,     9,    10,    -1,    -1,    -1,    -1,    -1,
-      -1,    37,    38,    39,    40,    41,    42,    43,    44,    45,
-      46,    47,    -1,    -1,    -1,    -1,    52,    -1,    54,    -1,
-      -1,    37,    38,    39,    40,    41,    42,    43,    44,    45,
-      46,    47,    -1,    -1,    -1,    -1,    52,    -1,    54,     3,
-       4,     5,     6,     7,     8,     9,    10,    -1,    -1,    -1,
+       0,    35,    11,    11,     0,    11,    72,    23,     1,    75,
+      76,    50,    23,     1,    23,    27,     1,    55,    54,     1,
+       1,    59,     1,    23,    24,     3,     1,    48,     3,     1,
+       1,     3,     3,    67,    68,    56,    56,     1,     1,     3,
+       3,    23,    24,    25,    26,    37,     0,    59,    27,    48,
+      50,    51,    54,    53,    50,    55,    57,    56,    59,   125,
+      52,     0,    55,    79,    64,    53,    66,    60,    79,    69,
+      55,    59,    53,    55,    52,    60,     1,    52,    59,    79,
+      52,    52,    52,    57,   150,    59,    11,    12,    13,    52,
+     204,    24,   206,     1,   208,     3,    54,   163,    98,    99,
+     100,     1,   216,   142,    24,    25,    26,    32,    33,    34,
+      35,    36,   112,   113,   114,   115,   116,   117,   118,   153,
+      53,    56,    55,    23,    24,    25,    26,    56,    13,   195,
+      55,    48,    49,    66,    56,   135,     1,    52,   138,    54,
+      59,   141,   142,    57,     1,    59,   142,    32,    33,    34,
+      35,    36,   152,    53,    11,    12,    13,    50,    23,    24,
+      25,    26,    32,    33,    34,    35,    36,    27,   168,   169,
+     179,   179,    27,   179,   170,    32,    33,    34,    35,    36,
+      57,    26,    59,   183,    23,    24,    25,    26,    53,    88,
+      89,    90,    91,    59,   190,    58,    53,   197,   198,   199,
+     196,   197,    25,    26,    52,     1,   202,    50,    51,   143,
+     178,   178,   153,   179,   214,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    23,    12,    11,    12,    13,   202,
+      -1,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    -1,    -1,    -1,    -1,    -1,    -1,    32,    33,    34,
+      35,    36,    -1,    -1,     1,    -1,    -1,    53,    -1,    -1,
+      -1,    -1,    -1,    59,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,    58,    -1,    -1,    -1,    -1,    -1,    -1,
+      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+      -1,    -1,     3,     4,     5,     6,     7,     8,     9,    10,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    55,    20,
+      21,    22,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    11,    12,    13,
+      -1,    52,    -1,    54,    -1,    56,     3,     4,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    -1,    32,    33,
+      34,    35,    36,    20,    21,    22,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    -1,    -1,    -1,    -1,    52,    -1,    54,     3,     4,
+       5,     6,     7,     8,     9,    10,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    20,    21,    22,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    -1,    -1,    -1,    -1,    52,    -1,    54,
+       3,     4,     5,     6,     7,     8,     9,    10,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    20,    21,    22,
+       3,     4,     5,     6,     7,     8,     9,    10,    -1,    -1,
+      -1,    -1,    -1,    -1,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    -1,    -1,    -1,    -1,    52,
+      -1,    54,    -1,    -1,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    -1,    -1,    -1,    -1,    52,
+      -1,    54,     3,     4,     5,     6,     7,     8,     9,    10,
       -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
       -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      11,    12,    13,    37,    38,    39,    40,    41,    42,    43,
-      44,    45,    46,    47,    11,    12,    13,    -1,    52,    -1,
-      54,    32,    33,    34,    35,    36,    -1,    11,    12,    13,
-      -1,    -1,    11,    12,    13,    32,    33,    34,    35,    36,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    58,    32,    33,
-      34,    35,    36,    32,    33,    34,    35,    36,    -1,    -1,
-      -1,    58,    -1,    -1,    11,    12,    13,    14,    15,    16,
-      17,    18,    19,    -1,    58,    -1,    -1,    -1,    -1,    58,
-      27,    28,    29,    30,    31,    32,    33,    34,    35,    36
+      -1,    -1,    -1,    11,    12,    13,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    11,    12,    13,
+      -1,    52,    -1,    54,    32,    33,    34,    35,    36,    -1,
+      11,    12,    13,    -1,    -1,    -1,    -1,    -1,    32,    33,
+      34,    35,    36,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      58,    32,    33,    34,    35,    36,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    58,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    -1,    -1,    -1,    58,    -1,    -1,
+      -1,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36
   };
 
   const signed char
@@ -1502,55 +1518,55 @@ namespace ccl { namespace rslang { namespace detail {
        0,     3,     4,     5,     6,     7,     8,     9,    10,    20,
       21,    22,    37,    38,    39,    40,    41,    42,    43,    44,
       45,    46,    47,    52,    54,    56,    62,    63,    64,    65,
-      66,    72,    73,    74,    75,    77,    79,    82,    83,    84,
+      71,    72,    73,    74,    76,    78,    81,    82,    83,    86,
       87,    88,    89,    90,    91,    92,    93,    94,    95,    96,
-      97,    48,    49,    56,    56,     4,    64,    74,    75,    77,
-      78,    83,    52,    93,    56,    54,    54,    54,    72,    75,
-      82,    83,    85,    86,    89,     3,     6,    52,    83,    85,
-      86,     1,     3,    67,    68,     0,    48,    23,    24,    25,
-      26,     1,     3,    52,    69,    80,    81,    11,    12,    13,
-      14,    15,    16,    17,    18,    19,    27,    28,    29,    30,
-      31,    32,    33,    34,    35,    36,    76,    52,    65,    83,
-      85,    85,    83,    85,    52,    69,    69,    83,     1,    53,
-     100,   100,    59,   100,   100,    27,    55,     1,    27,    57,
-      59,    66,    73,    73,    73,    73,     1,    69,    70,    71,
-      27,    59,    83,    83,    83,    83,    83,    83,    83,    83,
-      83,    83,    57,    57,   100,    57,    27,    50,    58,    83,
-      83,    83,    65,     1,    68,   100,    59,    83,     1,    80,
-     100,    52,    83,    83,     3,    72,    98,    99,    58,     1,
-      70,    71,    78,    83,    58,    58,    50,    51,     1,    55,
-      60,   101,    72,   100,    72,    72,    83,    83,    83,    98,
-     101,   101,    58,   101,    83,   101
+      48,    49,    48,    56,    48,    56,     4,     5,     6,    73,
+      74,    76,    77,    82,    52,    92,    56,    54,    54,    54,
+      71,    74,    81,    82,    84,    85,    88,     3,     6,    52,
+      82,    84,    85,     1,     3,    66,    67,     0,    23,    24,
+      25,    26,     1,     3,    52,    68,    79,    80,    11,    12,
+      13,    14,    15,    16,    17,    18,    19,    27,    28,    29,
+      30,    31,    32,    33,    34,    35,    36,    75,    52,    64,
+      82,    65,    84,    65,    84,    82,    84,    52,    68,    68,
+      82,     1,    53,    99,    99,    59,    99,    99,    27,    55,
+       1,    27,    57,    59,    72,    72,    72,    72,     1,    68,
+      69,    70,    27,    59,    82,    82,    82,    82,    82,    82,
+      82,    82,    82,    82,    57,    57,    99,    57,    27,    50,
+      58,    82,    82,    82,    64,     1,    67,    99,    59,    82,
+       1,    79,    99,    52,    82,    82,     3,    71,    97,    98,
+      58,     1,    69,    70,    77,    82,    58,    58,    50,    51,
+       1,    55,    60,   100,    71,    99,    71,    71,    82,    82,
+      82,    97,   100,   100,    58,   100,    82,   100
   };
 
   const signed char
   RSParserImpl::yyr1_[] =
   {
-       0,    61,    62,    62,    62,    63,    63,    63,    63,    64,
-      64,    65,    65,    66,    66,    67,    67,    67,    68,    68,
-      69,    69,    70,    70,    71,    71,    72,    72,    72,    73,
-      73,    74,    74,    75,    76,    76,    76,    76,    76,    76,
-      76,    76,    76,    76,    76,    77,    77,    77,    77,    78,
-      78,    78,    79,    79,    80,    80,    80,    81,    81,    82,
-      82,    82,    82,    83,    83,    83,    83,    83,    83,    84,
-      84,    84,    84,    84,    84,    85,    85,    86,    87,    87,
-      87,    88,    88,    88,    88,    89,    89,    89,    89,    89,
-      89,    89,    89,    89,    90,    90,    90,    90,    90,    90,
-      90,    91,    92,    93,    93,    94,    95,    95,    96,    96,
-      97,    98,    98,    99,    99,    99,   100,   100,   101,   101
+       0,    61,    62,    62,    62,    63,    63,    63,    63,    63,
+      64,    64,    65,    65,    66,    66,    66,    67,    67,    68,
+      68,    69,    69,    70,    70,    71,    71,    71,    72,    72,
+      73,    73,    74,    75,    75,    75,    75,    75,    75,    75,
+      75,    75,    75,    75,    76,    76,    76,    76,    77,    77,
+      77,    78,    78,    79,    79,    79,    80,    80,    81,    81,
+      81,    81,    82,    82,    82,    82,    82,    82,    83,    83,
+      83,    83,    83,    83,    84,    84,    85,    86,    86,    86,
+      87,    87,    87,    87,    87,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    89,    89,    89,    89,    89,    89,
+      89,    90,    91,    92,    92,    93,    94,    94,    95,    95,
+      96,    97,    97,    98,    98,    98,    99,    99,   100,   100
   };
 
   const signed char
   RSParserImpl::yyr2_[] =
   {
-       0,     2,     1,     1,     1,     2,     3,     3,     3,     1,
-       1,     1,     1,     4,     2,     1,     3,     3,     3,     2,
-       1,     3,     3,     3,     1,     1,     1,     1,     1,     1,
-       1,     3,     3,     3,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     2,     5,     2,     4,     1,
-       1,     1,     1,     1,     1,     1,     2,     3,     3,     3,
-       3,     3,     3,     1,     1,     1,     1,     4,     4,     1,
-       1,     1,     1,     1,     1,     1,     1,     3,     1,     1,
+       0,     2,     1,     1,     1,     2,     3,     3,     3,     3,
+       1,     1,     4,     2,     1,     3,     3,     3,     2,     1,
+       3,     3,     3,     1,     1,     1,     1,     1,     1,     1,
+       3,     3,     3,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     2,     5,     2,     4,     1,     1,
+       1,     1,     1,     1,     1,     2,     3,     3,     3,     3,
+       3,     3,     1,     1,     1,     1,     4,     4,     1,     1,
+       1,     1,     1,     1,     1,     1,     3,     1,     1,     1,
        1,     1,     1,     1,     1,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     1,     1,     1,     1,     1,     1,
        1,     3,     3,     4,     2,     7,     7,     8,    10,     8,
@@ -1574,15 +1590,15 @@ namespace ccl { namespace rslang { namespace detail {
   "BOOL", "DEBOOL", "RED", "DECLARATIVE", "RECURSIVE", "IMPERATIVE",
   "DEFINE", "STRUCT", "ASSIGN", "ITERATE", "LP", "RP", "LC", "RC", "LS",
   "RS", "BAR", "COMMA", "SEMICOLON", "$accept", "expression",
-  "global_declaration", "function_name", "logic_or_setexpr",
-  "function_decl", "arguments", "declaration", "variable", "var_enum",
-  "var_all", "logic", "logic_all", "logic_par", "logic_predicates",
-  "binary_predicate", "logic_unary", "logic_no_binary", "quantifier",
-  "quant_var", "quant_var_enum", "logic_binary", "setexpr",
-  "operation_name", "setexpr_enum", "setexpr_enum_min2", "literal",
-  "identifier", "setexpr_binary", "setexpr_generators", "enumeration",
-  "tuple", "boolean", "filter_expression", "declarative", "recursion",
-  "imperative", "imp_blocks", "imp_block", "RPE", "RCE", YY_NULLPTR
+  "global_declaration", "logic_or_setexpr", "function_definition",
+  "arguments", "declaration", "variable", "var_enum", "var_all", "logic",
+  "logic_all", "logic_par", "logic_predicates", "binary_predicate",
+  "logic_unary", "logic_no_binary", "quantifier", "quant_var",
+  "quant_var_enum", "logic_binary", "setexpr", "text_function",
+  "setexpr_enum", "setexpr_enum_min2", "literal", "identifier",
+  "setexpr_binary", "setexpr_generators", "enumeration", "tuple",
+  "boolean", "filter_expression", "declarative", "recursion", "imperative",
+  "imp_blocks", "imp_block", "RPE", "RCE", YY_NULLPTR
   };
 #endif
 
@@ -1591,18 +1607,18 @@ namespace ccl { namespace rslang { namespace detail {
   const short
   RSParserImpl::yyrline_[] =
   {
-       0,   262,   262,   263,   264,   268,   269,   270,   271,   274,
-     275,   279,   280,   284,   285,   290,   291,   292,   295,   296,
-     300,   301,   304,   305,   308,   309,   314,   315,   316,   319,
-     320,   323,   324,   328,   331,   332,   333,   334,   335,   336,
-     337,   338,   339,   340,   341,   345,   346,   347,   348,   351,
-     352,   353,   356,   357,   360,   361,   362,   365,   366,   370,
-     371,   372,   373,   379,   380,   381,   382,   383,   384,   387,
-     388,   389,   390,   391,   392,   395,   396,   399,   403,   404,
-     405,   409,   410,   411,   412,   416,   417,   418,   419,   420,
-     421,   422,   423,   424,   428,   429,   430,   431,   432,   433,
-     434,   437,   440,   443,   444,   447,   451,   452,   455,   456,
-     459,   462,   463,   466,   467,   468,   474,   475,   478,   479
+       0,   262,   262,   263,   264,   268,   269,   270,   271,   272,
+     276,   277,   281,   282,   287,   288,   289,   292,   293,   297,
+     298,   301,   302,   305,   306,   311,   312,   313,   316,   317,
+     320,   321,   325,   328,   329,   330,   331,   332,   333,   334,
+     335,   336,   337,   338,   342,   343,   344,   345,   348,   349,
+     350,   353,   354,   357,   358,   359,   362,   363,   367,   368,
+     369,   370,   376,   377,   378,   379,   380,   381,   384,   385,
+     386,   387,   388,   389,   392,   393,   396,   400,   401,   402,
+     406,   407,   408,   409,   410,   414,   415,   416,   417,   418,
+     419,   420,   421,   422,   426,   427,   428,   429,   430,   431,
+     432,   435,   438,   441,   442,   445,   449,   450,   453,   454,
+     457,   460,   461,   464,   465,   466,   472,   473,   476,   477
   };
 
   void
@@ -1687,9 +1703,9 @@ namespace ccl { namespace rslang { namespace detail {
 
 #line 15 "RSParserImpl.y"
 } } } // ccl::rslang::detail
-#line 1691 "RSParserImpl.cpp"
+#line 1707 "RSParserImpl.cpp"
 
-#line 486 "RSParserImpl.y"
+#line 484 "RSParserImpl.y"
 
 
 #ifdef _MSC_VER

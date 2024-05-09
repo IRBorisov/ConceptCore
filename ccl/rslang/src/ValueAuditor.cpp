@@ -66,7 +66,7 @@ bool ValueAuditor::AssertAllValues(Cursor iter) {
   return true;
 }
 
-bool ValueAuditor::ViGlobalDefinition(Cursor iter) {
+bool ValueAuditor::ViGlobalDeclaration(Cursor iter) {
   if (iter->id == TokenID::PUNC_STRUCT) {
     return VisitChild(iter, 1) && SetCurrent(ValueClass::value);
   } else if (iter.ChildrenCount() == 1) {
@@ -77,10 +77,10 @@ bool ValueAuditor::ViGlobalDefinition(Cursor iter) {
 }
 
 bool ValueAuditor::ViFunctionCall(Cursor iter) {
-  const auto& globalName = iter(0).data.ToText();
-  const auto funcType = globalClass(globalName);
+  const auto& alias = iter(0).data.ToText();
+  const auto funcType = globalClass(alias);
   if (funcType == ValueClass::invalid) {
-    OnError(SemanticEID::globalNoValue, iter->pos.start, globalName);
+    OnError(SemanticEID::globalNoValue, iter->pos.start, alias);
     return false;
   }
 
@@ -98,7 +98,7 @@ bool ValueAuditor::ViFunctionCall(Cursor iter) {
     current = funcType;
     return true;
   } else {
-    return RunCheckOnFunc(iter, globalName, args);
+    return RunCheckOnFunc(iter, alias, args);
   }
 }
 
@@ -131,18 +131,18 @@ bool ValueAuditor::RunCheckOnFunc(
 }
 
 bool ValueAuditor::ViGlobal(Cursor iter) {
-  const auto& globalName = iter->data.ToText();
-  if (iter->id == TokenID::ID_RADICAL) {
-    return SetCurrent(ValueClass::value);
-  } else {
-    const auto type = globalClass(globalName);
-    if (type == ValueClass::invalid) {
-      OnError(SemanticEID::globalNoValue, iter->pos.start, globalName);
-      return false;
-    }
-    current = type;
-    return true;
+  const auto& alias = iter->data.ToText();
+  const auto type = globalClass(alias);
+  if (type == ValueClass::invalid) {
+    OnError(SemanticEID::globalNoValue, iter->pos.start, alias);
+    return false;
   }
+  current = type;
+  return true;
+}
+
+bool ValueAuditor::ViRadical(Cursor /*iter*/) {
+  return SetCurrent(ValueClass::value);
 }
 
 bool ValueAuditor::ViLocal(Cursor iter) {
@@ -158,7 +158,7 @@ bool ValueAuditor::ViQuantifier(Cursor iter) {
   return AssertChildIsValue(iter, 1) && VisitChild(iter, 2);
 }
 
-bool ValueAuditor::ViTypedPredicate(Cursor iter) {
+bool ValueAuditor::ViSetexprPredicate(Cursor iter) {
   switch (iter->id) {
   default:
   case TokenID::IN:
@@ -202,7 +202,7 @@ bool ValueAuditor::ViBoolean(Cursor iter) {
   return VisitChild(iter, 0) && SetCurrent(ValueClass::props);
 }
 
-bool ValueAuditor::ViTypedBinary(Cursor iter) {
+bool ValueAuditor::ViSetexprBinary(Cursor iter) {
   if (!VisitChild(iter, 0)) {
     return false;
   }

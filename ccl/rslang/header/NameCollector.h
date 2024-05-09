@@ -22,9 +22,10 @@ public:
 protected:
   bool VisitDefault(Cursor iter) { return MergeChildren(iter); }
 
-  bool ViGlobalDefinition(Cursor iter);
+  bool ViGlobalDeclaration(Cursor iter);
 
   bool ViGlobal(Cursor iter);
+  // bool ViRadical(Cursor iter);
   bool ViLocal(Cursor iter);
 
   bool ViQuantifier(Cursor iter);

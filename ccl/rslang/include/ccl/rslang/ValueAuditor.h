@@ -33,19 +33,20 @@ public:
   [[nodiscard]] ValueClass VType() const noexcept { return current; }
 
 protected:
-  bool ViGlobalDefinition(Cursor iter);
+  bool ViGlobalDeclaration(Cursor iter);
 
   bool ViFunctionDefinition(Cursor iter) { return VisitAllChildren(iter); }
   bool ViFunctionCall(Cursor iter);
 
   bool ViGlobal(Cursor iter);
+  bool ViRadical(Cursor /*iter*/);
   bool ViLocal(Cursor iter);
   bool ViInteger(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::value); }
   bool ViIntegerSet(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::props); }
   bool ViEmptySet(Cursor /*iter*/) noexcept { return SetCurrent(ValueClass::value); }
 
-  bool ViLocalBind(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
-  bool ViLocalEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
+  bool ViTupleDeclaration(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
+  bool ViEnumDeclaration(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViArgumentsEnum(Cursor iter) { return VisitAllChildren(iter); }
   bool ViArgument(Cursor iter) { return VisitAllChildren(iter); }
 
@@ -56,8 +57,8 @@ protected:
   bool ViNegation(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViLogicBinary(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViEquals(Cursor iter) { return AssertAllValues(iter); }
-  bool ViOrdering(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
-  bool ViTypedPredicate(Cursor iter);
+  bool ViIntegerPredicate(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
+  bool ViSetexprPredicate(Cursor iter);
 
   bool ViDecart(Cursor iter);
   bool ViBoolean(Cursor iter);
@@ -70,11 +71,11 @@ protected:
   bool ViRecursion(Cursor iter) { return AssertAllValues(iter); }
 
   bool ViTuple(Cursor iter) { return AssertAllValues(iter); }
-  bool ViSetEnum(Cursor iter) { return AssertAllValues(iter); }
+  bool ViEnumeration(Cursor iter) { return AssertAllValues(iter); }
   bool ViBool(Cursor iter) { return AssertChildIsValue(iter, 0); }
   bool ViDebool(Cursor iter) { return AssertChildIsValue(iter, 0); }
 
-  bool ViTypedBinary(Cursor iter);
+  bool ViSetexprBinary(Cursor iter);
   bool ViProjectSet(Cursor iter) { return AssertChildIsValue(iter, 0); }
   bool ViProjectTuple(Cursor iter) { return AssertChildIsValue(iter, 0); }
   bool ViFilter(Cursor iter) { return VisitAllChildren(iter); }

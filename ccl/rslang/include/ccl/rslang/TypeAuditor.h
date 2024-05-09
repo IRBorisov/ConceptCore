@@ -73,19 +73,20 @@ public:
   void SetExepectTypification(const bool value = true) noexcept;
 
 protected:
-  bool ViGlobalDefinition(Cursor iter);
+  bool ViGlobalDeclaration(Cursor iter);
 
   bool ViFunctionDefinition(Cursor iter);
   bool ViFunctionCall(Cursor iter);
 
   bool ViGlobal(Cursor iter);
+  bool ViRadical(Cursor iter);
   bool ViLocal(Cursor iter);
   bool ViInteger(Cursor /*iter*/) { return SetCurrent(Typification::Integer()); }
   bool ViIntegerSet(Cursor /*iter*/) { return SetCurrent(Typification::Integer().Bool()); }
   bool ViEmptySet(Cursor /*iter*/);
 
-  bool ViLocalBind(Cursor iter);
-  bool ViLocalEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
+  bool ViTupleDeclaration(Cursor iter);
+  bool ViEnumDeclaration(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViArgumentsEnum(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViArgument(Cursor iter);
 
@@ -96,8 +97,8 @@ protected:
   bool ViNegation(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViLogicBinary(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
   bool ViEquals(Cursor iter);
-  bool ViOrdering(Cursor iter);
-  bool ViTypedPredicate(Cursor iter);
+  bool ViIntegerPredicate(Cursor iter);
+  bool ViSetexprPredicate(Cursor iter);
 
   bool ViDecart(Cursor iter);
   bool ViBoolean(Cursor iter);
@@ -110,11 +111,11 @@ protected:
   bool ViRecursion(Cursor iter);
 
   bool ViTuple(Cursor iter);
-  bool ViSetEnum(Cursor iter);
-  bool ViBool(Cursor iter) { return ViSetEnum(iter); }
+  bool ViEnumeration(Cursor iter);
+  bool ViBool(Cursor iter) { return ViEnumeration(iter); }
   bool ViDebool(Cursor iter);
 
-  bool ViTypedBinary(Cursor iter);
+  bool ViSetexprBinary(Cursor iter);
   bool ViProjectSet(Cursor iter);
   bool ViProjectTuple(Cursor iter);
   bool ViFilter(Cursor iter);

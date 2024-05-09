@@ -18,19 +18,20 @@ public:
 private:
   bool VisitDefault(Cursor iter);
 
-  bool ViGlobalDefinition(Cursor iter);
+  bool ViGlobalDeclaration(Cursor iter);
 
   bool ViFunctionDefinition(Cursor iter);
   bool ViFunctionCall(Cursor iter);
 
   // bool ViGlobal(Cursor iter);
+  // bool ViRadical(Cursor iter);
   // bool ViLocal(Cursor iter);
   // bool ViInteger(Cursor /*iter*/);
   // bool ViIntegerSet(Cursor iter)
   // bool ViEmptySet(Cursor iter);
 
-  bool ViLocalBind(Cursor iter);
-  bool ViLocalEnum(Cursor iter);
+  bool ViTupleDeclaration(Cursor iter);
+  bool ViEnumDeclaration(Cursor iter);
   bool ViArgumentsEnum(Cursor iter);
   bool ViArgument(Cursor iter);
 
@@ -41,8 +42,8 @@ private:
   bool ViNegation(Cursor iter);
   bool ViLogicBinary(Cursor iter);
   bool ViEquals(Cursor iter);
-  bool ViOrdering(Cursor iter) { return ViEquals(iter); }
-  bool ViTypedPredicate(Cursor iter) { return ViEquals(iter); }
+  bool ViIntegerPredicate(Cursor iter) { return ViEquals(iter); }
+  bool ViSetexprPredicate(Cursor iter) { return ViEquals(iter); }
 
   bool ViDeclarative(Cursor iter);
   bool ViImperative(Cursor iter);
@@ -55,11 +56,11 @@ private:
   bool ViBoolean(Cursor iter);
 
   bool ViTuple(Cursor iter);
-  bool ViSetEnum(Cursor iter);
+  bool ViEnumeration(Cursor iter);
   bool ViBool(Cursor iter) { return ViCard(iter); }
   bool ViDebool(Cursor iter) { return ViCard(iter); }
 
-  bool ViTypedBinary(Cursor iter) { return ViArithmetic(iter); }
+  bool ViSetexprBinary(Cursor iter) { return ViArithmetic(iter); }
   bool ViProjectSet(Cursor iter) { return ViCard(iter); }
   bool ViProjectTuple(Cursor iter) { return ViCard(iter); }
   bool ViFilter(Cursor iter);

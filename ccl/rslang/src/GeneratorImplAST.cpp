@@ -19,7 +19,7 @@ bool GeneratorImplAST::VisitDefault(Cursor iter) {
   return true;
 }
 
-bool GeneratorImplAST::ViGlobalDefinition(Cursor iter) {
+bool GeneratorImplAST::ViGlobalDeclaration(Cursor iter) {
   OutputChild(iter, 0);
   rsText += iter->ToString(syntax);
   if (iter.ChildrenCount() > 1) {
@@ -48,12 +48,12 @@ bool GeneratorImplAST::ViFunctionCall(Cursor iter) {
   return true;
 }
 
-bool GeneratorImplAST::ViLocalBind(Cursor iter) {
+bool GeneratorImplAST::ViTupleDeclaration(Cursor iter) {
   EnumChildren(iter, '(', ')', std::string(R"(, )"));
   return true;
 }
 
-bool GeneratorImplAST::ViLocalEnum(Cursor iter) {
+bool GeneratorImplAST::ViEnumDeclaration(Cursor iter) {
   EnumChildren(iter, R"(, )");
   return true;
 }
@@ -237,7 +237,7 @@ bool GeneratorImplAST::ViTuple(Cursor iter) {
   return true;
 }
 
-bool GeneratorImplAST::ViSetEnum(Cursor iter) {
+bool GeneratorImplAST::ViEnumeration(Cursor iter) {
   EnumChildren(iter, '{', '}', R"(, )");
   return true;
 }

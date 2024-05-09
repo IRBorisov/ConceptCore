@@ -446,44 +446,43 @@ namespace ccl { namespace rslang { namespace detail {
         S_YYACCEPT = 61,                         // $accept
         S_expression = 62,                       // expression
         S_global_declaration = 63,               // global_declaration
-        S_function_name = 64,                    // function_name
-        S_logic_or_setexpr = 65,                 // logic_or_setexpr
-        S_function_decl = 66,                    // function_decl
-        S_arguments = 67,                        // arguments
-        S_declaration = 68,                      // declaration
-        S_variable = 69,                         // variable
-        S_var_enum = 70,                         // var_enum
-        S_var_all = 71,                          // var_all
-        S_logic = 72,                            // logic
-        S_logic_all = 73,                        // logic_all
-        S_logic_par = 74,                        // logic_par
-        S_logic_predicates = 75,                 // logic_predicates
-        S_binary_predicate = 76,                 // binary_predicate
-        S_logic_unary = 77,                      // logic_unary
-        S_logic_no_binary = 78,                  // logic_no_binary
-        S_quantifier = 79,                       // quantifier
-        S_quant_var = 80,                        // quant_var
-        S_quant_var_enum = 81,                   // quant_var_enum
-        S_logic_binary = 82,                     // logic_binary
-        S_setexpr = 83,                          // setexpr
-        S_operation_name = 84,                   // operation_name
-        S_setexpr_enum = 85,                     // setexpr_enum
-        S_setexpr_enum_min2 = 86,                // setexpr_enum_min2
-        S_literal = 87,                          // literal
-        S_identifier = 88,                       // identifier
-        S_setexpr_binary = 89,                   // setexpr_binary
-        S_setexpr_generators = 90,               // setexpr_generators
-        S_enumeration = 91,                      // enumeration
-        S_tuple = 92,                            // tuple
-        S_boolean = 93,                          // boolean
-        S_filter_expression = 94,                // filter_expression
-        S_declarative = 95,                      // declarative
-        S_recursion = 96,                        // recursion
-        S_imperative = 97,                       // imperative
-        S_imp_blocks = 98,                       // imp_blocks
-        S_imp_block = 99,                        // imp_block
-        S_RPE = 100,                             // RPE
-        S_RCE = 101                              // RCE
+        S_logic_or_setexpr = 64,                 // logic_or_setexpr
+        S_function_definition = 65,              // function_definition
+        S_arguments = 66,                        // arguments
+        S_declaration = 67,                      // declaration
+        S_variable = 68,                         // variable
+        S_var_enum = 69,                         // var_enum
+        S_var_all = 70,                          // var_all
+        S_logic = 71,                            // logic
+        S_logic_all = 72,                        // logic_all
+        S_logic_par = 73,                        // logic_par
+        S_logic_predicates = 74,                 // logic_predicates
+        S_binary_predicate = 75,                 // binary_predicate
+        S_logic_unary = 76,                      // logic_unary
+        S_logic_no_binary = 77,                  // logic_no_binary
+        S_quantifier = 78,                       // quantifier
+        S_quant_var = 79,                        // quant_var
+        S_quant_var_enum = 80,                   // quant_var_enum
+        S_logic_binary = 81,                     // logic_binary
+        S_setexpr = 82,                          // setexpr
+        S_text_function = 83,                    // text_function
+        S_setexpr_enum = 84,                     // setexpr_enum
+        S_setexpr_enum_min2 = 85,                // setexpr_enum_min2
+        S_literal = 86,                          // literal
+        S_identifier = 87,                       // identifier
+        S_setexpr_binary = 88,                   // setexpr_binary
+        S_setexpr_generators = 89,               // setexpr_generators
+        S_enumeration = 90,                      // enumeration
+        S_tuple = 91,                            // tuple
+        S_boolean = 92,                          // boolean
+        S_filter_expression = 93,                // filter_expression
+        S_declarative = 94,                      // declarative
+        S_recursion = 95,                        // recursion
+        S_imperative = 96,                       // imperative
+        S_imp_blocks = 97,                       // imp_blocks
+        S_imp_block = 98,                        // imp_block
+        S_RPE = 99,                              // RPE
+        S_RCE = 100                              // RCE
       };
     };
 
@@ -981,9 +980,9 @@ namespace ccl { namespace rslang { namespace detail {
     /// Constants.
     enum
     {
-      yylast_ = 589,     ///< Last index in yytable_.
-      yynnts_ = 41,  ///< Number of nonterminal symbols.
-      yyfinal_ = 85 ///< Termination state number.
+      yylast_ = 640,     ///< Last index in yytable_.
+      yynnts_ = 40,  ///< Number of nonterminal symbols.
+      yyfinal_ = 87 ///< Termination state number.
     };
 
 
@@ -995,7 +994,7 @@ namespace ccl { namespace rslang { namespace detail {
 
 #line 15 "RSParserImpl.y"
 } } } // ccl::rslang::detail
-#line 999 "../header/RSParserImpl.h"
+#line 998 "../header/RSParserImpl.h"
 
 
 

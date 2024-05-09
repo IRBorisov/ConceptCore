@@ -49,8 +49,8 @@ bool IsEchelon(SyntaxTree::Cursor iter, const Index index) {
   return IsEchelon(iter);
 }
 
-bool IsRadical(const std::string& globalName) {
-  return !empty(globalName) && globalName.at(0) == 'R' && globalName.at(1) != '0';
+bool IsRadical(const std::string& alias) {
+  return !empty(alias) && alias.at(0) == 'R' && alias.at(1) != '0';
 }
 
 void MangleRadicals(const std::string& funcName, Typification& type) {
@@ -301,7 +301,7 @@ void TypeAuditor::Clear() noexcept {
   currentType = {};
 }
 
-bool TypeAuditor::ViGlobalDefinition(Cursor iter) {
+bool TypeAuditor::ViGlobalDeclaration(Cursor iter) {
   const auto childrenCount = iter.ChildrenCount();
   if (iter->id == TokenID::PUNC_STRUCT) {
     if (childrenCount != 2 || !IsEchelon(iter, 1)) {
@@ -420,37 +420,38 @@ std::optional<Typification::Substitutes> TypeAuditor::CheckFuncArguments(Cursor 
 }
 
 bool TypeAuditor::ViGlobal(Cursor iter) {
-  const auto& globalName = iter->data.ToText();
-  if (iter->id == TokenID::ID_RADICAL) {
-    if (!isFuncDeclaration && !isTypification) {
-      OnError(
-        SemanticEID::radicalUsage,
-        iter->pos.start,
-        globalName
-      );
-      return false;
-    }
-    return SetCurrent(Typification(globalName).ApplyBool());
-  } else {
-    if (env.context.FunctionArgsFor(globalName) != nullptr) {
-      OnError(
-        SemanticEID::globalFuncWithoutArgs,
-        iter->pos.start,
-        globalName
-      );
-      return false;
-    }
-    const auto* type = env.context.TypeFor(globalName); 
-    if (type == nullptr) {
-      OnError(
-        SemanticEID::globalNotTyped,
-        iter->pos.start,
-        globalName
-      );
-      return false;
-    }
-    return SetCurrent(*type);
+  const auto& alias = iter->data.ToText();
+  if (env.context.FunctionArgsFor(alias) != nullptr) {
+    OnError(
+      SemanticEID::globalFuncWithoutArgs,
+      iter->pos.start,
+      alias
+    );
+    return false;
   }
+  const auto* type = env.context.TypeFor(alias); 
+  if (type == nullptr) {
+    OnError(
+      SemanticEID::globalNotTyped,
+      iter->pos.start,
+      alias
+    );
+    return false;
+  }
+  return SetCurrent(*type);
+}
+
+bool TypeAuditor::ViRadical(Cursor iter) {
+  const auto& alias = iter->data.ToText();
+  if (!isFuncDeclaration && !isTypification) {
+    OnError(
+      SemanticEID::radicalUsage,
+      iter->pos.start,
+      alias
+    );
+    return false;
+  }
+  return SetCurrent(Typification(alias).ApplyBool());
 }
 
 bool TypeAuditor::ViLocal(Cursor iter) {
@@ -470,7 +471,7 @@ bool TypeAuditor::ViEmptySet(Cursor /*iter*/) {
   return SetCurrent(Typification::EmptySet());
 }
 
-bool TypeAuditor::ViLocalBind(Cursor iter) {
+bool TypeAuditor::ViTupleDeclaration(Cursor iter) {
   assert(isLocalDeclaration || isFuncDeclaration);
   const Typification type = std::get<Typification>(currentType);
   if (!type.IsTuple() || type.T().Arity() != iter.ChildrenCount()) {
@@ -545,7 +546,7 @@ bool TypeAuditor::ViArithmetic(Cursor iter) {
   return SetCurrent(result.value());
 }
 
-bool TypeAuditor::ViOrdering(Cursor iter) {
+bool TypeAuditor::ViIntegerPredicate(Cursor iter) {
   const auto test1 = ChildType(iter, 0);
   if(!test1.has_value()) {
     return false;
@@ -629,7 +630,7 @@ bool TypeAuditor::ViEquals(Cursor iter) {
   return SetCurrent(LogicT{});
 }
 
-bool TypeAuditor::ViTypedPredicate(Cursor iter) {
+bool TypeAuditor::ViSetexprPredicate(Cursor iter) {
   auto type2 = ChildTypeDebool(iter, 1, SemanticEID::invalidTypeOperation);
   if (!type2.has_value()) {
     return false;
@@ -721,7 +722,7 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
   }
 
   const bool isFull = iter->id == TokenID::NT_RECURSIVE_FULL;
-  Index iterationIndex{ isFull ? 3 : 2 };
+  const auto iterationIndex = static_cast<Index>(isFull ? 3 : 2);
 
   const auto iterationType = ChildType(iter, iterationIndex);
   if (!iterationType.has_value()) {
@@ -791,7 +792,7 @@ bool TypeAuditor::ViTuple(Cursor iter) {
   return SetCurrent(Typification::Tuple(components));
 }
 
-bool TypeAuditor::ViSetEnum(Cursor iter) {
+bool TypeAuditor::ViEnumeration(Cursor iter) {
   auto test = ChildType(iter, 0);
   if (!test.has_value()) {
     return false;
@@ -826,7 +827,7 @@ bool TypeAuditor::ViDebool(Cursor iter) {
   return SetCurrent(type.value());
 }
 
-bool TypeAuditor::ViTypedBinary(Cursor iter) {
+bool TypeAuditor::ViSetexprBinary(Cursor iter) {
   auto type1 = ChildTypeDebool(iter, 0, SemanticEID::invalidTypeOperation);
   if (!type1.has_value()) {
     return false;

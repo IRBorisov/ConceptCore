@@ -225,7 +225,7 @@ bool ASTInterpreter::SetCurrent(const ExpressionValue& value) noexcept {
   return true;
 }
 
-bool ASTInterpreter::ViGlobalDefinition(Cursor iter) {
+bool ASTInterpreter::ViGlobalDeclaration(Cursor iter) {
   return VisitChild(iter, 1);
 }
 
@@ -367,7 +367,7 @@ bool ASTInterpreter::ViEquals(Cursor iter) {
   return SetCurrent((val1 == val2) != (iter->id == TokenID::NOTEQUAL));
 }
 
-bool ASTInterpreter::ViOrdering(Cursor iter) {
+bool ASTInterpreter::ViIntegerPredicate(Cursor iter) {
   const auto val1 = EvaluateChild(iter, 0);
   if (!val1.has_value()) {
     return false;
@@ -501,7 +501,7 @@ bool ASTInterpreter::ViTuple(Cursor iter) {
   return SetCurrent(Factory::Tuple(args));
 }
 
-bool ASTInterpreter::ViSetEnum(Cursor iter) {
+bool ASTInterpreter::ViEnumeration(Cursor iter) {
   std::vector<StructuredData> args{};
   for (Index child = 0; child < iter.ChildrenCount(); ++child) {
     const auto childValue = EvaluateChild(iter, child);
@@ -521,7 +521,7 @@ bool ASTInterpreter::ViBool(Cursor iter) {
   return SetCurrent(Factory::Singleton(std::get<StructuredData>(childValue.value())));
 }
 
-bool ASTInterpreter::ViTypedBinary(Cursor iter) {
+bool ASTInterpreter::ViSetexprBinary(Cursor iter) {
   const auto val1 = EvaluateChild(iter, 0);
   if (!val1.has_value()) {
     return false;

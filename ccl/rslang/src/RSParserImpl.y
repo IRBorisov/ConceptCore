@@ -261,18 +261,15 @@ RawNode Imperative(
 expression
     : global_declaration
     | logic_or_setexpr                      { state->FinalizeExpression($1); }
-    | function_decl                         { state->FinalizeExpression($1); }
+    | function_definition                   { state->FinalizeExpression($1); }
     ;
 
 global_declaration
     : GLOBAL DEFINE                         { state->FinalizeCstEmpty($1, $2); }
     | GLOBAL STRUCT setexpr                 { state->FinalizeCstExpression($1, $2, $3); }
     | GLOBAL DEFINE logic_or_setexpr        { state->FinalizeCstExpression($1, $2, $3); }
-    | function_name DEFINE function_decl    { state->FinalizeCstExpression($1, $2, $3); }
-    ;
-function_name
-    : FUNCTION
-    | PREDICATE
+    | FUNCTION DEFINE function_definition   { state->FinalizeCstExpression($1, $2, $3); }
+	| PREDICATE DEFINE function_definition  { state->FinalizeCstExpression($1, $2, $3); }
     ;
 
 logic_or_setexpr
@@ -280,7 +277,7 @@ logic_or_setexpr
     | setexpr
     ;
 
-function_decl
+function_definition
     : LS arguments RS logic_or_setexpr      { $$ = FunctionDeclaration($1, $2, $4); }
     | LS error                              { state->OnError(ParseEID::expectedDeclaration); YYABORT; }
     ;
@@ -407,9 +404,10 @@ literal
 
 identifier
     : GLOBAL
-    | function_name
+    | FUNCTION
+	| PREDICATE
+	| LOCAL
     | RADICAL
-    | LOCAL
     ;
 
 setexpr_binary
