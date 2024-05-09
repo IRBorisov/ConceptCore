@@ -19,6 +19,12 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.4] - 2024-05-10
+
+### Fixed
+
+- EmptySet is correctly processed as argument for functions and other operations
+
 ## [0.1.3] - 2024-05-08
 
 ### Changed
