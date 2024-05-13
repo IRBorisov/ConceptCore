@@ -15,11 +15,16 @@ void Normalizer::Normalize(SyntaxTree::Node& root) {
     break;
   }
   case TokenID::NT_RECURSIVE_FULL:
-  case TokenID::NT_RECURSIVE_SHORT:
+  case TokenID::NT_RECURSIVE_SHORT: {
+    Recursion(root);
+    break;
+  }
   case TokenID::NT_DECLARATIVE_EXPR: {
-    if (root(0).token.id == TokenID::NT_TUPLE_DECL) {
-      TupleDeclaration(root);
-    }
+    Declarative(root);
+    break;
+  }
+  case TokenID::NT_IMPERATIVE_EXPR: {
+    Imperative(root);
     break;
   }
   case TokenID::NT_FUNC_CALL: {
@@ -42,6 +47,46 @@ void Normalizer::Quantifier(SyntaxTree::Node& quant) {
   }
 }
 
+void Normalizer::Declarative(SyntaxTree::Node& root) {
+  if (root(0).token.id != TokenID::NT_TUPLE_DECL) {
+    return;
+  }
+  const auto newName = ProcessTupleDeclaration(root(0));
+  SubstituteTupleVariables(root(1), newName);
+  SubstituteTupleVariables(root(2), newName);
+}
+
+void Normalizer::Recursion(SyntaxTree::Node& root) {
+  if (root(0).token.id != TokenID::NT_TUPLE_DECL) {
+    return;
+  }
+  const auto newName = ProcessTupleDeclaration(root(0));
+  SubstituteTupleVariables(root(2), newName);
+  if (root.token.id == TokenID::NT_RECURSIVE_FULL) {
+    SubstituteTupleVariables(root(3), newName);
+  }
+}
+
+void Normalizer::Imperative(SyntaxTree::Node& root) {
+  for (Index child = 1; child < root.ChildrenCount(); ++child) {
+    const auto childID = root(child).token.id;
+    if (childID != TokenID::ITERATE && childID != TokenID::ASSIGN) {
+      continue;
+    }
+    auto& declRoot = root(child);
+    if (declRoot(0).token.id != TokenID::NT_TUPLE_DECL) {
+      continue;
+    }
+    const auto newName = ProcessTupleDeclaration(declRoot(0));
+    for (Index child2 = 0; child2 < root.ChildrenCount(); ++child2) {
+      if (child2 != child) {
+        SubstituteTupleVariables(root(child2), newName);
+      }
+    }
+    SubstituteTupleVariables(root, newName);
+  }
+}
+
 void Normalizer::EnumDeclaration(SyntaxTree::Node& quant) {
   auto newQuant = std::make_unique<SyntaxTree::Node>(quant.token);
   newQuant->AddChildCopy(quant(0));
@@ -61,32 +106,12 @@ void Normalizer::TupleDeclaration(
   SyntaxTree::Node& declaration,
   SyntaxTree::Node& predicate
 ) {
-  const auto newName = CreateTupleName(declaration);
-  declaration.RemoveAll();
-  declaration.token.data = TokenData{ newName };
-  declaration.token.id = TokenID::ID_LOCAL;
+  const auto newName = ProcessTupleDeclaration(declaration);
   SubstituteTupleVariables(predicate, newName);
 }
 
-void Normalizer::TupleDeclaration(SyntaxTree::Node& target) {
-  const auto token = target.token.id;
-  auto newName = CreateTupleName(target(0));
-
-  target(0).RemoveAll();
-  target(0).token.id = TokenID::ID_LOCAL;
-  target(0).token.data = TokenData{ newName };
-
-  if (token == TokenID::NT_DECLARATIVE_EXPR) {
-    SubstituteTupleVariables(target(1), newName);
-  }
-  SubstituteTupleVariables(target(2), newName);
-  if (token == TokenID::NT_RECURSIVE_FULL) {
-    SubstituteTupleVariables(target(3), newName);
-  }
-}
-
-std::string Normalizer::CreateTupleName(const SyntaxTree::Node& root) {
-  tuples.clear();
+std::string Normalizer::ProcessTupleDeclaration(SyntaxTree::Node& root) {
+  tupleSubstitutes.clear();
   std::string newName{ '@' };
 
   std::stack<const SyntaxTree::Node*> nodeStack{};
@@ -101,7 +126,7 @@ std::string Normalizer::CreateTupleName(const SyntaxTree::Node& root) {
     if (curNode->token.id == TokenID::ID_LOCAL) {
       const auto& name = curNode->token.data.ToText();
       newName += name;
-      tuples.insert({ name, curPath });
+      tupleSubstitutes.insert({ name, curPath });
     } else if (const auto childCount = curNode->ChildrenCount(); childCount > 0) {
       for (auto child = static_cast<Index>(childCount - 1); child >= 0; --child) {
         curPath.emplace_back(static_cast<Index>(child + 1));
@@ -111,15 +136,20 @@ std::string Normalizer::CreateTupleName(const SyntaxTree::Node& root) {
       }
     }
   }
+  root.RemoveAll();
+  root.token.data = TokenData{ newName };
+  root.token.id = TokenID::ID_LOCAL;
   return newName;
 }
 
 void Normalizer::SubstituteTupleVariables(SyntaxTree::Node& target, const std::string& newName) {
   for (Index child = 0; child < target.ChildrenCount(); ++child) {
-    if (target(child).token.id == TokenID::ID_LOCAL) {
+    if (target(child).token.id != TokenID::ID_LOCAL) {
+      SubstituteTupleVariables(target(child), newName);
+    } else {
       const auto& localName = target(child).token.data.ToText();
-      if (tuples.contains(localName)) {
-        const auto& indexes = tuples.at(localName);
+      if (tupleSubstitutes.contains(localName)) {
+        const auto& indexes = tupleSubstitutes.at(localName);
         target(child).token.data = TokenData{ newName };
         for (const auto prIndex : indexes) {
           target.ExtendChild(child, TokenID::SMALLPR);
@@ -127,21 +157,19 @@ void Normalizer::SubstituteTupleVariables(SyntaxTree::Node& target, const std::s
           target(child).token.data = TokenData{ std::vector<Index>{ prIndex } };
         }
       }
-    } else {
-      SubstituteTupleVariables(target(child), newName);
     }
   }
 }
 
 void Normalizer::Function(SyntaxTree::Node& func) {
-  nodes.clear();
+  nodeSubstitutes.clear();
   nameSubstitutes.clear();
   
   const auto* funcTree = termFuncs(func(0).token.data.ToText());
   if (funcTree != nullptr) {
     const auto argNames = ArgNames(funcTree->root->At(1).At(0));
     for (Index child = 1; child < func.ChildrenCount(); ++child) {
-      nodes.insert({ argNames.at(static_cast<size_t>(child) - 1), &func(child) });
+      nodeSubstitutes.insert({ argNames.at(static_cast<size_t>(child) - 1), &func(child) });
     }
     SyntaxTree newTree = *funcTree;
     SubstituteArgs(newTree.root->At(1).At(1), func.token.pos);
@@ -167,8 +195,8 @@ void Normalizer::SubstituteArgs(SyntaxTree::Node& target, const StrRange pos) {
     }
   } else {
     const auto& localName = target.token.ToString();
-    if (nodes.contains(localName)) {
-      target = *nodes.at(localName);
+    if (nodeSubstitutes.contains(localName)) {
+      target = *nodeSubstitutes.at(localName);
     } else {
       const auto& oldName = target.token.ToString();
       std::string newName{};

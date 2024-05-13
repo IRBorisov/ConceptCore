@@ -41,16 +41,15 @@ private:
   bool ViQuantifier(Cursor iter);
   bool ViNegation(Cursor iter);
   bool ViLogicBinary(Cursor iter);
-  bool ViEquals(Cursor iter);
-  bool ViIntegerPredicate(Cursor iter) { return ViEquals(iter); }
-  bool ViSetexprPredicate(Cursor iter) { return ViEquals(iter); }
+  bool ViEquals(Cursor iter) { return OutputBinary(iter); }
+  bool ViIntegerPredicate(Cursor iter) { return OutputBinary(iter); }
+  bool ViSetexprPredicate(Cursor iter) { return OutputBinary(iter); }
 
   bool ViDeclarative(Cursor iter);
-  bool ViImperative(Cursor iter);
-  bool ViImpDeclare(Cursor iter);
-  bool ViImpAssign(Cursor iter);
-  bool ViImpCheck(Cursor iter);
   bool ViRecursion(Cursor iter);
+  bool ViImperative(Cursor iter);
+  bool ViIterate(Cursor iter) { return OutputBinary(iter); }
+  bool ViAssign(Cursor iter) { return OutputBinary(iter); }
 
   bool ViDecart(Cursor iter);
   bool ViBoolean(Cursor iter);
@@ -71,9 +70,10 @@ private:
   void Clear() noexcept;
 
   void OutputChild(const Cursor& iter, Index index, bool addBrackets = false);
+  bool OutputBinary(const Cursor& iter);
 
-  void EnumChildren(const Cursor& iter, const std::string& separator);
-  void EnumChildren(const Cursor& iter, char left, char right, const std::string& separator);
+  bool EnumChildren(const Cursor& iter, const std::string& separator);
+  bool EnumChildren(const Cursor& iter, char left, char right, const std::string& separator);
 };
 
 } // namespace ccl::rslang

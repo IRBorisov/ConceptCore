@@ -17,6 +17,7 @@ enum class ParseEID : uint32_t {
   missingParenthesis = 0x8406,      // Пропущена скобка ')'
   missingCurlyBrace = 0x8407,       // Пропущена скобка '}'
   invalidQuantifier = 0x8408,       // Некорректная кванторная декларация
+  invalidImperative = 0x8409,       // Использование императивного синтаксиса вне императивного блока
   expectedDeclaration = 0x8414,     // Ожидалось объявление аргументов
   expectedLocal = 0x8415,           // Ожидалось имя локальной переменной
 };

@@ -698,13 +698,13 @@ bool TypeAuditor::ViImperative(Cursor iter) {
   return SetCurrent(std::get<Typification>(type.value()).Bool());
 }
 
-bool TypeAuditor::ViImpDeclare(Cursor iter) {
+bool TypeAuditor::ViIterate(Cursor iter) {
   const auto domain = ChildTypeDebool(iter, 1, SemanticEID::invalidTypeOperation);
   return domain.has_value() 
     && VisitChildDeclaration(iter, 0, domain.value());
 }
 
-bool TypeAuditor::ViImpAssign(Cursor iter) {
+bool TypeAuditor::ViAssign(Cursor iter) {
   const auto domain = ChildType(iter, 1);
   return domain.has_value()
     && VisitChildDeclaration(iter, 0, std::get<Typification>(domain.value()));

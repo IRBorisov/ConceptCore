@@ -232,21 +232,19 @@ public:
         assert(ChildrenCount() == 2);
         return visitor.ViSetexprPredicate(*this);
 
+      case TokenID::ITERATE:
+        assert(ChildrenCount() == 2);
+        return visitor.ViIterate(*this);
+      case TokenID::ASSIGN:
+        assert(ChildrenCount() == 2);
+        return visitor.ViAssign(*this);
+
       case TokenID::NT_DECLARATIVE_EXPR:
         assert(ChildrenCount() == 3);
         return visitor.ViDeclarative(*this);
       case TokenID::NT_IMPERATIVE_EXPR:
         assert(ChildrenCount() > 1);
         return visitor.ViImperative(*this);
-      case TokenID::NT_IMP_DECLARE:
-        assert(ChildrenCount() == 2);
-        return visitor.ViImpDeclare(*this);
-      case TokenID::NT_IMP_ASSIGN:
-        assert(ChildrenCount() == 2);
-        return visitor.ViImpAssign(*this);
-      case TokenID::NT_IMP_LOGIC:
-        assert(ChildrenCount() == 1);
-        return visitor.ViImpCheck(*this);
 
       case TokenID::DECART:
         assert(ChildrenCount() > 1);
@@ -349,11 +347,10 @@ private:
   bool ViSetexprPredicate(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViDeclarative(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViImperative(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViImpDeclare(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViImpAssign(Cursor iter) { return this->BaseT().VisitDefault(iter); }
-  bool ViImpCheck(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViRecursion(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViImperative(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViIterate(Cursor iter) { return this->BaseT().VisitDefault(iter); }
+  bool ViAssign(Cursor iter) { return this->BaseT().VisitDefault(iter); }
 
   bool ViDecart(Cursor iter) { return this->BaseT().VisitDefault(iter); }
   bool ViBoolean(Cursor iter) { return this->BaseT().VisitDefault(iter); }

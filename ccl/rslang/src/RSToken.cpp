@@ -93,10 +93,6 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
   case TokenID::NT_IMPERATIVE_EXPR: return "IMPERATIVE";
   case TokenID::NT_RECURSIVE_FULL: return "REC_FULL";
   case TokenID::NT_RECURSIVE_SHORT: return "REC_SHORT";
-
-  case TokenID::NT_IMP_DECLARE: return "IDECLARE";
-  case TokenID::NT_IMP_ASSIGN: return "IASSIGN";
-  case TokenID::NT_IMP_LOGIC: return "ICHECK";
   }
 }
 
@@ -133,6 +129,9 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
   case TokenID::SUBSET_OR_EQ: return R"( \subseteq )";
   case TokenID::NOTSUBSET: return R"( \notsubset )";
 
+  case TokenID::ASSIGN: return R"( \assign )";
+  case TokenID::ITERATE: return R"( \from )";
+
   case TokenID::UNION: return R"( \union )";
   case TokenID::INTERSECTION: return R"( \intersect )";
   case TokenID::SET_MINUS: return R"( \setminus )";
@@ -143,8 +142,6 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
 
   case TokenID::PUNC_DEFINE: return R"( \defexpr )";
   case TokenID::PUNC_STRUCT: return R"( \deftype )";
-  case TokenID::PUNC_ASSIGN: return R"( \assign )";
-  case TokenID::PUNC_ITERATE: return R"( \from )";
   }
 }
 
@@ -174,10 +171,8 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
   case TokenID::IMPLICATION: return "\xE2\x87\x92"; // \u21D2
   case TokenID::EQUIVALENT: return "\xE2\x87\x94"; // \u21D4
 
-  case TokenID::PUNC_DEFINE: return ":==";
-  case TokenID::PUNC_STRUCT: return "::=";
-  case TokenID::PUNC_ASSIGN: return ":=";
-  case TokenID::PUNC_ITERATE: return ":\xE2\x88\x88"; // \u2208
+  case TokenID::ASSIGN: return ":=";
+  case TokenID::ITERATE: return ":\xE2\x88\x88"; // \u2208
 
   case TokenID::IN: return "\xE2\x88\x88"; // \u2208
   case TokenID::NOTIN: return "\xE2\x88\x89"; // \u2209
@@ -192,6 +187,9 @@ std::string ConvertID(std::string_view id, const Syntax syntax) {
   case TokenID::DECART: return "\xC3\x97"; // \u00D7
 
   case TokenID::BOOLEAN: return "\xE2\x84\xAC"; // \u212C
+
+  case TokenID::PUNC_DEFINE: return ":==";
+  case TokenID::PUNC_STRUCT: return "::=";
   }
 }
 
@@ -239,32 +237,36 @@ bool Token::operator==(const Token& rhs) const {
 
 std::string Token::ToString(const Syntax syntax) const {
   switch (id) {
-  default: {
-    return Str(id, syntax);
-  }
-  case TokenID::ID_LOCAL: {
-    return ConvertID(data.ToText(), syntax);
-  }
-  case TokenID::ID_GLOBAL:
-  case TokenID::ID_FUNCTION:
-  case TokenID::ID_PREDICATE:
-  case TokenID::ID_RADICAL: {
-    return data.ToText();
-  }
-  case TokenID::LIT_INTEGER: {
-    return std::to_string(data.ToInt());
-  }
-  case TokenID::BIGPR:
-  case TokenID::SMALLPR:
-  case TokenID::FILTER: {
-    const auto& indicies = data.ToTuple();
-    std::string result = Str(id) + std::to_string(*begin(indicies));
-    result += std::accumulate(next(begin(indicies)), end(indicies), std::string{},
-                             [](std::string text, const Index index) -> decltype(auto) {
-                               text += ',';
-                               text += std::to_string(index);
-                               return text;
-                             });
+    default: {
+      return Str(id, syntax);
+    }
+    case TokenID::ID_LOCAL: {
+      return ConvertID(data.ToText(), syntax);
+    }
+    case TokenID::ID_GLOBAL:
+    case TokenID::ID_FUNCTION:
+    case TokenID::ID_PREDICATE:
+    case TokenID::ID_RADICAL: {
+      return data.ToText();
+    }
+    case TokenID::LIT_INTEGER: {
+      return std::to_string(data.ToInt());
+    }
+    case TokenID::BIGPR:
+    case TokenID::SMALLPR:
+    case TokenID::FILTER: {
+      const auto& indicies = data.ToTuple();
+      std::string result = Str(id) + std::to_string(*begin(indicies));
+      result += std::accumulate(
+        next(begin(indicies)),
+        end(indicies),
+        std::string{},
+        [](std::string text, const Index index) -> decltype(auto) {
+          text += ',';
+          text += std::to_string(index);
+          return text;
+        }
+      );
     return result;
   }
   }

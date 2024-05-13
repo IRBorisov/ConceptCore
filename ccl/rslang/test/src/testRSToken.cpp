@@ -129,16 +129,43 @@ TEST_F(UTRSToken, TokenToString) {
 TEST_F(UTRSToken, TokenToStringUnicode) {
   using ccl::operator""_c17;
 
-  EXPECT_EQ("p1", Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03C01"_c17 }).ToString(Syntax::ASCII));
-  EXPECT_EQ("aw", Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03B1\u03C9"_c17 }).ToString(Syntax::ASCII));
-  EXPECT_EQ("qu?u?p", Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03F0"_c17 }).ToString(Syntax::ASCII));
+  EXPECT_EQ(
+    Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03C01"_c17 }).ToString(Syntax::ASCII),
+    "p1"
+  );
+  EXPECT_EQ(
+    Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03B1\u03C9"_c17 }).ToString(Syntax::ASCII),
+    "aw"
+  );
+  EXPECT_EQ(
+    Token(TokenID::ID_LOCAL, StrRange{}, TokenData{ u8"\u03F0"_c17 }).ToString(Syntax::ASCII),
+    "qu?u?p"
+  );
 }
 
 TEST_F(UTRSToken, CompareOperations) {
-  EXPECT_EQ(Token::CompareOperations(TokenID::INTERRUPT, TokenID::INTERRUPT), Comparison::INCOMPARABLE);
-  EXPECT_EQ(Token::CompareOperations(TokenID::ID_LOCAL, TokenID::ID_LOCAL), Comparison::INCOMPARABLE);
-  EXPECT_EQ(Token::CompareOperations(TokenID::ID_LOCAL, TokenID::PLUS), Comparison::INCOMPARABLE);
-  EXPECT_EQ(Token::CompareOperations(TokenID::PLUS, TokenID::MINUS), Comparison::EQUAL);
-  EXPECT_EQ(Token::CompareOperations(TokenID::MULTIPLY, TokenID::MINUS), Comparison::GREATER);
-  EXPECT_EQ(Token::CompareOperations(TokenID::MINUS, TokenID::MULTIPLY), Comparison::LESS);
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::INTERRUPT, TokenID::INTERRUPT),
+    Comparison::INCOMPARABLE
+  );
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::ID_LOCAL, TokenID::ID_LOCAL),
+    Comparison::INCOMPARABLE
+  );
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::ID_LOCAL, TokenID::PLUS),
+    Comparison::INCOMPARABLE
+  );
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::PLUS, TokenID::MINUS),
+    Comparison::EQUAL
+  );
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::MULTIPLY, TokenID::MINUS),
+    Comparison::GREATER
+  );
+  EXPECT_EQ(
+    Token::CompareOperations(TokenID::MINUS, TokenID::MULTIPLY),
+    Comparison::LESS
+  );
 }

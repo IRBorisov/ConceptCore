@@ -100,8 +100,8 @@ R{number}           { return TokenID::ID_RADICAL; }
 {global_id}         { return TokenID::ID_GLOBAL; }
 {local_id}          { return TokenID::ID_LOCAL; }
 
-"\assign"           { return TokenID::PUNC_ASSIGN; }
-"\from"             { return TokenID::PUNC_ITERATE; }
+"\assign"           { return TokenID::ASSIGN; }
+"\from"             { return TokenID::ITERATE; }
 "\defexpr"          { return TokenID::PUNC_DEFINE; }
 "\deftype"          { return TokenID::PUNC_STRUCT; }
 "("                 { return TokenID::PUNC_PL; }

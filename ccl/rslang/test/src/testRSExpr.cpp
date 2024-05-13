@@ -69,7 +69,11 @@ TEST_F(UTRSExpr, FilterIDs) {
 TEST_F(UTRSExpr, Translate) {
   using ccl::operator""_c17;
   std::string input{ u8"\u212C X1 X2 ab ba"_c17 };
-  const auto repCount = ccl::rslang::TranslateRS(input, TFFactory::FilterIdentifiers(), ccl::CreateTranslator(idMap));
+  const auto repCount = ccl::rslang::TranslateRS(
+    input,
+    TFFactory::FilterIdentifiers(),
+    ccl::CreateTranslator(idMap)
+  );
   EXPECT_EQ(repCount, 2);
   EXPECT_EQ(input, u8"\u212C X42 X2 ba ba"_c17);
 }

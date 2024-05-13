@@ -81,11 +81,10 @@ protected:
   bool ViBoolean(Cursor iter);
 
   bool ViDeclarative(Cursor iter);
-  bool ViImperative(Cursor iter);
-  //bool ViImpDeclare(Cursor iter);
-  //bool ViImpAssign(Cursor iter);
-  //bool ViImpCheck(Cursor iter);
   bool ViRecursion(Cursor iter);
+  bool ViImperative(Cursor iter);
+  //bool ViIterate(Cursor iter);
+  //bool ViAssign(Cursor iter);
 
   bool ViTuple(Cursor iter);
   bool ViEnumeration(Cursor iter);

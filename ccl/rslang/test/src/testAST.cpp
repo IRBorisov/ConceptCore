@@ -235,6 +235,8 @@ TEST_F(UTSyntaxTree, CursorDispatchVisit) {
 }
 
 TEST_F(UTSyntaxTree, FindMinimalNode) {
+  using namespace ccl::rslang;
+
   SyntaxTree::Node root{ Token{ TokenID::AND, StrRange{0, 10} } };
   root.AddChildCopy(SyntaxTree::Node{ Token{ TokenID::OR, StrRange{0, 5} } });
   root.AddChildCopy(SyntaxTree::Node{ Token{ TokenID::BOOL, StrRange{6, 10} } });
@@ -242,15 +244,15 @@ TEST_F(UTSyntaxTree, FindMinimalNode) {
   root(0).AddChildCopy(SyntaxTree::Node{ Token{ TokenID::CARD, StrRange{4, 5} } });
 
   const SyntaxTree::Cursor cursor{root};
-  EXPECT_FALSE(ccl::rslang::FindMinimalNode(cursor, StrRange{11, 11}).has_value());
-  EXPECT_FALSE(ccl::rslang::FindMinimalNode(cursor, StrRange{-1, -1}).has_value());
-  EXPECT_FALSE(ccl::rslang::FindMinimalNode(cursor, StrRange{0, 11}).has_value());
+  EXPECT_FALSE(FindMinimalNode(cursor, StrRange{11, 11}).has_value());
+  EXPECT_FALSE(FindMinimalNode(cursor, StrRange{-1, -1}).has_value());
+  EXPECT_FALSE(FindMinimalNode(cursor, StrRange{0, 11}).has_value());
 
-  EXPECT_EQ(ccl::rslang::FindMinimalNode(cursor, StrRange{ 0, 0 }).value()->id, TokenID::BIGPR);
-  EXPECT_EQ(ccl::rslang::FindMinimalNode(cursor, StrRange{ 4, 5 }).value()->id, TokenID::CARD);
-  EXPECT_EQ(ccl::rslang::FindMinimalNode(cursor, StrRange{ 3, 4 }).value()->id, TokenID::OR);
-  EXPECT_EQ(ccl::rslang::FindMinimalNode(cursor, StrRange{ 0, 10 }).value()->id, TokenID::AND);
-  EXPECT_EQ(ccl::rslang::FindMinimalNode(cursor, StrRange{ 5, 6 }).value()->id, TokenID::AND);
+  EXPECT_EQ(FindMinimalNode(cursor, StrRange{ 0, 0 }).value()->id, TokenID::BIGPR);
+  EXPECT_EQ(FindMinimalNode(cursor, StrRange{ 4, 5 }).value()->id, TokenID::CARD);
+  EXPECT_EQ(FindMinimalNode(cursor, StrRange{ 3, 4 }).value()->id, TokenID::OR);
+  EXPECT_EQ(FindMinimalNode(cursor, StrRange{ 0, 10 }).value()->id, TokenID::AND);
+  EXPECT_EQ(FindMinimalNode(cursor, StrRange{ 5, 6 }).value()->id, TokenID::AND);
 }
 
 TEST_F(UTSyntaxTree, ASTAccess) {

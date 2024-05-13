@@ -13,11 +13,12 @@ protected:
 };
 
 TEST_F(UTLogger, ResolveErrorType) {
-  EXPECT_EQ(ccl::rslang::ResolveErrorType(static_cast<uint32_t>(ErrorStatus::WARNING)), ErrorStatus::WARNING);
-  EXPECT_EQ(ccl::rslang::ResolveErrorType(static_cast<uint32_t>(ErrorStatus::WARNING) + 1), ErrorStatus::WARNING);
-  EXPECT_EQ(ccl::rslang::ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL)), ErrorStatus::CRITICAL);
-  EXPECT_EQ(ccl::rslang::ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL) + 1), ErrorStatus::CRITICAL);
-  EXPECT_EQ(ccl::rslang::ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL) - 1), ErrorStatus::WARNING);
+  using namespace ccl::rslang;
+  EXPECT_EQ(ResolveErrorType(static_cast<uint32_t>(ErrorStatus::WARNING)), ErrorStatus::WARNING);
+  EXPECT_EQ(ResolveErrorType(static_cast<uint32_t>(ErrorStatus::WARNING) + 1), ErrorStatus::WARNING);
+  EXPECT_EQ(ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL)), ErrorStatus::CRITICAL);
+  EXPECT_EQ(ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL) + 1), ErrorStatus::CRITICAL);
+  EXPECT_EQ(ResolveErrorType(static_cast<uint32_t>(ErrorStatus::CRITICAL) - 1), ErrorStatus::WARNING);
 
   EXPECT_TRUE(Error(static_cast<uint32_t>(ErrorStatus::WARNING), 0).IsWarning());
   EXPECT_FALSE(Error(static_cast<uint32_t>(ErrorStatus::WARNING), 0).IsCritical());

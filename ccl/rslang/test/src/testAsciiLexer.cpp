@@ -71,7 +71,7 @@ TEST_F(UTAsciiLexer, Keywords) {
   TestSingle(R"(\and)", TokenID::AND);
   TestSingle(R"(\or)", TokenID::OR);
 
-  TestSingle(R"(\from)", TokenID::PUNC_ITERATE);
+  TestSingle(R"(\from)", TokenID::ITERATE);
   TestSingle(R"(\in)", TokenID::IN);
   TestSingle(R"(\notin)", TokenID::NOTIN);
   TestSingle(R"(\subseteq)", TokenID::SUBSET_OR_EQ);

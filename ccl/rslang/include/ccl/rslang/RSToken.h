@@ -82,11 +82,13 @@ enum class TokenID : uint32_t { // NOLINT(performance-enum-size)
   RECURSIVE,
   IMPERATIVE,
 
+  // Imperative operators
+  ITERATE,
+  ASSIGN,
+
   // Punctuation
   PUNC_DEFINE,
   PUNC_STRUCT,
-  PUNC_ASSIGN,
-  PUNC_ITERATE,
   PUNC_PL,
   PUNC_PR,
   PUNC_CL,
@@ -113,10 +115,6 @@ enum class TokenID : uint32_t { // NOLINT(performance-enum-size)
   NT_RECURSIVE_FULL, // Полная рекурсия
   NT_RECURSIVE_SHORT, // Сокращенная рекурсия
 
-  NT_IMP_DECLARE, // Блок декларации
-  NT_IMP_ASSIGN, // Блок присвоения
-  NT_IMP_LOGIC, // Блок проверки
-  
   // ======= Helper tokens ========
   INTERRUPT,
   END,

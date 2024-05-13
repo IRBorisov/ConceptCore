@@ -254,6 +254,7 @@ TEST_F(UTTypeAuditor, ConstructorsCorrect) {
 
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a})", "B(X1*X1)"_t);
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a; 1 \eq 1})", "B(X1*X1)"_t);
+  ExpectTypification(R"(I{(a, c) | (a,c) \from X1*X1; (b,d) \assign (a,a); d \eq b})", "B(X1*X1)"_t);
 }
 
 TEST_F(UTTypeAuditor, ConstructorsErrors) {
@@ -276,6 +277,8 @@ TEST_F(UTTypeAuditor, ConstructorsErrors) {
 
   ExpectError(R"(I{(a, b) | a \from X1; b \assign {a}; a \noteq b})", SemanticEID::typesNotCompatible, 47);
   ExpectError(R"(I{(a, b) | a \from X1; g \in a \setminus X2; b \assign {a}})", SemanticEID::invalidTypeOperation, 29);
+  ExpectError(R"(I{(a, c) | a \from X1; (a,c) \assign (a,a)})", SemanticEID::localShadowing, 24);
+  ExpectError(R"(I{(a, c) | a \from X1; (a,c) \from X1*X1})", SemanticEID::localShadowing, 24);
 }
 
 TEST_F(UTTypeAuditor, TypedPredicatesCorrect) {

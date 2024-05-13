@@ -57,10 +57,10 @@ public:
     }
   }
 
-  void CreateSyntaxTree(RawNode root);
-  void FinalizeExpression(RawNode expr);
-  void FinalizeCstEmpty(RawNode cst, RawNode mode);
-  void FinalizeCstExpression(RawNode cst, RawNode mode, RawNode data);
+  bool CreateSyntaxTree(RawNode root);
+  bool FinalizeExpression(RawNode expr);
+  bool FinalizeCstEmpty(RawNode cst, RawNode mode);
+  bool FinalizeCstExpression(RawNode cst, RawNode mode, RawNode data);
 };
 
 } // namespace ccl::rslang::detail

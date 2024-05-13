@@ -65,10 +65,9 @@ protected:
 
   bool ViDeclarative(Cursor iter);
   bool ViImperative(Cursor iter);
-  bool ViImpDeclare(Cursor iter) { return AssertChildIsValue(iter, 1); }
-  bool ViImpAssign(Cursor iter) { return AssertChildIsValue(iter, 1); }
-  bool ViImpCheck(Cursor iter) { return VisitAllAndSetCurrent(iter, ValueClass::value); }
   bool ViRecursion(Cursor iter) { return AssertAllValues(iter); }
+  bool ViIterate(Cursor iter) { return AssertChildIsValue(iter, 1); }
+  bool ViAssign(Cursor iter) { return AssertChildIsValue(iter, 1); }
 
   bool ViTuple(Cursor iter) { return AssertAllValues(iter); }
   bool ViEnumeration(Cursor iter) { return AssertAllValues(iter); }

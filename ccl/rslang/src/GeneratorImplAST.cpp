@@ -147,13 +147,6 @@ bool GeneratorImplAST::ViLogicBinary(Cursor iter) {
   return true;
 }
 
-bool GeneratorImplAST::ViEquals(Cursor iter) {
-  OutputChild(iter, 0);
-  rsText += iter->ToString(syntax);
-  OutputChild(iter, 1);
-  return true;
-}
-
 bool GeneratorImplAST::ViDeclarative(Cursor iter) {
   rsText += Token::Str(TokenID::DECLARATIVE, syntax);
   rsText += '{';
@@ -181,30 +174,11 @@ bool GeneratorImplAST::ViImperative(Cursor iter) {
   return true;
 }
 
-bool GeneratorImplAST::ViImpDeclare(Cursor iter) {
-  OutputChild(iter, 0);
-  rsText += Token::Str(TokenID::PUNC_ITERATE, syntax);
-  OutputChild(iter, 1);
-  return true;
-}
-
-bool GeneratorImplAST::ViImpAssign(Cursor iter) {
-  OutputChild(iter, 0);
-  rsText += Token::Str(TokenID::PUNC_ASSIGN, syntax);
-  OutputChild(iter, 1);
-  return true;
-}
-
-bool GeneratorImplAST::ViImpCheck(Cursor iter) {
-  OutputChild(iter, 0);
-  return true;
-}
-
 bool GeneratorImplAST::ViRecursion(Cursor iter) {
   rsText += Token::Str(TokenID::RECURSIVE, syntax);
   rsText += '{';
   OutputChild(iter, 0);
-  rsText += Token::Str(TokenID::PUNC_ASSIGN);
+  rsText += Token::Str(TokenID::ASSIGN);
   OutputChild(iter, 1);
   rsText += R"( | )";
   OutputChild(iter, 2);
@@ -252,19 +226,28 @@ void GeneratorImplAST::OutputChild(const Cursor& iter, const Index index, const 
   }
 }
 
-void GeneratorImplAST::EnumChildren(const Cursor& iter, const std::string& separator) {
+bool GeneratorImplAST::OutputBinary(const Cursor& iter) {
+  OutputChild(iter, 0);
+  rsText += iter->ToString(syntax);
+  OutputChild(iter, 1);
+  return true;
+}
+
+bool GeneratorImplAST::EnumChildren(const Cursor& iter, const std::string& separator) {
   for (Index child = 0; child < iter.ChildrenCount(); ++child) {
     if (child > 0) {
       rsText += separator;
     }
     OutputChild(iter, child);
   }
+  return true;
 }
 
-void GeneratorImplAST::EnumChildren(const Cursor& iter, const char left, const char right, const std::string& separator) {
+bool GeneratorImplAST::EnumChildren(const Cursor& iter, const char left, const char right, const std::string& separator) {
   rsText += left;
   EnumChildren(iter, separator);
   rsText += right;
+  return true;
 }
 
 } // namespace ccl::rslang

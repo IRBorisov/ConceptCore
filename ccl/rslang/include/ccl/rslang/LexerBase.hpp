@@ -30,8 +30,11 @@ public:
       lex->lex();
       auto token = lex->MakeToken();
       if (token.id == TokenID::INTERRUPT && lex->reporter.has_value()) {
-        lex->reporter.value()(Error{ static_cast<uint32_t>(LexerEID::unknownSymbol),
-                                      token.pos.start, { lex->Text() } });
+        lex->reporter.value()(Error{
+          static_cast<uint32_t>(LexerEID::unknownSymbol),
+          token.pos.start,
+          { lex->Text() }
+        });
       }
       return token;
     };

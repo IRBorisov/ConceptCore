@@ -29,14 +29,14 @@ bool ASTInterpreter::NameCollector::ViGlobalDeclaration(Cursor iter) {
     return false; // TODO: specify error
   }
   switch (iter(0).id) {
-  default:
-  case TokenID::ID_FUNCTION:
-  case TokenID::ID_PREDICATE: {
-    return false; // TODO: specify error
-  }
-  case TokenID::ID_GLOBAL: {
-    return iter.ChildrenCount() == 2 && VisitChild(iter, 1);
-  }
+    default:
+    case TokenID::ID_FUNCTION:
+    case TokenID::ID_PREDICATE: {
+      return false; // TODO: specify error
+    }
+    case TokenID::ID_GLOBAL: {
+      return iter.ChildrenCount() == 2 && VisitChild(iter, 1);
+    }
   }
 }
 
@@ -93,14 +93,13 @@ bool ASTInterpreter::NameCollector::ViImperative(Cursor iter) {
   child.MoveToChild(1);
   do {
     switch (child->id) {
-    case TokenID::NT_IMP_ASSIGN:
-    case TokenID::NT_IMP_DECLARE: {
-      const auto varID = *begin(parent.nodeVars[iter.Child(0).get()]);
-      vars.erase(std::remove(begin(vars), end(vars), varID), end(vars));
-      break;
-    }
-    default:
-    case TokenID::NT_IMP_LOGIC: break;
+      case TokenID::ITERATE:
+      case TokenID::ASSIGN: {
+        const auto varID = *begin(parent.nodeVars[iter.Child(0).get()]);
+        vars.erase(std::remove(begin(vars), end(vars), varID), end(vars));
+        break;
+      }
+      default: break;
     }
   } while (child.MoveToNextSibling());
   return true;

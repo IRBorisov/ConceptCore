@@ -6,6 +6,7 @@
 
 #include "ccl/rslang/RSGenerator.h"
 #include "ccl/rslang/Parser.h"
+#include "ccl/rslang/Literals.h"
 
 using ccl::operator""_c17;
 
@@ -71,9 +72,18 @@ TEST_F(UTRSGenerator, ExtractPrefix) {
 }
 
 TEST_F(UTRSGenerator, FromASTGlobal) {
-  ExpectASTGeneration("X1:== ", "X1:==");
-  ExpectASTGeneration("D1:==X1\\X2", "D1:==X1\\X2");
-  ExpectASTGeneration(u8"F1:==[a\u2208X1]a \\ a"_c17, u8"F1:==[a\u2208X1] a\\a"_c17);
+  ExpectASTGeneration(
+    "X1:== ",
+    "X1:=="
+  );
+  ExpectASTGeneration(
+    "D1:==X1\\X2",
+    "D1:==X1\\X2"
+  );
+  ExpectASTGeneration(
+    u8"F1:==[a\u2208X1]a \\ a"_c17,
+    u8"F1:==[a\u2208X1] a\\a"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, FromASTInteger) {
@@ -86,12 +96,30 @@ TEST_F(UTRSGenerator, FromASTInteger) {
   ExpectASTGeneration("1 +2*3", "1+2*3");
   ExpectASTGeneration("(1+2) * 3", "(1+2)*3");
 
-  ExpectASTGeneration("1 = 2", "1=2");
-  ExpectASTGeneration(u8"1 \u2260 2"_c17, u8"1\u22602"_c17);
-  ExpectASTGeneration("1 > 2", "1>2");
-  ExpectASTGeneration("1 < 2", "1<2");
-  ExpectASTGeneration(u8"1 \u2264 2"_c17, u8"1\u22642"_c17);
-  ExpectASTGeneration(u8"1 \u2265 2"_c17, u8"1\u22652"_c17);
+  ExpectASTGeneration(
+    "1 = 2",
+    "1=2"
+  );
+  ExpectASTGeneration(
+    u8"1 \u2260 2"_c17,
+    u8"1\u22602"_c17
+  );
+  ExpectASTGeneration(
+    "1 > 2",
+    "1>2"
+  );
+  ExpectASTGeneration(
+    "1 < 2",
+    "1<2"
+  );
+  ExpectASTGeneration(
+    u8"1 \u2264 2"_c17,
+    u8"1\u22642"_c17
+  );
+  ExpectASTGeneration(
+    u8"1 \u2265 2"_c17,
+    u8"1\u22652"_c17
+  );
 
   ExpectASTGeneration("1+2=3", "1+2=3");
   ExpectASTGeneration("1-2=3", "1-2=3");
@@ -102,42 +130,129 @@ TEST_F(UTRSGenerator, FromASTInteger) {
 }
 
 TEST_F(UTRSGenerator, FromASTLogic) {
-  ExpectASTGeneration(u8"\u00AC (1=2 & 3=4)"_c17, u8"\u00AC(1=2 & 3=4)"_c17);
-  ExpectASTGeneration(u8"\u00AC (1=2 \u2228 3=4)"_c17, u8"\u00AC(1=2 \u2228 3=4)"_c17);
-  ExpectASTGeneration(u8"\u00AC (1=2 \u21D2 3=4)"_c17, u8"\u00AC(1=2 \u21D2 3=4)"_c17);
-  ExpectASTGeneration(u8"\u00AC (1=2 \u21D4 3=4)"_c17, u8"\u00AC(1=2 \u21D4 3=4)"_c17);
+  ExpectASTGeneration(
+    u8"\u00AC (1=2 & 3=4)"_c17,
+    u8"\u00AC(1=2 & 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u00AC (1=2 \u2228 3=4)"_c17,
+    u8"\u00AC(1=2 \u2228 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u00AC (1=2 \u21D2 3=4)"_c17,
+    u8"\u00AC(1=2 \u21D2 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u00AC (1=2 \u21D4 3=4)"_c17,
+    u8"\u00AC(1=2 \u21D4 3=4)"_c17
+  );
 
-  ExpectASTGeneration("1=2 & (3=4 & 5=6)", "1=2 & (3=4 & 5=6)");
-  ExpectASTGeneration(u8"1=2 \u2228 (3=4 \u2228 5=6)"_c17, u8"1=2 \u2228 (3=4 \u2228 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 \u21D2 (3=4 \u21D2 5=6)"_c17, u8"1=2 \u21D2 (3=4 \u21D2 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 \u21D4 (3=4 \u21D4 5=6)"_c17, u8"1=2 \u21D4 (3=4 \u21D4 5=6)"_c17);
+  ExpectASTGeneration(
+    "1=2 & (3=4 & 5=6)",
+    "1=2 & (3=4 & 5=6)"
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u2228 (3=4 \u2228 5=6)"_c17,
+    u8"1=2 \u2228 (3=4 \u2228 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u21D2 (3=4 \u21D2 5=6)"_c17,
+    u8"1=2 \u21D2 (3=4 \u21D2 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u21D4 (3=4 \u21D4 5=6)"_c17,
+    u8"1=2 \u21D4 (3=4 \u21D4 5=6)"_c17
+  );
 
-  ExpectASTGeneration(u8"1=2 & (3=4 \u2228 5=6)"_c17, u8"1=2 & (3=4 \u2228 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 & (3=4 \u21D2 5=6)"_c17, u8"1=2 & (3=4 \u21D2 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 & (3=4 \u21D4 5=6)"_c17, u8"1=2 & (3=4 \u21D4 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 \u2228 (3=4 \u21D2 5=6)"_c17, u8"1=2 \u2228 (3=4 \u21D2 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 \u2228 (3=4 \u21D4 5=6)"_c17, u8"1=2 \u2228 (3=4 \u21D4 5=6)"_c17);
-  ExpectASTGeneration(u8"1=2 \u21D2 (3=4 \u21D4 5=6)"_c17, u8"1=2 \u21D2 (3=4 \u21D4 5=6)"_c17);
+  ExpectASTGeneration(
+    u8"1=2 & (3=4 \u2228 5=6)"_c17,
+    u8"1=2 & (3=4 \u2228 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 & (3=4 \u21D2 5=6)"_c17,
+    u8"1=2 & (3=4 \u21D2 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 & (3=4 \u21D4 5=6)"_c17,
+    u8"1=2 & (3=4 \u21D4 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u2228 (3=4 \u21D2 5=6)"_c17,
+    u8"1=2 \u2228 (3=4 \u21D2 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u2228 (3=4 \u21D4 5=6)"_c17,
+    u8"1=2 \u2228 (3=4 \u21D4 5=6)"_c17
+  );
+  ExpectASTGeneration(
+    u8"1=2 \u21D2 (3=4 \u21D4 5=6)"_c17,
+    u8"1=2 \u21D2 (3=4 \u21D4 5=6)"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, FromASTQuantifier) {
-  ExpectASTGeneration(u8"\u2200a\u2208X1 (1=2)"_c17, u8"\u2200a\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2203a\u2208X1 (1=2)"_c17, u8"\u2203a\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2200a,b\u2208X1 (1=2)"_c17, u8"\u2200a, b\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 1=2 & 3=4"_c17, u8"\u2200a\u2208X1 1=2 & 3=4"_c17);
-  ExpectASTGeneration(u8"\u2200b\u2208X1\u2200a\u2208X1 1=2"_c17, u8"\u2200b\u2208X1 \u2200a\u2208X1 1=2"_c17);
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 (1=2)"_c17,
+    u8"\u2200a\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2203a\u2208X1 (1=2)"_c17,
+    u8"\u2203a\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a,b\u2208X1 (1=2)"_c17,
+    u8"\u2200a, b\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 1=2 & 3=4"_c17,
+    u8"\u2200a\u2208X1 1=2 & 3=4"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200b\u2208X1\u2200a\u2208X1 1=2"_c17,
+    u8"\u2200b\u2208X1 \u2200a\u2208X1 1=2"_c17
+  );
 
-  ExpectASTGeneration(u8"\u00AC\u2200a\u2208X1 1=2"_c17, u8"\u00AC\u2200a\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 \u00AC1=2"_c17, u8"\u2200a\u2208X1 \u00AC1=2"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 (1=2 & 3=4)"_c17, u8"\u2200a\u2208X1 (1=2 & 3=4)"_c17);
-  ExpectASTGeneration(u8"\u2203a\u2208X1 (1=2 & 3=4)"_c17, u8"\u2203a\u2208X1 (1=2 & 3=4)"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 (1=2 \u2228 3=4)"_c17, u8"\u2200a\u2208X1 (1=2 \u2228 3=4)"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 (1=2 \u21D2 3=4)"_c17, u8"\u2200a\u2208X1 (1=2 \u21D2 3=4)"_c17);
-  ExpectASTGeneration(u8"\u2200a\u2208X1 (1=2 \u21D4 3=4)"_c17, u8"\u2200a\u2208X1 (1=2 \u21D4 3=4)"_c17);
+  ExpectASTGeneration(
+    u8"\u00AC\u2200a\u2208X1 1=2"_c17,
+    u8"\u00AC\u2200a\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 \u00AC1=2"_c17,
+    u8"\u2200a\u2208X1 \u00AC1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 (1=2 & 3=4)"_c17,
+    u8"\u2200a\u2208X1 (1=2 & 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2203a\u2208X1 (1=2 & 3=4)"_c17,
+    u8"\u2203a\u2208X1 (1=2 & 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 (1=2 \u2228 3=4)"_c17,
+    u8"\u2200a\u2208X1 (1=2 \u2228 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 (1=2 \u21D2 3=4)"_c17,
+    u8"\u2200a\u2208X1 (1=2 \u21D2 3=4)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200a\u2208X1 (1=2 \u21D4 3=4)"_c17,
+    u8"\u2200a\u2208X1 (1=2 \u21D4 3=4)"_c17
+  );
 
-  ExpectASTGeneration(u8"\u2200(a,b)\u2208X1 1=2"_c17, u8"\u2200(a, b)\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2200(a,b,c)\u2208X1 1=2"_c17, u8"\u2200(a, b, c)\u2208X1 1=2"_c17);
-  ExpectASTGeneration(u8"\u2200(a,(b,c))\u2208X1 1=2"_c17, u8"\u2200(a, (b, c))\u2208X1 1=2"_c17);
+  ExpectASTGeneration(
+    u8"\u2200(a,b)\u2208X1 1=2"_c17,
+    u8"\u2200(a, b)\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200(a,b,c)\u2208X1 1=2"_c17,
+    u8"\u2200(a, b, c)\u2208X1 1=2"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u2200(a,(b,c))\u2208X1 1=2"_c17,
+    u8"\u2200(a, (b, c))\u2208X1 1=2"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, FromASTTyped) {
@@ -146,56 +261,182 @@ TEST_F(UTRSGenerator, FromASTTyped) {
   ExpectASTGeneration("F1[a]", "F1[a]");
   ExpectASTGeneration("F1[S1 , S2 , S3]", "F1[S1, S2, S3]");
 
-  ExpectASTGeneration(u8"X1 \u2208 X2"_c17, u8"X1\u2208X2"_c17);
-  ExpectASTGeneration(u8"X1 \u2209 X2"_c17, u8"X1\u2209X2"_c17);
-  ExpectASTGeneration(u8"X1 \u2282 X2"_c17, u8"X1\u2282X2"_c17);
-  ExpectASTGeneration(u8"X1 \u2286 X2"_c17, u8"X1\u2286X2"_c17);
-  ExpectASTGeneration(u8"X1 \u2284 X2"_c17, u8"X1\u2284X2"_c17);
+  ExpectASTGeneration(
+    u8"X1 \u2208 X2"_c17,
+    u8"X1\u2208X2"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1 \u2209 X2"_c17,
+    u8"X1\u2209X2"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1 \u2282 X2"_c17,
+    u8"X1\u2282X2"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1 \u2286 X2"_c17,
+    u8"X1\u2286X2"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1 \u2284 X2"_c17,
+    u8"X1\u2284X2"_c17
+  );
 
-  ExpectASTGeneration(u8"\u212C\u212C( X1 )"_c17, u8"\u212C\u212C(X1)"_c17);
-  ExpectASTGeneration(u8"\u212C(\u212C( X1 ))"_c17, u8"\u212C\u212C(X1)"_c17);
-  ExpectASTGeneration("Pr1( S1 )", "Pr1(S1)");
-  ExpectASTGeneration("Pr42( S1 )", "Pr42(S1)");
-  ExpectASTGeneration("pr1( a )", "pr1(a)");
-  ExpectASTGeneration("Fi1,2[ b, c]( a )", "Fi1,2[b, c](a)");
-  ExpectASTGeneration("pr42( a )", "pr42(a)");
-  ExpectASTGeneration("bool( a )", "bool(a)");
-  ExpectASTGeneration("debool( a )", "debool(a)");
-  ExpectASTGeneration("red( a )", "red(a)");
+  ExpectASTGeneration(
+    u8"\u212C\u212C( X1 )"_c17,
+    u8"\u212C\u212C(X1)"_c17
+  );
+  ExpectASTGeneration(
+    u8"\u212C(\u212C( X1 ))"_c17,
+    u8"\u212C\u212C(X1)"_c17
+  );
+  ExpectASTGeneration(
+    "Pr1( S1 )",
+    "Pr1(S1)"
+  );
+  ExpectASTGeneration(
+    "Pr42( S1 )",
+    "Pr42(S1)"
+  );
+  ExpectASTGeneration(
+    "pr1( a )",
+    "pr1(a)"
+  );
+  ExpectASTGeneration(
+    "Fi1,2[ b, c]( a )",
+    "Fi1,2[b, c](a)"
+  );
+  ExpectASTGeneration(
+    "pr42( a )",
+    "pr42(a)"
+  );
+  ExpectASTGeneration(
+    "bool( a )",
+    "bool(a)"
+  );
+  ExpectASTGeneration(
+    "debool( a )",
+    "debool(a)"
+  );
+  ExpectASTGeneration(
+    "red( a )",
+    "red(a)"
+  );
 
-  ExpectASTGeneration("(a,b)", "(a, b)");
-  ExpectASTGeneration("(a,b,c)", "(a, b, c)");
-  ExpectASTGeneration("{a}", "{a}");
-  ExpectASTGeneration("{a, b}", "{a, b}");
-  ExpectASTGeneration("{a,b,c}", "{a, b, c}");
-  ExpectASTGeneration("{(a,b),c}", "{(a, b), c}");
+  ExpectASTGeneration(
+    "(a,b)",
+    "(a, b)"
+  );
+  ExpectASTGeneration(
+    "(a,b,c)",
+    "(a, b, c)"
+  );
+  ExpectASTGeneration(
+    "{a}",
+    "{a}"
+  );
+  ExpectASTGeneration(
+    "{a, b}",
+    "{a, b}"
+  );
+  ExpectASTGeneration(
+    "{a,b,c}",
+    "{a, b, c}"
+  );
+  ExpectASTGeneration(
+    "{(a,b),c}",
+    "{(a, b), c}"
+  );
 
-  ExpectASTGeneration(u8"{a \u2208 X1|1=2}"_c17, u8"D{a\u2208X1 | 1=2}"_c17);
-  ExpectASTGeneration(u8"D{(a,b) \u2208 X1|1=2}"_c17, u8"D{(a, b)\u2208X1 | 1=2}"_c17);
-  ExpectASTGeneration(u8"D{(a,b,c) \u2208 X1|1=2}"_c17, u8"D{(a, b, c)\u2208X1 | 1=2}"_c17);
-  ExpectASTGeneration(u8"D{(a,(b,c)) \u2208 X1|1=2}"_c17, u8"D{(a, (b, c))\u2208X1 | 1=2}"_c17);
-  ExpectASTGeneration(u8"D{((a,b),c) \u2208 X1|1=2}"_c17, u8"D{((a, b), c)\u2208X1 | 1=2}"_c17);
-  ExpectASTGeneration("R{a:=X1 | 1=1| a \\ a}", "R{a:=X1 | 1=1 | a\\a}");
-  ExpectASTGeneration(u8"I{ (a,b) | b:\u2208X1; a:= b; 1=1}"_c17, u8"I{(a, b) | b:\u2208X1; a:=b; 1=1}"_c17);
+  ExpectASTGeneration(
+    u8"{a \u2208 X1|1=2}"_c17,
+    u8"D{a\u2208X1 | 1=2}"_c17
+  );
+  ExpectASTGeneration(
+    u8"D{(a,b) \u2208 X1|1=2}"_c17,
+    u8"D{(a, b)\u2208X1 | 1=2}"_c17
+  );
+  ExpectASTGeneration(
+    u8"D{(a,b,c) \u2208 X1|1=2}"_c17,
+    u8"D{(a, b, c)\u2208X1 | 1=2}"_c17
+  );
+  ExpectASTGeneration(
+    u8"D{(a,(b,c)) \u2208 X1|1=2}"_c17
+    , u8"D{(a, (b, c))\u2208X1 | 1=2}"_c17
+  );
+  ExpectASTGeneration(
+    u8"D{((a,b),c) \u2208 X1|1=2}"_c17,
+    u8"D{((a, b), c)\u2208X1 | 1=2}"_c17
+  );
+  ExpectASTGeneration(
+    "R{a:=X1 | 1=1| a \\ a}",
+    "R{a:=X1 | 1=1 | a\\a}"
+  );
+  ExpectASTGeneration(
+    u8"I{ (a,b) | b:\u2208X1; a:= b; 1=1}"_c17,
+    u8"I{(a, b) | b:\u2208X1; a:=b; 1=1}"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, FromASTTypedOperators) {
-  ExpectASTGeneration("X1\\(X2\\X3)", "X1\\(X2\\X3)");
-  ExpectASTGeneration("(X1\\X2)\\X3", "X1\\X2\\X3");
-  ExpectASTGeneration("X1\\X2\\X3", "X1\\X2\\X3");
-  ExpectASTGeneration(u8"X1\u222AX2\u222AX3"_c17, u8"X1\u222AX2\u222AX3"_c17);
-  ExpectASTGeneration(u8"X1\u2229X2\u2229X3"_c17, u8"X1\u2229X2\u2229X3"_c17);
-  ExpectASTGeneration(u8"X1\u2206X2\u2206X3"_c17, u8"X1\u2206X2\u2206X3"_c17);
+  ExpectASTGeneration(
+    "X1\\(X2\\X3)",
+    "X1\\(X2\\X3)"
+  );
+  ExpectASTGeneration(
+    "(X1\\X2)\\X3",
+    "X1\\X2\\X3"
+  );
+  ExpectASTGeneration(
+    "X1\\X2\\X3",
+    "X1\\X2\\X3"
+  );
+  ExpectASTGeneration(
+    u8"X1\u222AX2\u222AX3"_c17,
+    u8"X1\u222AX2\u222AX3"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1\u2229X2\u2229X3"_c17,
+    u8"X1\u2229X2\u2229X3"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1\u2206X2\u2206X3"_c17,
+    u8"X1\u2206X2\u2206X3"_c17
+  );
 
-  ExpectASTGeneration(u8"X1\\(X2\u222AX3)"_c17, u8"X1\\(X2\u222AX3)"_c17);
+  ExpectASTGeneration(
+    u8"X1\\(X2\u222AX3)"_c17,
+    u8"X1\\(X2\u222AX3)"_c17
+  );
 
-  ExpectASTGeneration(u8"X1\u00D7X2\u00D7X3"_c17, u8"X1\u00D7X2\u00D7X3"_c17);
-  ExpectASTGeneration(u8"(X1\u00D7X2)\u00D7X3"_c17, u8"(X1\u00D7X2)\u00D7X3"_c17);
-  ExpectASTGeneration(u8"X1\u00D7(X2\u00D7X3)"_c17, u8"X1\u00D7(X2\u00D7X3)"_c17);
-  ExpectASTGeneration(u8"X1\u00D7Pr1( S1 )"_c17, u8"X1\u00D7Pr1(S1)"_c17);
-  ExpectASTGeneration(u8"Pr1( S1 )\u00D7X1"_c17, u8"Pr1(S1)\u00D7X1"_c17);
-  ExpectASTGeneration(u8"{ S1 }\u00D7X1"_c17, u8"{S1}\u00D7X1"_c17);
-  ExpectASTGeneration(u8"X1\u00D7{ S1 }"_c17, u8"X1\u00D7{S1}"_c17);
+  ExpectASTGeneration(
+    u8"X1\u00D7X2\u00D7X3"_c17,
+    u8"X1\u00D7X2\u00D7X3"_c17
+  );
+  ExpectASTGeneration(
+    u8"(X1\u00D7X2)\u00D7X3"_c17,
+    u8"(X1\u00D7X2)\u00D7X3"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1\u00D7(X2\u00D7X3)"_c17,
+    u8"X1\u00D7(X2\u00D7X3)"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1\u00D7Pr1( S1 )"_c17,
+    u8"X1\u00D7Pr1(S1)"_c17
+  );
+  ExpectASTGeneration(
+    u8"Pr1( S1 )\u00D7X1"_c17,
+    u8"Pr1(S1)\u00D7X1"_c17
+  );
+  ExpectASTGeneration(
+    u8"{ S1 }\u00D7X1"_c17,
+    u8"{S1}\u00D7X1"_c17
+  );
+  ExpectASTGeneration(
+    u8"X1\u00D7{ S1 }"_c17,
+    u8"X1\u00D7{S1}"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, CreateCall) {
@@ -234,12 +475,22 @@ TEST_F(UTRSGenerator, FunctionFromExpression) {
 
   EXPECT_EQ(gen.FunctionFromExpr({}, ""), "");
   EXPECT_EQ(gen.FunctionFromExpr({ "S1" }, ""), "");
-  EXPECT_EQ(gen.FunctionFromExpr({ "S1" }, "X1\\X1"), u8"[arg1\u2208\u212C(X1)] X1\\X1"_c17);
-  EXPECT_EQ(gen.FunctionFromExpr({ "S1" }, "S1\\X1"), u8"[arg1\u2208\u212C(X1)] arg1\\X1"_c17);
-  EXPECT_EQ(gen.FunctionFromExpr({ "S1", "X1" }, "S1\\X1"), 
-            u8"[arg1\u2208\u212C(X1), arg2\u2208\u212C(X1)] arg1\\arg2"_c17);
-  EXPECT_EQ(gen.FunctionFromExpr({ "S1" }, u8"{arg1 \u2208 S1 | 1=1}"_c17),
-            u8"[arg2\u2208\u212C(X1)] {arg1 \u2208 arg2 | 1=1}"_c17);
+  EXPECT_EQ(
+    gen.FunctionFromExpr({ "S1" }, "X1\\X1"),
+    u8"[arg1\u2208\u212C(X1)] X1\\X1"_c17
+  );
+  EXPECT_EQ(
+    gen.FunctionFromExpr({ "S1" }, "S1\\X1"),
+    u8"[arg1\u2208\u212C(X1)] arg1\\X1"_c17
+  );
+  EXPECT_EQ(
+    gen.FunctionFromExpr({ "S1", "X1" }, "S1\\X1"), 
+    u8"[arg1\u2208\u212C(X1), arg2\u2208\u212C(X1)] arg1\\arg2"_c17
+  );
+  EXPECT_EQ(
+    gen.FunctionFromExpr({ "S1" }, u8"{arg1 \u2208 S1 | 1=1}"_c17),
+    u8"[arg2\u2208\u212C(X1)] {arg1 \u2208 arg2 | 1=1}"_c17
+  );
 }
 
 TEST_F(UTRSGenerator, GenerateStructure) {
@@ -259,20 +510,30 @@ TEST_F(UTRSGenerator, GenerateStructure) {
 TEST_F(UTRSGenerator, Ascii2RS) {
   using ccl::rslang::ConvertTo;
 
-  EXPECT_EQ(ConvertTo(R"(S1 \in B(X1))", Syntax::MATH), u8"S1\u2208\u212C(X1)"_c17);
-  EXPECT_EQ(ConvertTo("B(Y*(X1*X2)*BB(X3))", Syntax::MATH),
-            u8"\u212C(Y\u00D7(X1\u00D7X2)\u00D7\u212C\u212C(X3))"_c17);
+  EXPECT_EQ(
+    ConvertTo(R"(S1 \in B(X1))", Syntax::MATH),
+    u8"S1\u2208\u212C(X1)"_c17
+  );
+  EXPECT_EQ(
+    ConvertTo("B(Y*(X1*X2)*BB(X3))", Syntax::MATH),
+    u8"\u212C(Y\u00D7(X1\u00D7X2)\u00D7\u212C\u212C(X3))"_c17
+  );
 
   EXPECT_EQ(ConvertTo("  X1  ", Syntax::MATH), "X1");
   EXPECT_EQ(ConvertTo("a,?b", Syntax::MATH), "a,?b");
 }
 
 TEST_F(UTRSGenerator, RS2Ascii) {
-  EXPECT_EQ(ConvertTo(u8"S1\u2208\u212C(X1)"_c17, Syntax::ASCII), R"(S1 \in B(X1))");
-  EXPECT_EQ(ConvertTo(u8"\u212C(Y\u00D7(X1\u00D7X2)\u00D7\u212C\u212C(X3))"_c17, Syntax::ASCII),
-            R"(B(Y*(X1*X2)*BB(X3)))");
+  EXPECT_EQ(
+    ConvertTo(u8"S1\u2208\u212C(X1)"_c17, Syntax::ASCII),
+    R"(S1 \in B(X1))"
+  );
+  EXPECT_EQ(
+    ConvertTo(u8"\u212C(Y\u00D7(X1\u00D7X2)\u00D7\u212C\u212C(X3))"_c17, Syntax::ASCII),
+    R"(B(Y*(X1*X2)*BB(X3)))"
+  );
 
-  EXPECT_EQ(ccl::rslang::ConvertTo("  X1  ", Syntax::ASCII), R"(X1)");
-  EXPECT_EQ(ccl::rslang::ConvertTo("\xE2\x88\x85", Syntax::ASCII), R"({})");
-  EXPECT_EQ(ccl::rslang::ConvertTo("a,?b", Syntax::ASCII), R"(a,?b)");
+  EXPECT_EQ(ConvertTo("  X1  ", Syntax::ASCII), R"(X1)");
+  EXPECT_EQ(ConvertTo("\xE2\x88\x85", Syntax::ASCII), R"({})");
+  EXPECT_EQ(ConvertTo("a,?b", Syntax::ASCII), R"(a,?b)");
 }

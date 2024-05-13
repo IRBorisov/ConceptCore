@@ -91,8 +91,8 @@ TEST_F(UTMathLexer, SingleSymbol) {
   TestSingle(u8"\u00D7"_c17, TokenID::DECART, 1);
   TestSingle("\xE2\x84\xAC", TokenID::BOOLEAN, 1);
 
-  TestToken(u8":\u2208"_c17, TokenID::PUNC_ITERATE);
-  TestSingle(":=", TokenID::PUNC_ASSIGN);
+  TestToken(u8":\u2208"_c17, TokenID::ITERATE);
+  TestSingle(":=", TokenID::ASSIGN);
   TestSingle(":==", TokenID::PUNC_DEFINE);
   TestSingle("::=", TokenID::PUNC_STRUCT);
 }

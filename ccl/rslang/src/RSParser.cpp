@@ -18,6 +18,7 @@
 #endif
 
 #include <optional>
+#include <unordered_map>
 
 namespace ccl::rslang::detail {
 
@@ -186,6 +187,26 @@ RawNode TermDeclaration(
   return result;
 }
 
+RawNode TupleDeclaration(ParserState* state, RawNode tuple) {
+  // TODO: check tuple contains only local variables, ParseEID::expectedLocal
+  std::vector<Node*> stack{ tuple.get()};
+  while (!stack.empty()) {
+    auto node = stack.back();
+    const auto id = node->token.id;
+    stack.pop_back();
+    if (id == TokenID::NT_TUPLE) {
+      node->token.id = TokenID::NT_TUPLE_DECL;
+    } else if (id != TokenID::ID_LOCAL) {
+      state->OnError(ParseEID::expectedLocal, node->token.pos.start);
+      return nullptr;
+    }
+    for (const auto& child: node->children) {
+      stack.emplace_back(child.get());
+    }
+  }
+  return tuple;
+}
+
 RawNode FullRecursion(
   RawNode rec,
   RawNode declaration, 
@@ -232,6 +253,30 @@ RawNode Imperative(RawNode imp, RawNode value, RawNode actions, RawNode rc) {
   return result;
 }
 
+bool SemanticCheck(ParserState* state, RawNode root) {
+  std::vector<Node*> stack{ root.get() };
+  std::vector<Node*> parents{ nullptr };
+  while (!stack.empty()) {
+    const auto node = stack.back();
+    stack.pop_back();
+    const auto parent = parents.back();
+    parents.pop_back();
+
+    const auto id = node->token.id;
+    if (id == TokenID::ASSIGN || id == TokenID::ITERATE) {
+      if (parent == nullptr || parent->token.id != TokenID::NT_IMPERATIVE_EXPR) {
+        state->OnError(ParseEID::invalidImperative, node->token.pos.start);
+        return false;
+      }
+    }
+    for (const auto& child: node->children) {
+      stack.emplace_back(child.get());
+      parents.emplace_back(node);
+    }
+  }
+  return true;
+}
+
 SyntaxTree::RawNode CreateNodeRecursive(Node& astNode) {
   if (astNode.token.id == TokenID::PUNC_PL) {
     return CreateNodeRecursive(*astNode.children.at(0));
@@ -244,25 +289,29 @@ SyntaxTree::RawNode CreateNodeRecursive(Node& astNode) {
   }
 }
 
-void ParserState::CreateSyntaxTree(RawNode root) {
+bool ParserState::CreateSyntaxTree(RawNode root) {
+  if (!SemanticCheck(this, root)) {
+    return false;
+  }
   parsedTree = std::make_unique<SyntaxTree>(CreateNodeRecursive(*root));
+  return true;
 }
 
-void ParserState::FinalizeExpression(RawNode expr) {
-  CreateSyntaxTree(expr);
+bool ParserState::FinalizeExpression(RawNode expr) {
+  return CreateSyntaxTree(expr);
 }
 
-void ParserState::FinalizeCstEmpty(RawNode cst, RawNode mode) {
+bool ParserState::FinalizeCstEmpty(RawNode cst, RawNode mode) {
   mode->token.pos = StrRange{ cst->token.pos.start, mode->token.pos.finish };
   mode->children.emplace_back(cst);
-  CreateSyntaxTree(mode);
+  return CreateSyntaxTree(mode);
 }
 
-void ParserState::FinalizeCstExpression(RawNode cst, RawNode mode, RawNode data) {
+bool ParserState::FinalizeCstExpression(RawNode cst, RawNode mode, RawNode data) {
   mode->token.pos = StrRange{ cst->token.pos.start, data->token.pos.finish };
   mode->children.emplace_back(cst);
   mode->children.emplace_back(data);
-  CreateSyntaxTree(mode);
+  return CreateSyntaxTree(mode);
 }
 
 } // namespace ccl::rslang::detail

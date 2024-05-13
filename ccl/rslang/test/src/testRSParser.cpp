@@ -5,6 +5,7 @@
 #include "ccl/rslang/RSParser.h"
 #include "ccl/rslang/AsciiLexer.h"
 #include "ccl/rslang/ErrorLogger.h"
+#include "ccl/rslang/Literals.h"
 
 using ccl::operator""_c17;
 
@@ -100,14 +101,22 @@ TEST_F(UTRSParser, GlobalDeclAST) {
   ExpectAST(R"(S1 \deftype B(X1))", u8"[::=[S1][\u212C[X1]]]"_c17);
   ExpectAST(R"(D1 \defexpr X1 \setminus X2)", u8"[:==[D1][\\[X1][X2]]]"_c17);
   ExpectAST(R"(A1 \defexpr 1 \eq 1)", u8"[:==[A1][=[1][1]]]"_c17);
-  ExpectAST(R"(F1 \defexpr [a \in X1] X1 \setminus a)", 
-            u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]]][\\[X1][a]]]]"_c17);
-  ExpectAST(R"(P1 \defexpr [a \in X1] 1 \eq 1)", 
-            u8"[:==[P1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]]][=[1][1]]]]"_c17);
-  ExpectAST(R"(F1 \defexpr [a \in X1, b \in X1] {b,a})",
-            u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][SET[b][a]]]]"_c17);
-  ExpectAST(R"(F1 \defexpr [a \in R1, b \in B(X1*R1)] {a} \setminus Pr2(b))",
-            u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][R1]][ARG[b][\u212C[\u00D7[X1][R1]]]]][\\[SET[a]][Pr2[b]]]]]"_c17);
+  ExpectAST(
+    R"(F1 \defexpr [a \in X1] X1 \setminus a)",
+    u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]]][\\[X1][a]]]]"_c17
+  );
+  ExpectAST(
+    R"(P1 \defexpr [a \in X1] 1 \eq 1)",
+    u8"[:==[P1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]]][=[1][1]]]]"_c17
+  );
+  ExpectAST(
+    R"(F1 \defexpr [a \in X1, b \in X1] {b,a})",
+    u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][SET[b][a]]]]"_c17
+  );
+  ExpectAST(
+    R"(F1 \defexpr [a \in R1, b \in B(X1*R1)] {a} \setminus Pr2(b))",
+    u8"[:==[F1][FUNCTION_DEFINITION[ARGS[ARG[a][R1]][ARG[b][\u212C[\u00D7[X1][R1]]]]][\\[SET[a]][Pr2[b]]]]]"_c17
+  );
 }
 
 TEST_F(UTRSParser, GlobalDeclErrors) {
@@ -138,6 +147,7 @@ TEST_F(UTRSParser, LogicPredicatesCorrect) {
 }
 
 TEST_F(UTRSParser, LogicPredicatesAST) {
+  ExpectAST(R"(a \in X1)", u8"[\u2208[a][X1]]"_c17);
   ExpectAST(R"(1 \eq 2)", u8"[=[1][2]]"_c17);
   ExpectAST(R"(1 \ls X1)", u8"[<[1][X1]]"_c17);
   ExpectAST(R"(1 \gr 2)", u8"[>[1][2]]"_c17);
@@ -150,6 +160,8 @@ TEST_F(UTRSParser, LogicPredicatesErrors) {
   ExpectError(R"(1 \eq 1 \eq 1)", ParseEID::syntax, 8);
   ExpectError(R"(1 \gr 1 \eq 1)", ParseEID::syntax, 8);
   ExpectError(R"(P1[])", ParseEID::syntax, 3);
+  ExpectError(R"(a \assign X1)", ParseEID::invalidImperative, 0);
+  ExpectError(R"(a \from X1)", ParseEID::invalidImperative, 0);
 }
 
 TEST_F(UTRSParser, LogicOperatorsCorrect) {
@@ -170,16 +182,39 @@ TEST_F(UTRSParser, LogicOperatorsCorrect) {
 TEST_F(UTRSParser, LogicOperatorsAST) {
   ExpectAST(R"(\neg 1 \eq 2)", u8"[\u00AC[=[1][2]]]"_c17);
 
-  ExpectAST(R"(1 \eq 1 \and 2 \eq 2 \and 3 \eq 3)", "[&[&[=[1][1]][=[2][2]]][=[3][3]]]");
-  ExpectAST(R"(1 \eq 1 \or 2 \eq 2 \or 3 \eq 3)", u8"[\u2228[\u2228[=[1][1]][=[2][2]]][=[3][3]]]"_c17);
-  ExpectAST(R"(1 \eq 1 \impl 2 \eq 2 \impl 3 \eq 3)", u8"[\u21D2[\u21D2[=[1][1]][=[2][2]]][=[3][3]]]"_c17);
-  ExpectAST(R"(1 \eq 1 \equiv 2 \eq 2 \equiv 3 \eq 3)", u8"[\u21D4[\u21D4[=[1][1]][=[2][2]]][=[3][3]]]"_c17);
+  ExpectAST(
+    R"(1 \eq 1 \and 2 \eq 2 \and 3 \eq 3)",
+    "[&[&[=[1][1]][=[2][2]]][=[3][3]]]"
+  );
+  ExpectAST(
+    R"(1 \eq 1 \or 2 \eq 2 \or 3 \eq 3)",
+    u8"[\u2228[\u2228[=[1][1]][=[2][2]]][=[3][3]]]"_c17
+  );
+  ExpectAST(
+    R"(1 \eq 1 \impl 2 \eq 2 \impl 3 \eq 3)",
+    u8"[\u21D2[\u21D2[=[1][1]][=[2][2]]][=[3][3]]]"_c17
+  );
+  ExpectAST(
+    R"(1 \eq 1 \equiv 2 \eq 2 \equiv 3 \eq 3)",
+    u8"[\u21D4[\u21D4[=[1][1]][=[2][2]]][=[3][3]]]"_c17
+  );
 
-  ExpectAST(R"((1 \eq 1 \and 2 \eq 2) \and 3 \eq 3)", "[&[&[=[1][1]][=[2][2]]][=[3][3]]]");
-  ExpectAST(R"(1 \eq 1 \and (2 \eq 2 \and 3 \eq 3))", "[&[=[1][1]][&[=[2][2]][=[3][3]]]]");
-  ExpectAST(R"(1 \eq 1 \or 2 \eq 2 \and 3 \eq 3)", u8"[\u2228[=[1][1]][&[=[2][2]][=[3][3]]]]"_c17);
-  ExpectAST(R"(1 \eq 1 \and 2 \eq 2 \or 3 \eq 3 \impl 4 \eq 4 \equiv 5 \eq 5)",
-            u8"[\u21D4[\u21D2[\u2228[&[=[1][1]][=[2][2]]][=[3][3]]][=[4][4]]][=[5][5]]]"_c17);
+  ExpectAST(
+    R"((1 \eq 1 \and 2 \eq 2) \and 3 \eq 3)",
+    "[&[&[=[1][1]][=[2][2]]][=[3][3]]]"
+  );
+  ExpectAST(
+    R"(1 \eq 1 \and (2 \eq 2 \and 3 \eq 3))",
+    "[&[=[1][1]][&[=[2][2]][=[3][3]]]]"
+  );
+  ExpectAST(
+    R"(1 \eq 1 \or 2 \eq 2 \and 3 \eq 3)",
+    u8"[\u2228[=[1][1]][&[=[2][2]][=[3][3]]]]"_c17
+  );
+  ExpectAST(
+    R"(1 \eq 1 \and 2 \eq 2 \or 3 \eq 3 \impl 4 \eq 4 \equiv 5 \eq 5)",
+    u8"[\u21D4[\u21D2[\u2228[&[=[1][1]][=[2][2]]][=[3][3]]][=[4][4]]][=[5][5]]]"_c17
+  );
 }
 
 TEST_F(UTRSParser, LogicOperatorsErrors) {
@@ -204,20 +239,35 @@ TEST_F(UTRSParser, LogicQuantifiedCorrect) {
 
   ExpectNoWarnings(R"(\A a \in X1 \A b \in X1 1 \eq 1)");
   ExpectNoWarnings(R"(\A a,b,c \in X1 1 \eq 1)");
+  ExpectNoWarnings(R"(\A a,b,c,d \in X1 1 \eq 1)");
   ExpectNoWarnings(R"(\A (a,b,c) \in X1 1 \eq 1)");
+  ExpectNoWarnings(R"(\A (a,(b,d),c) \in X1 1 \eq 1)");
 }
 
 TEST_F(UTRSParser, LogicQuantifiedAST) {
-  ExpectAST(R"(\A a \in X1 1 \eq 2)", u8"[\u2200[a][X1][=[1][2]]]"_c17);
-  ExpectAST(R"(\A a,b \in X1 1 \eq 2)", u8"[\u2200[ENUM_DECLARATION[a][b]][X1][=[1][2]]]"_c17);
-  ExpectAST(R"(\A a \in X1 1 \eq 2 \and 3 \eq 4)", u8"[&[\u2200[a][X1][=[1][2]]][=[3][4]]]"_c17);
-  ExpectAST(R"(\A a \in X1 (1 \eq 2 \and 3 \eq 4))", u8"[\u2200[a][X1][&[=[1][2]][=[3][4]]]]"_c17);
+  ExpectAST(
+    R"(\A a \in X1 1 \eq 2)",
+    u8"[\u2200[a][X1][=[1][2]]]"_c17
+  );
+  ExpectAST(
+    R"(\A a,b \in X1 1 \eq 2)",
+    u8"[\u2200[ENUM_DECLARATION[a][b]][X1][=[1][2]]]"_c17
+  );
+  ExpectAST(
+    R"(\A a \in X1 1 \eq 2 \and 3 \eq 4)",
+    u8"[&[\u2200[a][X1][=[1][2]]][=[3][4]]]"_c17
+  );
+  ExpectAST(
+    R"(\A a \in X1 (1 \eq 2 \and 3 \eq 4))",
+    u8"[\u2200[a][X1][&[=[1][2]][=[3][4]]]]"_c17
+  );
 }
 
 TEST_F(UTRSParser, LogicQuantifiedErrors) {
   ExpectError(R"(\A a \in X1, \A b \in X1 1 \eq 1)", ParseEID::invalidQuantifier, 11);
   ExpectError(R"(\A ()", ParseEID::invalidQuantifier, 4);
   ExpectError(R"(\A (a,X1) \in X1 1 \eq 1)", ParseEID::expectedLocal, 6);
+  ExpectError(R"(\A ((a,X1),b) \in X1 1 \eq 1)", ParseEID::expectedLocal, 7);
   ExpectError(R"(\A a \notsubset X1 1 \eq 1)", ParseEID::invalidQuantifier, 5);
   ExpectError(R"(\A a \notin X1 1 \eq 1)", ParseEID::invalidQuantifier, 5);
   ExpectError(R"(\A a \subset X1 1 \eq 2)", ParseEID::invalidQuantifier, 5);
@@ -249,7 +299,7 @@ TEST_F(UTRSParser, Identifiers) {
   ExpectNoWarnings(R"(hello_world)");
 }
 
-TEST_F(UTRSParser, TermOperatorsCorrect) {
+TEST_F(UTRSParser, SetexprOperatorsCorrect) {
   TestAllBinaryCombos(R"( \plus )");
   TestAllBinaryCombos(R"( \minus )");
   TestAllBinaryCombos(R"( \multiply )");
@@ -270,7 +320,7 @@ TEST_F(UTRSParser, TermOperatorsCorrect) {
   TestAllBinaryCombos(R"( * )");
 }
 
-TEST_F(UTRSParser, TermOperatorsAST) {
+TEST_F(UTRSParser, SetexprOperatorsAST) {
   ExpectAST(R"(1 \plus 2 \plus 3)", "[+[+[1][2]][3]]");
   ExpectAST(R"((1 \plus 2) \plus 3)", "[+[+[1][2]][3]]");
   ExpectAST(R"(1 \plus (2 \plus 3))", "[+[1][+[2][3]]]");
@@ -284,11 +334,13 @@ TEST_F(UTRSParser, TermOperatorsAST) {
   ExpectAST(R"(a \setminus b \setminus c)", "[\\[\\[a][b]][c]]");
   ExpectAST(R"((a \setminus b) \setminus c)", "[\\[\\[a][b]][c]]");
   ExpectAST(R"(a \setminus (b \setminus c))", "[\\[a][\\[b][c]]]");
-  ExpectAST(R"(((a \union b) \intersect (c \setminus d)) \symmdiff (e * f))",
-            u8"[\u2206[\u2229[\u222A[a][b]][\\[c][d]]][\u00D7[e][f]]]"_c17);
+  ExpectAST(
+    R"(((a \union b) \intersect (c \setminus d)) \symmdiff (e * f))",
+    u8"[\u2206[\u2229[\u222A[a][b]][\\[c][d]]][\u00D7[e][f]]]"_c17
+  );
 }
 
-TEST_F(UTRSParser, TermOperatorsErrors) {
+TEST_F(UTRSParser, SetexprOperatorsErrors) {
   ExpectError(R"(1 \plus  \plus )", ParseEID::syntax, 9);
   ExpectError(R"(1 \minus  \minus )", ParseEID::syntax, 10);
 
@@ -301,7 +353,7 @@ TEST_F(UTRSParser, TermOperatorsErrors) {
   ExpectError(R"(X1 \setminus (1))", ParseEID::syntax, 15);
 }
 
-TEST_F(UTRSParser, TermTextOperationsCorrect) {
+TEST_F(UTRSParser, SetexprTextOperationsCorrect) {
   ExpectNoWarnings(R"(card(X1))");
   ExpectNoWarnings(R"(card(1))");
   ExpectNoWarnings(R"(card(a))");
@@ -317,18 +369,18 @@ TEST_F(UTRSParser, TermTextOperationsCorrect) {
   ExpectNoWarnings(R"(red(a))");
 }
 
-TEST_F(UTRSParser, TermTextOperationsAST) {
+TEST_F(UTRSParser, SetexprTextOperationsAST) {
   ExpectAST(R"(card(X1))", u8"[card[X1]]"_c17);
   ExpectAST(R"(Pr2(a))", u8"[Pr2[a]]"_c17);
   ExpectAST(R"(Fi1,2[b](a))", u8"[Fi1,2[b][a]]"_c17);
 }
 
-TEST_F(UTRSParser, TermTextOperationsErrors) {
+TEST_F(UTRSParser, SetexprTextOperationsErrors) {
   ExpectError(R"(Pr1,b(a))", ParseEID::syntax, 3);
   ExpectError(R"(Fi1,b[c](a))", ParseEID::syntax, 3);
 }
 
-TEST_F(UTRSParser, TermConstructorsCorrect) {
+TEST_F(UTRSParser, SetexprConstructorsCorrect) {
   ExpectNoWarnings(R"(B(a))");
   ExpectNoWarnings(R"(B(a*b*(c*d)))");
   ExpectNoWarnings(R"(BB(a))");
@@ -352,9 +404,10 @@ TEST_F(UTRSParser, TermConstructorsCorrect) {
   ExpectNoWarnings(R"(I{(b, a) | a \from X1; b \assign a})");
   ExpectNoWarnings(R"(I{ red(b) | a \from X1; b \assign a})");
   ExpectNoWarnings(R"(I{(a, b) | a \from X1; b \assign a; (a,b) \in S1})");
+  ExpectNoWarnings(R"(I{(a, d) | (a,c) \from X1*X1; (b,d) \assign (a,c); (a,b) \in S1})");
 }
 
-TEST_F(UTRSParser, TermConstructorsAST) {
+TEST_F(UTRSParser, SetexprConstructorsAST) {
   ExpectAST(R"(B(a))", u8"[\u212C[a]]"_c17);
 
   ExpectAST(R"((a,b,c))", u8"[TUPLE[a][b][c]]"_c17);
@@ -362,25 +415,43 @@ TEST_F(UTRSParser, TermConstructorsAST) {
   ExpectAST(R"({{a, b}, {c, d}})", u8"[SET[SET[a][b]][SET[c][d]]]"_c17);
   ExpectAST(R"({a})", u8"[SET[a]]"_c17);
 
-  ExpectAST(R"(D{a \in X1 | 1 \eq 2})",
-            u8"[DECLARATIVE[a][X1][=[1][2]]]"_c17);
-  ExpectAST(R"(D{(a,b) \in X1 | 1 \eq 2})",
-            u8"[DECLARATIVE[TUPLE_DECLARATION[a][b]][X1][=[1][2]]]"_c17);
+  ExpectAST(
+    R"(D{a \in X1 | 1 \eq 2})",
+    u8"[DECLARATIVE[a][X1][=[1][2]]]"_c17
+  );
+  ExpectAST(
+    R"(D{(a,b) \in X1 | 1 \eq 2})",
+    u8"[DECLARATIVE[TUPLE_DECLARATION[a][b]][X1][=[1][2]]]"_c17
+  );
 
-  ExpectAST(R"(R{a \assign S1 | card(a) \ls 10 | a \setminus a})",
-            u8"[REC_FULL[a][S1][<[card[a]][10]][\\[a][a]]]"_c17);
-  ExpectAST(R"(R{a \assign S1 | a \setminus a})",
-            u8"[REC_SHORT[a][S1][\\[a][a]]]"_c17);
-  ExpectAST(R"(R{(a,b) \assign S1 | (a \setminus a, b)})",
-            u8"[REC_SHORT[TUPLE_DECLARATION[a][b]][S1][TUPLE[\\[a][a]][b]]]"_c17);
+  ExpectAST(
+    R"(R{a \assign S1 | card(a) \ls 10 | a \setminus a})",
+    u8"[REC_FULL[a][S1][<[card[a]][10]][\\[a][a]]]"_c17
+  );
+  ExpectAST(
+    R"(R{a \assign S1 | a \setminus a})",
+    u8"[REC_SHORT[a][S1][\\[a][a]]]"_c17
+  );
+  ExpectAST(
+    R"(R{(a,b) \assign S1 | (a \setminus a, b)})",
+    u8"[REC_SHORT[TUPLE_DECLARATION[a][b]][S1][TUPLE[\\[a][a]][b]]]"_c17
+  );
 
-  ExpectAST(R"(I{(a, b) | a \from X1; b \assign a})",
-            u8"[IMPERATIVE[TUPLE[a][b]][IDECLARE[a][X1]][IASSIGN[b][a]]]"_c17);
-  ExpectAST(R"(I{(a, b) | a \from X1; b \assign a; (a,b) \in S1})",
-            u8"[IMPERATIVE[TUPLE[a][b]][IDECLARE[a][X1]][IASSIGN[b][a]][ICHECK[\u2208[TUPLE[a][b]][S1]]]]"_c17);
+  ExpectAST(
+    R"(I{(a, b) | a \from X1; b \assign a})",
+    u8"[IMPERATIVE[TUPLE[a][b]][:\u2208[a][X1]][:=[b][a]]]"_c17
+  );
+  ExpectAST(
+    R"(I{(a, b) | a \from X1; b \assign a; (a,b) \in S1})",
+    u8"[IMPERATIVE[TUPLE[a][b]][:\u2208[a][X1]][:=[b][a]][\u2208[TUPLE[a][b]][S1]]]"_c17
+  );
+  ExpectAST(
+    R"(I{d | (a,b) \from X1; (c,(d,e)) \assign a; (c,e) \in S1})",
+    u8"[IMPERATIVE[d][:\u2208[TUPLE_DECLARATION[a][b]][X1]][:=[TUPLE_DECLARATION[c][TUPLE_DECLARATION[d][e]]][a]][\u2208[TUPLE[c][e]][S1]]]"_c17
+  );
 }
 
-TEST_F(UTRSParser, TermConstructorsErrors) {
+TEST_F(UTRSParser, SetexprConstructorsErrors) {
   ExpectError(R"({(a;b) \in X1 | 1 \eq 1})", ParseEID::syntax, 3);
 
   ExpectError(R"(D{a \in X1 | 1 \eq 1 a)", ParseEID::missingCurlyBrace, 21);
@@ -408,8 +479,14 @@ TEST_F(UTRSParser, FunctionDefinitionCorrect) {
 }
 
 TEST_F(UTRSParser, FunctionDefinitionAST) {
-  ExpectAST(R"([a \in X1, b \in X1] a \eq b)", u8"[FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][=[a][b]]]"_c17);
-  ExpectAST(R"([a \in X1, b \in X1] a \setminus b)", u8"[FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][\\[a][b]]]"_c17);
+  ExpectAST(
+    R"([a \in X1, b \in X1] a \eq b)",
+    u8"[FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][=[a][b]]]"_c17
+  );
+  ExpectAST(
+    R"([a \in X1, b \in X1] a \setminus b)",
+    u8"[FUNCTION_DEFINITION[ARGS[ARG[a][X1]][ARG[b][X1]]][\\[a][b]]]"_c17
+  );
 }
 
 TEST_F(UTRSParser, FunctionDefinitionErrors) {

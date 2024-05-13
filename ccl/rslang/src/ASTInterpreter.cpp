@@ -25,7 +25,7 @@ public:
   
 private:
   struct BlockMeta {
-    TokenID type{ TokenID::NT_IMP_LOGIC };
+    TokenID rootID{};
     uint32_t arg{};
     std::optional<object::StructuredData> domain{};
   };
@@ -44,21 +44,22 @@ public:
     CreateBlockMetadata();
     for (current = 0; ; ++current) {
       incrementIter = false;
-      if (IsDone()) {
+      if (HasReachedEnd()) {
         if (!SaveElement()) {
           return false;
         }
-      } else {
-        if (!ProcessBlock()) {
-          return false;
-        }
+      } else if (!ProcessBlock()) {
+        return false;
       }
       if (incrementIter && !PrepareNextIteration()) {
         return true;
       }
       if (++parent.iterationCounter > MAX_ITERATIONS) {
-        parent.OnError(ValueEID::iterationsLimit, imperative->pos.start,
-                       std::to_string(MAX_ITERATIONS));
+        parent.OnError(
+          ValueEID::iterationsLimit,
+          imperative->pos.start,
+          std::to_string(MAX_ITERATIONS)
+        );
         return false;
       }
     }
@@ -70,24 +71,23 @@ private:
     iter.MoveToChild(1);
     do {
       BlockMeta newBlock{};
-      newBlock.type = iter->id;
-      switch (newBlock.type) {
-      case TokenID::NT_IMP_DECLARE: {
+      newBlock.rootID = iter->id;
+      switch (newBlock.rootID) {
+      case TokenID::ITERATE: {
         newBlock.arg = *begin(parent.nodeVars[iter.Child(0).get()]);
         break;
       }
-      case TokenID::NT_IMP_ASSIGN: {
+      case TokenID::ASSIGN: {
         newBlock.arg = *begin(parent.nodeVars[iter.Child(0).get()]);
         break;
       }
-      default:
-      case TokenID::NT_IMP_LOGIC: break;
+      default: break;
       }
       metaData.emplace_back(std::move(newBlock));
     } while (iter.MoveToNextSibling());
   }
 
-  [[nodiscard]] bool IsDone() const noexcept {
+  [[nodiscard]] bool HasReachedEnd() const noexcept {
     return current + 1 >= imperative.ChildrenCount();
   }
 
@@ -107,42 +107,38 @@ private:
     child.MoveToChild(static_cast<Index>(current + 1));
     auto& meta = metaData.at(static_cast<size_t>(current));
 
-    switch (meta.type) {
-    default:
-    case TokenID::NT_IMP_LOGIC: {
-      const auto predicatValue = parent.EvaluateChild(child, 0);
-      if (!predicatValue.has_value()) {
+    switch (meta.rootID) {
+    default: {
+      const auto predicatValue = parent.EvaluateChild(imperative, static_cast<Index>(current + 1));
+      if (!predicatValue.has_value() || !std::holds_alternative<bool>(predicatValue.value())) {
         return false;
-      } else {
-        incrementIter = !std::get<bool>(predicatValue.value());
-        return true;
       }
+      incrementIter = !std::get<bool>(predicatValue.value());
+      return true;
     }
-    case TokenID::NT_IMP_DECLARE: {
+    case TokenID::ITERATE: {
       const auto domain = parent.ExtractDomain(child);
       if (!domain.has_value()) {
         return false;
-      } else if (domain->B().IsEmpty()) {
+      } 
+      if (domain->B().IsEmpty()) {
         incrementIter = true;
-        return true;
       } else {
         meta.domain = domain.value();
-
         auto element = std::begin(meta.domain->B());
         parent.idsData[meta.arg] = *element;
         blockStack.emplace(current);
         iterStack.emplace(element);
-        return true;
       }
+      return true;
     }
-    case TokenID::NT_IMP_ASSIGN: {
+    case TokenID::ASSIGN: {
       const auto localValue = parent.ExtractDomain(child);
       if (!localValue.has_value()) {
         return false;
-      } else {
-        parent.idsData[meta.arg] = localValue.value();
-        return true;
       }
+      parent.idsData[meta.arg] = localValue.value();
+      return true;
     }
     }
   }
@@ -275,7 +271,11 @@ bool ASTInterpreter::ViCard(Cursor iter) {
   }
   const auto size = std::get<StructuredData>(base.value()).B().Cardinality();
   if (size == StructuredData::SET_INFINITY) {
-    OnError(ValueEID::typedOverflow, iter->pos.start, std::to_string(StructuredData::SET_INFINITY));
+    OnError(
+      ValueEID::typedOverflow,
+      iter->pos.start,
+      std::to_string(StructuredData::SET_INFINITY)
+    );
     return false;
   }
   return SetCurrent(Factory::Val(size));
@@ -291,13 +291,19 @@ bool ASTInterpreter::ViQuantifier(Cursor iter) {
   const auto isUniversal = iter->id == TokenID::FORALL;
   for (const auto& child : domain->B()) {
     if (++iterationCounter > MAX_ITERATIONS) {
-      OnError(ValueEID::iterationsLimit, iter->pos.start, std::to_string(MAX_ITERATIONS));
+      OnError(
+        ValueEID::iterationsLimit,
+        iter->pos.start,
+        std::to_string(MAX_ITERATIONS)
+      );
       return false;
     }
     idsData[varID] = child;
-    if (const auto iterationValue = EvaluateChild(iter, 2); !iterationValue.has_value()) {
+    const auto iterationValue = EvaluateChild(iter, 2);
+    if (!iterationValue.has_value()) {
       return false;
-    } else if (std::get<bool>(iterationValue.value()) != isUniversal) {
+    }
+    if (std::get<bool>(iterationValue.value()) != isUniversal) {
       return SetCurrent(!isUniversal);
     }
   }
@@ -345,8 +351,7 @@ bool ASTInterpreter::ViLogicBinary(Cursor iter) {
 }
 
 bool ASTInterpreter::TryEvaluateFromFirstArg(TokenID operation, bool firstArgValue) noexcept {
-  if ((operation == TokenID::AND && !firstArgValue) ||
-    (operation == TokenID::OR && firstArgValue)) {
+  if ((operation == TokenID::AND && !firstArgValue) || (operation == TokenID::OR && firstArgValue)) {
     return SetCurrent(firstArgValue);
   } else if (operation == TokenID::IMPLICATION && !firstArgValue) {
     return SetCurrent(!firstArgValue);
@@ -396,7 +401,11 @@ bool ASTInterpreter::ViDeclarative(Cursor iter) {
   auto result = Factory::EmptySet();
   for (const auto& child : setDomain->B()) {
     if (++iterationCounter > MAX_ITERATIONS) {
-      OnError(ValueEID::iterationsLimit, iter->pos.start, std::to_string(MAX_ITERATIONS));
+      OnError(
+        ValueEID::iterationsLimit,
+        iter->pos.start,
+        std::to_string(MAX_ITERATIONS)
+      );
       return false;
     }
     idsData[varID] = child;
@@ -428,7 +437,11 @@ bool ASTInterpreter::ViRecursion(Cursor iter) {
   StructuredData current = initial.value();
   do {
     if (++iterationCounter > MAX_ITERATIONS) {
-      OnError(ValueEID::iterationsLimit, iter->pos.start, std::to_string(MAX_ITERATIONS));
+      OnError(
+        ValueEID::iterationsLimit,
+        iter->pos.start,
+        std::to_string(MAX_ITERATIONS)
+      );
       return false;
     }
 
@@ -454,16 +467,21 @@ bool ASTInterpreter::ViRecursion(Cursor iter) {
 bool ASTInterpreter::ViDecart(Cursor iter) {
   std::vector<StructuredData> args{};
   for (Index child = 0; child < iter.ChildrenCount(); ++child) {
-    if (const auto childValue = EvaluateChild(iter, child); !childValue.has_value()) {
+    const auto childValue = EvaluateChild(iter, child);
+    if (!childValue.has_value()) {
       return false;
-    } else {
-      args.emplace_back(std::get<StructuredData>(childValue.value()));
-    }
+    } 
+     args.emplace_back(std::get<StructuredData>(childValue.value()));
   }
 
   curValue = Factory::Decartian(args);
-  if (std::get<StructuredData>(curValue).B().Cardinality() == StructuredData::SET_INFINITY) {
-    OnError(ValueEID::typedOverflow, iter->pos.start, std::to_string(StructuredData::SET_INFINITY));
+  const auto cardinality = std::get<StructuredData>(curValue).B().Cardinality();
+  if (cardinality == StructuredData::SET_INFINITY) {
+    OnError(
+      ValueEID::typedOverflow,
+      iter->pos.start,
+      std::to_string(StructuredData::SET_INFINITY)
+    );
     return false;
   }
   return true;
@@ -627,7 +645,10 @@ bool ASTInterpreter::ViDebool(Cursor iter) {
   }
   const auto value = std::get<StructuredData>(childValue.value());
   if (value.B().Cardinality() != 1) {
-    OnError(ValueEID::invalidDebool, iter->pos.start);
+    OnError(
+      ValueEID::invalidDebool,
+      iter->pos.start
+    );
     return false;
   }
   return SetCurrent(std::get<StructuredData>(childValue.value()).B().Debool());

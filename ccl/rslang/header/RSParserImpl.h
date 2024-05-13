@@ -87,8 +87,8 @@ RawNode FunctionDeclaration(
 
 RawNode FunctionCall(
     RawNode function,
-    RawNode args, RawNode
-    rs
+    RawNode args,
+    RawNode rs
 );
 
 RawNode FilterCall(
@@ -109,7 +109,12 @@ RawNode TermDeclaration(
     RawNode declaration,
     RawNode domain,
     RawNode predicate,
-    RawNode rc);
+    RawNode rc
+);
+RawNode TupleDeclaration(
+    ParserState* state,
+    RawNode tuple
+);
 
 RawNode FullRecursion(
     RawNode rec,
@@ -137,7 +142,7 @@ RawNode Imperative(
 
 } // namespace ccl::rslang::detail
 
-#line 141 "../header/RSParserImpl.h"
+#line 146 "../header/RSParserImpl.h"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -267,7 +272,7 @@ RawNode Imperative(
 
 #line 15 "RSParserImpl.y"
 namespace ccl { namespace rslang { namespace detail {
-#line 271 "../header/RSParserImpl.h"
+#line 276 "../header/RSParserImpl.h"
 
 
 
@@ -351,10 +356,10 @@ namespace ccl { namespace rslang { namespace detail {
     RST_DECLARATIVE = 300,         // DECLARATIVE
     RST_RECURSIVE = 301,           // RECURSIVE
     RST_IMPERATIVE = 302,          // IMPERATIVE
-    RST_DEFINE = 303,              // DEFINE
-    RST_STRUCT = 304,              // STRUCT
-    RST_ASSIGN = 305,              // ASSIGN
-    RST_ITERATE = 306,             // ITERATE
+    RST_ITERATE = 303,             // ITERATE
+    RST_ASSIGN = 304,              // ASSIGN
+    RST_DEFINE = 305,              // DEFINE
+    RST_STRUCT = 306,              // STRUCT
     RST_LP = 307,                  // LP
     RST_RP = 308,                  // RP
     RST_LC = 309,                  // LC
@@ -430,10 +435,10 @@ namespace ccl { namespace rslang { namespace detail {
         S_DECLARATIVE = 45,                      // DECLARATIVE
         S_RECURSIVE = 46,                        // RECURSIVE
         S_IMPERATIVE = 47,                       // IMPERATIVE
-        S_DEFINE = 48,                           // DEFINE
-        S_STRUCT = 49,                           // STRUCT
-        S_ASSIGN = 50,                           // ASSIGN
-        S_ITERATE = 51,                          // ITERATE
+        S_ITERATE = 48,                          // ITERATE
+        S_ASSIGN = 49,                           // ASSIGN
+        S_DEFINE = 50,                           // DEFINE
+        S_STRUCT = 51,                           // STRUCT
         S_LP = 52,                               // LP
         S_RP = 53,                               // RP
         S_LC = 54,                               // LC
@@ -451,38 +456,34 @@ namespace ccl { namespace rslang { namespace detail {
         S_arguments = 66,                        // arguments
         S_declaration = 67,                      // declaration
         S_variable = 68,                         // variable
-        S_var_enum = 69,                         // var_enum
-        S_var_all = 70,                          // var_all
-        S_logic = 71,                            // logic
+        S_variable_pack = 69,                    // variable_pack
+        S_logic = 70,                            // logic
+        S_logic_no_binary = 71,                  // logic_no_binary
         S_logic_all = 72,                        // logic_all
         S_logic_par = 73,                        // logic_par
         S_logic_predicates = 74,                 // logic_predicates
         S_binary_predicate = 75,                 // binary_predicate
         S_logic_unary = 76,                      // logic_unary
-        S_logic_no_binary = 77,                  // logic_no_binary
-        S_quantifier = 78,                       // quantifier
-        S_quant_var = 79,                        // quant_var
-        S_quant_var_enum = 80,                   // quant_var_enum
-        S_logic_binary = 81,                     // logic_binary
-        S_setexpr = 82,                          // setexpr
-        S_text_function = 83,                    // text_function
-        S_setexpr_enum = 84,                     // setexpr_enum
-        S_setexpr_enum_min2 = 85,                // setexpr_enum_min2
-        S_literal = 86,                          // literal
-        S_identifier = 87,                       // identifier
-        S_setexpr_binary = 88,                   // setexpr_binary
-        S_setexpr_generators = 89,               // setexpr_generators
-        S_enumeration = 90,                      // enumeration
-        S_tuple = 91,                            // tuple
-        S_boolean = 92,                          // boolean
-        S_filter_expression = 93,                // filter_expression
-        S_declarative = 94,                      // declarative
-        S_recursion = 95,                        // recursion
-        S_imperative = 96,                       // imperative
-        S_imp_blocks = 97,                       // imp_blocks
-        S_imp_block = 98,                        // imp_block
-        S_RPE = 99,                              // RPE
-        S_RCE = 100                              // RCE
+        S_quantifier = 77,                       // quantifier
+        S_logic_binary = 78,                     // logic_binary
+        S_setexpr = 79,                          // setexpr
+        S_text_function = 80,                    // text_function
+        S_setexpr_enum = 81,                     // setexpr_enum
+        S_setexpr_enum_min2 = 82,                // setexpr_enum_min2
+        S_literal = 83,                          // literal
+        S_identifier = 84,                       // identifier
+        S_setexpr_binary = 85,                   // setexpr_binary
+        S_setexpr_generators = 86,               // setexpr_generators
+        S_enumeration = 87,                      // enumeration
+        S_tuple = 88,                            // tuple
+        S_boolean = 89,                          // boolean
+        S_filter_expression = 90,                // filter_expression
+        S_declarative = 91,                      // declarative
+        S_recursion = 92,                        // recursion
+        S_imperative = 93,                       // imperative
+        S_imp_blocks = 94,                       // imp_blocks
+        S_RPE = 95,                              // RPE
+        S_RCE = 96                               // RCE
       };
     };
 
@@ -980,9 +981,9 @@ namespace ccl { namespace rslang { namespace detail {
     /// Constants.
     enum
     {
-      yylast_ = 640,     ///< Last index in yytable_.
-      yynnts_ = 40,  ///< Number of nonterminal symbols.
-      yyfinal_ = 87 ///< Termination state number.
+      yylast_ = 620,     ///< Last index in yytable_.
+      yynnts_ = 36,  ///< Number of nonterminal symbols.
+      yyfinal_ = 89 ///< Termination state number.
     };
 
 
@@ -994,7 +995,7 @@ namespace ccl { namespace rslang { namespace detail {
 
 #line 15 "RSParserImpl.y"
 } } } // ccl::rslang::detail
-#line 998 "../header/RSParserImpl.h"
+#line 999 "../header/RSParserImpl.h"
 
 
 

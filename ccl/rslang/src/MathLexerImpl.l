@@ -67,7 +67,7 @@ local_id    (_|{lower}){alnum}*
 \x{21D2}            { return TokenID::IMPLICATION; }
 \x{21D4}            { return TokenID::EQUIVALENT; }
 
-:\x{2208}           { return TokenID::PUNC_ITERATE; }
+:\x{2208}           { return TokenID::ITERATE; }
 \x{2208}            { return TokenID::IN; }
 \x{2209}            { return TokenID::NOTIN; }
 \x{2286}            { return TokenID::SUBSET_OR_EQ; }
@@ -104,7 +104,7 @@ R{number}           { return TokenID::ID_RADICAL; }
 {global_id}         { return TokenID::ID_GLOBAL; }
 {local_id}          { return TokenID::ID_LOCAL; }
 
-":="                { return TokenID::PUNC_ASSIGN; }
+":="                { return TokenID::ASSIGN; }
 ":=="               { return TokenID::PUNC_DEFINE; }
 "::="               { return TokenID::PUNC_STRUCT; }
 "("                 { return TokenID::PUNC_PL; }

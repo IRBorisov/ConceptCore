@@ -269,6 +269,7 @@ TEST_F(UTASTInterpreter, TypedBasics) {
 }
 
 TEST_F(UTASTInterpreter, TypedExpressions) {
+  ExpectValue(R"({})", Factory::EmptySet());
   ExpectValue(R"(bool(X1))", Factory::Singleton(data.at("X1")));
   ExpectValue(R"(bool(X1 \setminus X1))", Factory::Singleton(Factory::EmptySet()));
   ExpectValue(R"(debool(bool(X1)))", data.at("X1"));
@@ -297,6 +298,7 @@ TEST_F(UTASTInterpreter, TypedExpressions) {
 
   ExpectValue(R"(I{(a,b) | a \from X1; b \assign a; b \noteq a})", Factory::EmptySet());
   ExpectValue(R"(I{a | a \from X1})", data.at("X1"));
+  ExpectValue(R"(I{a | (a,b) \from X1*X1; b \eq b})", data.at("X1"));
 
   ExpectValue(R"(R{a \assign X1 | a \setminus a})", Factory::EmptySet());
   ExpectValue(R"(R{a \assign {} | a \union X1})", data.at("X1"));

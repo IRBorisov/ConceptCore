@@ -398,15 +398,15 @@ void OpRelativation::ModifyExpressions() {
                                        termID,        // 1
                                        baseName,      // 2
                                        updated,        // 3
-                                       Token::Str(TokenID::PUNC_ITERATE), // 4
-                                       Token::Str(TokenID::PUNC_ASSIGN)); // 5
+                                       Token::Str(TokenID::ITERATE), // 4
+                                       Token::Str(TokenID::ASSIGN)); // 5
 #else
       std::string newExpression = "I{(";
       newExpression += baseID + ", " + termID;
       newExpression += ") | ";
-      newExpression += baseID + Token::Str(TokenID::PUNC_ITERATE) + baseName;
+      newExpression += baseID + Token::Str(TokenID::ITERATE) + baseName;
       newExpression += "; ";
-      newExpression += termID + Token::Str(TokenID::PUNC_ASSIGN) + updated + "}";
+      newExpression += termID + Token::Str(TokenID::ASSIGN) + updated + "}";
 #endif
       resultSchema->SetExpressionFor(entity, newExpression);
       break;
