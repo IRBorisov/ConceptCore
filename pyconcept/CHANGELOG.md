@@ -19,6 +19,12 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.5] - 2024-05-10
+
+### Added
+
+- Allow tuple declarations in imperative syntax
+
 ## [0.1.4] - 2024-05-10
 
 ### Fixed
