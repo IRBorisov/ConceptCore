@@ -19,6 +19,17 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.6] - 2024-06-14
+
+### Fixed
+
+- Fix emptyset type deduction in recursive structures
+
+### Added
+
+- Allow single argument for multi-Filter
+- Add fixed dependencies versions to build requirements
+
 ## [0.1.5] - 2024-05-10
 
 ### Added

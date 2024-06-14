@@ -38,6 +38,8 @@ class TypeAuditor final : public ASTVisitor<TypeAuditor> {
   friend class SyntaxTree::Cursor;
   friend class ASTVisitor<TypeAuditor>;
 
+  static constexpr auto typeDeductionDepth = 5;
+
   struct LocalData  {
     TypedID arg;
     int32_t level{};

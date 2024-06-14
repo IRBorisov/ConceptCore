@@ -492,7 +492,7 @@ bool ASTInterpreter::ViBoolean(Cursor iter) {
   if (!childValue.has_value()) {
     return false;
   }
-  const auto value = std::get<StructuredData>(childValue.value());
+  const auto& value = std::get<StructuredData>(childValue.value());
   if (
       (iter.IsRoot() || (iter.Parent().id != TokenID::IN && iter.Parent().id != TokenID::NT_DECLARATIVE_EXPR)) &&
       value.B().Cardinality() >= StructuredData::BOOL_INFINITY
@@ -600,14 +600,56 @@ bool ASTInterpreter::ViFilter(Cursor iter) {
   }
 
   const auto& indicies = iter->data.ToTuple();
+  const auto tupleParam = ssize(indicies) == iter.ChildrenCount() - 1;
+  if (tupleParam) {
+    return EvaluateFilterTuple(iter, indicies, argument);
+  } else {
+    return EvaluateFilterComplex(iter, indicies, argument);
+  }
+}
+
+bool ASTInterpreter::EvaluateFilterComplex(
+  Cursor iter,
+  const std::vector<Index>& indicies,
+  const object::StructuredData& argument
+) {
+  const auto param = EvaluateChild(iter, 0);
+  if (!param.has_value()) {
+    return false;
+  }
+  const auto& paramValue = std::get<StructuredData>(param.value());
+  if (paramValue.B().IsEmpty()) {
+    return SetCurrent(Factory::EmptySet());
+  }
+
+  auto result = Factory::EmptySet();
+  for (const auto& element : argument.B()) {
+    std::vector<StructuredData> components{};
+    for (auto i = 0U; i < size(indicies); ++i) {
+      components.emplace_back(element.T().Component(indicies[i]));
+    }
+    const auto tuple = Factory::Tuple(components);
+    if (paramValue.B().Contains(tuple)) {
+      result.ModifyB().AddElement(element);
+    }
+  }
+  return SetCurrent(std::move(result));
+}
+
+bool ASTInterpreter::EvaluateFilterTuple(
+  Cursor iter,
+  const std::vector<Index>& indicies,
+  const object::StructuredData& argument
+) {
   std::vector<StructuredData> params{};
   params.reserve(size(indicies));
   for (Index child = 0; child < iter.ChildrenCount() - 1; ++child) {
     const auto param = EvaluateChild(iter, child);
     if (!param.has_value()) {
       return false;
-    } 
-    if (const auto val = std::get<StructuredData>(param.value()); val.B().IsEmpty()) {
+    }
+    const auto& val = std::get<StructuredData>(param.value());
+    if (val.B().IsEmpty()) {
       return SetCurrent(Factory::EmptySet());
     } else {
       params.emplace_back(val);

@@ -251,6 +251,10 @@ TEST_F(UTTypeAuditor, ConstructorsCorrect) {
   ExpectTypification(R"(R{a \assign {} | Pr1(a) \eq Pr2(a) | a \union (X1*X1)})", "B(X1*X1)"_t);
   ExpectTypification(R"(R{a \assign {} | a \union D{x \in X1 | x \eq x}})", "B(X1)"_t);
   ExpectTypification(R"(R{a \assign {} | red(a) \eq {} | a \union {X1}})", "BB(X1)"_t);
+  ExpectTypification(
+    R"(R{(a, b) \assign (I{(x, {}) | x \from X1}, {}) | (X1 * B(X1*X1), b \union Fi1[X1](a))})",
+    "B(X1*B(X1*X1))*B(X1*B(X1*X1))"_t
+  );
 
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a})", "B(X1*X1)"_t);
   ExpectTypification(R"(I{(a, b) | a \from X1; b \assign a; 1 \eq 1})", "B(X1*X1)"_t);
@@ -340,6 +344,8 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   ExpectTypification(R"(Pr1(S1))", "B(X1)"_t);
   ExpectTypification(R"(Pr1({}))", "B(R0)"_t);
   ExpectTypification(R"(Fi1[X1](S1))", "B(X1*X1)"_t);
+  ExpectTypification(R"(Fi1,2[X1, X1](S1))", "B(X1*X1)"_t);
+  ExpectTypification(R"(Fi1,2[X1 * X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](Z*X1))", "B(Z*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](C1*X1))", "B(C1*X1)"_t);
   ExpectTypification(R"(Pr1,2(S1))", "B(X1*X1)"_t);
@@ -364,7 +370,8 @@ TEST_F(UTTypeAuditor, TypedOperationsErrors) {
   ExpectError(R"(Fi1[Z](B(X1)))", SemanticEID::invalidFilterArgumentType, 7);
   ExpectError(R"(Fi3[X1](X1*X1))", SemanticEID::invalidFilterArgumentType, 8);
   ExpectError(R"(Fi1[X1](B(X1)*X1))", SemanticEID::typesNotEqual, 4);
-  ExpectError(R"(Fi1,2[X1](X1*X1))", SemanticEID::invalidFilterArity, 0);
+  ExpectError(R"(Fi1,2[X1*{X1}](B(X1)*X1))", SemanticEID::typesNotEqual, 6);
+  ExpectError(R"(Fi1,2,1[X1, X1](X1*X1))", SemanticEID::invalidFilterArity, 0);
   ExpectError(R"(\A a \in X1 Fi1[a](B(X1)*X1) \eq X1)", SemanticEID::typesNotEqual, 16);
   ExpectError(R"(\A a \in X1*X1 Fi1[a](B(X1)*X1) \eq X1)", SemanticEID::typesNotEqual, 19);
   ExpectError(R"(red(X1))", SemanticEID::invalidReduce, 5);

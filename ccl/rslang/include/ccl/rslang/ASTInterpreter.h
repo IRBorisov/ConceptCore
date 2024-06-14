@@ -112,6 +112,17 @@ private:
 
   [[nodiscard]] std::optional<object::StructuredData> ExtractDomain(Cursor iter);
   [[nodiscard]] bool TryEvaluateFromFirstArg(TokenID operation, bool firstArgValue) noexcept;
+
+  [[nodiscard]] bool EvaluateFilterComplex(
+    Cursor iter,
+    const std::vector<Index>& indicies,
+    const object::StructuredData& argument
+  );
+  [[nodiscard]] bool EvaluateFilterTuple(
+    Cursor iter,
+    const std::vector<Index>& indicies,
+    const object::StructuredData& argument
+  );
 };
 
 } // namespace ccl::rslang

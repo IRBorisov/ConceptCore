@@ -285,6 +285,7 @@ TEST_F(UTASTInterpreter, TypedExpressions) {
   ExpectValue(R"(Pr1,2(S3 \setminus S3))", Factory::EmptySet());
   ExpectValue(R"(Fi1[X1](S3))", data.at("S3"));
   ExpectValue(R"(Fi1,2[X1,X2](S3))", data.at("S3"));
+  ExpectValue(R"(Fi1,2[X1*X2](S3))", data.at("S3"));
   ExpectValue(R"(Fi2,1[X2,X1](S3))", data.at("S3"));
   ExpectValue(R"(Fi1[X1 \setminus X1](S3))", Factory::EmptySet());
   ExpectValue(R"(Fi1[X1](S3 \setminus S3))", Factory::EmptySet());

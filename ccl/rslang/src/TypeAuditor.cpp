@@ -724,15 +724,15 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
   const bool isFull = iter->id == TokenID::NT_RECURSIVE_FULL;
   const auto iterationIndex = static_cast<Index>(isFull ? 3 : 2);
 
-  const auto iterationType = ChildType(iter, iterationIndex);
-  if (!iterationType.has_value()) {
+  auto iterationValue = ChildType(iter, iterationIndex);
+  if (!iterationValue.has_value()) {
     return false;
   } 
-  if (!env.AreCompatible(iterationType.value(), initType.value())) {
+  if (!env.AreCompatible(iterationValue.value(), initType.value())) {
     OnError(
       SemanticEID::typesNotEqual,
       iter(iterationIndex).pos.start, 
-      iterationType.value(),
+      iterationValue.value(),
       initType.value()
     );
     return false;
@@ -740,12 +740,19 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
 
   { 
     const auto guard = noWarnings.CreateGuard();
-    ClearLocalVariables();
-    if (!VisitChildDeclaration(iter, 0, std::get<Typification>(iterationType.value()))) {
-      return false;
-    }
-    if (!VisitChild(iter, iterationIndex)) {
-      return false;
+    for (auto retries = typeDeductionDepth; retries > 0; --retries) {
+      ClearLocalVariables();
+      if (!VisitChildDeclaration(iter, 0, std::get<Typification>(iterationValue.value()))) {
+        return false;
+      }
+      auto newIteration = ChildType(iter, iterationIndex);
+      if (!newIteration.has_value()) {
+        return false;
+      }
+      if (std::get<Typification>(newIteration.value()) == std::get<Typification>(iterationValue.value())) {
+        break;
+      }
+      iterationValue = newIteration;
     }
   }
 
@@ -756,7 +763,7 @@ bool TypeAuditor::ViRecursion(Cursor iter) {
   }
 
   EndScope(iter->pos.start);
-  return SetCurrent(iterationType.value());
+  return SetCurrent(iterationValue.value());
 }
 
 bool TypeAuditor::ViDecart(Cursor iter) {
@@ -927,7 +934,8 @@ bool TypeAuditor::ViProjectTuple(Cursor iter) {
 
 bool TypeAuditor::ViFilter(Cursor iter) {
   const auto& indicies = iter->data.ToTuple();
-  if (ssize(indicies) + 1 != iter.ChildrenCount()) {
+  const auto tupleParam = ssize(indicies) == iter.ChildrenCount() - 1;
+  if (!tupleParam && iter.ChildrenCount() > 2) {
     OnError(SemanticEID::invalidFilterArity, iter->pos.start);
     return false;
   }
@@ -949,7 +957,7 @@ bool TypeAuditor::ViFilter(Cursor iter) {
     return false;
   }
 
-  Index child{ 0 };
+  std::vector<Typification> bases{};
   for (const auto index : indicies) {
     if (!argument.B().Base().T().TestIndex(index)) {
       OnError(
@@ -959,21 +967,43 @@ bool TypeAuditor::ViFilter(Cursor iter) {
       );
       return false;
     } 
-    const auto param = ChildType(iter, child);
-    if(!param.has_value()) {
+    bases.push_back(argument.B().Base().T().Component(index));
+  }
+
+  if (tupleParam) {
+    for (Index child = 0; child + 1 < iter.ChildrenCount(); ++child) {
+      const auto param = ChildType(iter, child);
+      if (!param.has_value()) {
+        return false;
+      }
+      const auto& paramType = std::get<Typification>(param.value());
+      if (!paramType.IsCollection() ||
+          !env.AreCompatible(bases.at(child), paramType.B().Base())) {
+        OnError(
+          SemanticEID::typesNotEqual,
+          iter(child).pos.start,
+          bases.at(child).Bool(), paramType
+        );
+        return false;
+      }
+      ++child;
+    }
+  } else {
+    const auto param = ChildType(iter, 0);
+    if (!param.has_value()) {
       return false;
     }
     const auto& paramType = std::get<Typification>(param.value());
-    if (!paramType.IsCollection() || 
-        !env.AreCompatible(argument.B().Base().T().Component(index), paramType.B().Base())) {
+    const auto expected = Typification::Tuple(std::move(bases)).ApplyBool();
+    if (!paramType.IsCollection() ||
+        !env.AreCompatible(expected, paramType)) {
       OnError(
         SemanticEID::typesNotEqual,
-        iter(child).pos.start,
-        argument.B().Base().T().Component(index).Bool(), paramType
+        iter(0).pos.start,
+        expected, paramType
       );
       return false;
     }
-    ++child;
   }
   return SetCurrent(maybeArgument.value());
 }
