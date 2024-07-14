@@ -2,6 +2,11 @@
 
 $workDir = Resolve-Path -Path "${PSScriptRoot}\..\ccl\rslang\src"
 
+# Change default relative path according to your work directory setup
+# Re-flex repository: https://github.com/Genivia/RE-flex
+$reflexRelative = Resolve-Path -Path "${PSScriptRoot}\..\..\GH-RE-flex\bin\win64"
+$Env:PATH += ";${reflexRelative}"
+
 function BuildLexers {
   Set-Location -Path ${workDir}
   BuildSyntax('AsciiLexer')

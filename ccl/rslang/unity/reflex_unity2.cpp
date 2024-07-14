@@ -31,6 +31,7 @@
 #include "../lib/error.cpp"
 #include "../lib/input.cpp"
 #include "../lib/matcher.cpp"
+#include "../lib/simd.cpp"
 
 #undef min
 #undef max
