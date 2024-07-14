@@ -4,6 +4,9 @@ $packageName = 'pyconcept'
 $output = "${PSScriptRoot}\..\..\output\py\${packageName}"
 $python = '.\venv\Scripts\python.exe'
 
+$scripts = Resolve-Path -Path "${PSScriptRoot}\..\venv\Scripts"
+$Env:PATH += ";${scripts}"
+
 $ccl_source = "${PSScriptRoot}\..\..\ccl"
 $ccl_destination = "${PSScriptRoot}\..\ccl"
 $ccl_include = ('*.cpp','*.hpp','*.h')
@@ -70,7 +73,9 @@ function PrepareOutput {
 function BuildProject {
     Write-Host 'Building project...' -ForegroundColor DarkGreen
     & $python -m build --wheel --no-isolation --outdir="${output}"
-    & $python -m build --sdist --no-isolation --outdir="${output}"
+    if ($LASTEXITCODE -eq 0) {
+        & $python -m build --sdist --no-isolation --outdir="${output}"
+    }
 }
 
 function TestWheel([string] $wheelPath) {
