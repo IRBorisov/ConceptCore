@@ -23,6 +23,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wuseless-cast"
+	#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 #include "../lib/convert.cpp"

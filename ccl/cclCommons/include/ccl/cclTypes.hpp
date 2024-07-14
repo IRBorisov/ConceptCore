@@ -26,8 +26,11 @@ struct StaticMap {
 
   [[nodiscard]] constexpr bool ContainsKey(const Key& key) const noexcept {
     const auto itr =
-      std::find_if(begin(data), end(data),
-        [&key](const auto& v) { return v.first == key; });
+      std::find_if(
+        begin(data),
+        end(data),
+        [&key](const auto& v) { return v.first == key; }
+      );
     if (itr != end(data)) {
       return true;
     } else {
@@ -37,8 +40,11 @@ struct StaticMap {
 
   [[nodiscard]] constexpr bool ContainsValue(const Value& value) const noexcept {
     const auto itr =
-      std::find_if(begin(data), end(data),
-        [&value](const auto& v) { return v.second == value; });
+      std::find_if(
+        begin(data),
+        end(data),
+        [&value](const auto& v) { return v.second == value; }
+      );
     if (itr != end(data)) {
       return true;
     } else {

@@ -25,6 +25,7 @@
 	#pragma GCC diagnostic ignored "-Wuseless-cast"
 	#pragma GCC diagnostic ignored "-Wunused-label"
 	#pragma GCC diagnostic ignored "-Warray-bounds"
+	#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 #include "../lib/debug.cpp"

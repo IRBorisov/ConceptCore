@@ -986,7 +986,7 @@ bool TypeAuditor::ViFilter(Cursor iter) {
         );
         return false;
       }
-      ++child;
+      ++child; // NOLINT(clang-diagnostic-for-loop-analysis)
     }
   } else {
     const auto param = ChildType(iter, 0);

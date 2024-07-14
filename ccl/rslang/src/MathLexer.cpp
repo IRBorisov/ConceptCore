@@ -24,6 +24,7 @@
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wuseless-cast"
   #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 #include "MathLexerImpl.hpp"

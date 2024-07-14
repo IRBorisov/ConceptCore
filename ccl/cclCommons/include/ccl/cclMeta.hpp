@@ -44,7 +44,7 @@ public:
   template<typename Up,
     typename std::enable_if_t<std::is_constructible_v<T, Up&&>>>
   PropagateConst(PropagateConst<Up>&& up) // NOLINT(google-explicit-constructor, hicpp-explicit-conversions)
-    : pointer{ std::move(up.pointer) } {}
+    : pointer{ std::move(up).pointer } {}
 
   template<typename Up,
     typename std::enable_if_t<std::is_constructible_v<T, Up&&>>>
@@ -56,7 +56,7 @@ public:
   template<typename Up,
     typename std::enable_if_t<std::is_constructible_v<T, Up&&>>>
   constexpr PropagateConst& operator=(PropagateConst<Up>&& up) {
-    pointer = std::move(up.pointer);
+    pointer = std::move(up).pointer;
     return *this;
   }
 

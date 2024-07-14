@@ -7,7 +7,7 @@ LABEL description="Linux build environment"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install standard packages
-RUN dnf update && \
+RUN dnf update -y && \
     dnf upgrade -y && \
     dnf install -y \
         nano \

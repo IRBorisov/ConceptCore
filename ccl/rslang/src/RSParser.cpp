@@ -191,7 +191,7 @@ RawNode TupleDeclaration(ParserState* state, RawNode tuple) {
   // TODO: check tuple contains only local variables, ParseEID::expectedLocal
   std::vector<Node*> stack{ tuple.get()};
   while (!stack.empty()) {
-    auto node = stack.back();
+    auto* node = stack.back();
     const auto id = node->token.id;
     stack.pop_back();
     if (id == TokenID::NT_TUPLE) {
@@ -257,9 +257,9 @@ bool SemanticCheck(ParserState* state, RawNode root) {
   std::vector<Node*> stack{ root.get() };
   std::vector<Node*> parents{ nullptr };
   while (!stack.empty()) {
-    const auto node = stack.back();
+    auto *const node = stack.back();
     stack.pop_back();
-    const auto parent = parents.back();
+    auto *const parent = parents.back();
     parents.pop_back();
 
     const auto id = node->token.id;

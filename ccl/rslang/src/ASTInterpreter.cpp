@@ -625,8 +625,9 @@ bool ASTInterpreter::EvaluateFilterComplex(
   auto result = Factory::EmptySet();
   for (const auto& element : argument.B()) {
     std::vector<StructuredData> components{};
-    for (auto i = 0U; i < size(indicies); ++i) {
-      components.emplace_back(element.T().Component(indicies[i]));
+    components.reserve(size(indicies));
+    for (const auto& index : indicies) {
+      components.emplace_back(element.T().Component(index));
     }
     const auto tuple = Factory::Tuple(components);
     if (paramValue.B().Contains(tuple)) {
