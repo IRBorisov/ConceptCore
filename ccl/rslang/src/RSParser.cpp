@@ -188,7 +188,6 @@ RawNode TermDeclaration(
 }
 
 RawNode TupleDeclaration(ParserState* state, RawNode tuple) {
-  // TODO: check tuple contains only local variables, ParseEID::expectedLocal
   std::vector<Node*> stack{ tuple.get()};
   while (!stack.empty()) {
     auto* node = stack.back();
