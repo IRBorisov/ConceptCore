@@ -22,6 +22,7 @@ protected:
   using FunctionArguments = ccl::rslang::FunctionArguments;
   using ValueClass = ccl::rslang::ValueClass;
   using Syntax = ccl::rslang::Syntax;
+  using TypeID = ccl::rslang::TypedID;
 
 protected:
   Schema core{};
@@ -722,28 +723,6 @@ TEST_F(UTSchema, Translations) {
   }
 }
 
-TEST_F(UTSchema, TypeConsistency) {
-  const Typification rsType{"X1"};
-  EXPECT_TRUE(Schema::CheckTypeConstistency(rsType, CstType::base));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(rsType, CstType::constant));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(rsType, CstType::structured));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(rsType, CstType::term));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(rsType, CstType::axiom));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(rsType, CstType::theorem));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(rsType, CstType::function));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(rsType, CstType::predicate));
-
-  const LogicT logicType{};
-  EXPECT_FALSE(Schema::CheckTypeConstistency(logicType, CstType::base));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(logicType, CstType::constant));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(logicType, CstType::structured));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(logicType, CstType::term));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(logicType, CstType::axiom));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(logicType, CstType::theorem));
-  EXPECT_FALSE(Schema::CheckTypeConstistency(logicType, CstType::function));
-  EXPECT_TRUE(Schema::CheckTypeConstistency(logicType, CstType::predicate));
-}
-
 TEST_F(UTSchema, Evaluate) {
   {
     EXPECT_FALSE(core.Evaluate("X1=X1").has_value());
@@ -766,13 +745,13 @@ TEST_F(UTSchema, MakeAuditor) {
   {
     auto auditor = core.MakeAuditor();
     ASSERT_NE(auditor, nullptr);
-    EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))"_rs, Syntax::MATH));
-    EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))", Syntax::MATH));
+    EXPECT_TRUE(auditor->CheckExpression(R"(X1 \in B(X1))"_rs, Syntax::MATH));
+    EXPECT_FALSE(auditor->CheckExpression(R"(X1 \in B(X1))", Syntax::MATH));
   }
   {
     auto auditor = core.MakeAuditor();
     ASSERT_NE(auditor, nullptr);
-    EXPECT_FALSE(auditor->CheckType(R"(X1 \in B(X1))"_rs, Syntax::ASCII));
-    EXPECT_TRUE(auditor->CheckType(R"(X1 \in B(X1))", Syntax::ASCII));
+    EXPECT_FALSE(auditor->CheckExpression(R"(X1 \in B(X1))"_rs, Syntax::ASCII));
+    EXPECT_TRUE(auditor->CheckExpression(R"(X1 \in B(X1))", Syntax::ASCII));
   }
 }

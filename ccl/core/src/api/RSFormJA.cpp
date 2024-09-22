@@ -31,11 +31,11 @@ std::string ParseExpression(const std::string& expression, const rslang::Syntax 
 }
 
 const semantic::RSForm& RSFormJA::data() const noexcept {
-  return *schema.get();
+  return *schema;
 }
 
 semantic::RSForm& RSFormJA::data() noexcept {
-  return *schema.get();
+  return *schema;
 }
 
 RSFormJA RSFormJA::FromData(semantic::RSForm&& data) {
@@ -74,11 +74,12 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
   JSON result{};
 
   auto analyser = schema->Core().RSLang().MakeAuditor();
-  const auto typeOK = analyser->CheckType(text, syntaxHint);
+  const auto typeOK = analyser->CheckExpression(text, syntaxHint);
   const auto valueOK = typeOK && analyser->CheckValue();
 
   result["parseResult"] = typeOK;
-  result["syntax"] = analyser->parser.syntax;
+  result["syntax"] = analyser->GetSyntax();
+  result["prefixLen"] = 0;
   if (typeOK) {
     result["typification"] = analyser->GetType();
   } else {
@@ -96,10 +97,55 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
     result["errors"] += error;
   }
 
-  if (analyser->isParsed) {
-    result["astText"] = rslang::AST2String::Apply(analyser->parser.AST());
-    result["ast"] = analyser->parser.AST();
+  if (analyser->IsParsed()) {
+    result["astText"] = rslang::AST2String::Apply(analyser->AST());
+    result["ast"] = analyser->AST();
   } else {
+    result["astText"] = "";
+    result["ast"] = JSON::array();
+  }
+
+  return result.dump(JSON_IDENT);
+}
+
+std::string RSFormJA::CheckConstituenta(
+  const std::string& alias,
+  const std::string& definition,
+  semantic::CstType targetType
+) const {
+  JSON result{};
+
+  auto analyser = schema->Core().RSLang().MakeAuditor();
+  const auto typeOK = analyser->CheckConstituenta(alias, definition, targetType);
+  const auto valueOK = typeOK && analyser->CheckValue();
+
+  result["parseResult"] = typeOK;
+  result["syntax"] = analyser->GetSyntax();
+  result["prefixLen"] = analyser->prefixLen;
+  if (typeOK) {
+    result["typification"] = analyser->GetType();
+  }
+  else {
+    result["typification"] = "N/A";
+  }
+  if (valueOK) {
+    result["valueClass"] = analyser->GetValueClass();
+  }
+  else {
+    result["valueClass"] = ccl::rslang::ValueClass::invalid;
+  }
+  result["args"] = analyser->GetDeclarationArgs();
+
+  result["errors"] = JSON::array();
+  for (const auto& error : analyser->Errors().All()) {
+    result["errors"] += error;
+  }
+
+  if (typeOK) {
+    result["astText"] = rslang::AST2String::Apply(analyser->AST());
+    result["ast"] = analyser->AST();
+  }
+  else {
     result["astText"] = "";
     result["ast"] = JSON::array();
   }

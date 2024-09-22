@@ -333,6 +333,7 @@ bool TypeAuditor::ViGlobalDeclaration(Cursor iter) {
 }
 
 bool TypeAuditor::ViFunctionDefinition(Cursor iter) {
+  StartScope();
   {
     const auto guard = isFuncDeclaration.CreateGuard();
     if (!VisitChild(iter, 0)) {
@@ -348,6 +349,7 @@ bool TypeAuditor::ViFunctionDefinition(Cursor iter) {
   if (!type.has_value()) {
     return false;
   }
+  EndScope(iter->pos.start);
   return SetCurrent(type.value());
 }
 

@@ -85,14 +85,26 @@ TEST_F(UTRSParser, GlobalDeclCorrect) {
   ExpectNoWarnings(R"(S1 \defexpr B(C1))");
   ExpectNoWarnings(R"(S1 \defexpr B(D1))");
   ExpectNoWarnings(R"(S1 \defexpr B(X1*(X1*X1)))");
+  ExpectNoWarnings(R"(F1 \defexpr B(X1*(X1*X1)))");
+  ExpectNoWarnings(R"(D1 \defexpr B(X1*(X1*X1)))");
+  ExpectNoWarnings(R"(P1 \defexpr B(X1*(X1*X1)))");
   ExpectNoWarnings(R"(D1 \defexpr X1 \setminus X1)");
+  ExpectNoWarnings(R"(A1 \defexpr X1 \setminus X1)");
+  ExpectNoWarnings(R"(F1 \defexpr X1 \setminus X1)");
+  ExpectNoWarnings(R"(P1 \defexpr X1 \setminus X1)");
   ExpectNoWarnings(R"(A1 \defexpr 1 \eq 1)");
   ExpectNoWarnings(R"(T1 \defexpr 1 \eq 1)");
+  ExpectNoWarnings(R"(F1 \defexpr 1 \eq 1)");
+  ExpectNoWarnings(R"(D1 \defexpr 1 \eq 1)");
+  ExpectNoWarnings(R"(S1 \defexpr [a \in X1] X1 \setminus a)");
+  ExpectNoWarnings(R"(D1 \defexpr [a \in X1] X1 \setminus a)");
   ExpectNoWarnings(R"(F1 \defexpr [a \in X1] X1 \setminus a)");
   ExpectNoWarnings(R"(F1 \defexpr [a \in R1] {a})");
   ExpectNoWarnings(R"(F1 \defexpr [a \in B(D1)] X1 \setminus a)");
   ExpectNoWarnings(R"(F1 \defexpr [a \in D1 \setminus D1] X1 \setminus a)");
   ExpectNoWarnings(R"(P1 \defexpr [a \in D1 \setminus D1] 1 \eq 1)");
+  ExpectNoWarnings(R"(D1 \defexpr [a \in D1 \setminus D1] 1 \eq 1)");
+  ExpectNoWarnings(R"(S1 \defexpr [a \in D1 \setminus D1] 1 \eq 1)");
   ExpectNoWarnings(R"(F1 \defexpr [a \in B(X1)] card(a))");
 }
 
@@ -123,10 +135,6 @@ TEST_F(UTRSParser, GlobalDeclErrors) {
   ExpectError(R"(F1 \defexpr [] X1 \setminus X1)", ParseEID::expectedDeclaration, 13);
   ExpectError(R"(F1 \defexpr [a] X1 \setminus a)", ParseEID::expectedDeclaration, 14);
   ExpectError(R"(F1 \defexpr [a \subseteq X1] X1 \setminus a)", ParseEID::expectedDeclaration, 15);
-  ExpectError(R"(S1 \deftype 1 \eq 1)", ParseEID::syntax);
-  ExpectError(R"(F1 \defexpr )", ParseEID::syntax);
-  ExpectError(R"(F1 \defexpr 1 \eq 1)", ParseEID::syntax);
-  ExpectError(R"(F1 \defexpr X1)", ParseEID::syntax);
 }
 
 TEST_F(UTRSParser, LogicPredicatesCorrect) {

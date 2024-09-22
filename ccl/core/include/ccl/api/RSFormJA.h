@@ -25,6 +25,8 @@ public:
   [[nodiscard]] std::string ToMinimalJSON() const;
 
   [[nodiscard]] std::string CheckExpression(const std::string& text, rslang::Syntax syntaxHint = rslang::Syntax::UNDEF) const;
+  [[nodiscard]] std::string CheckConstituenta(const std::string& alias, const std::string& definition, semantic::CstType targetType) const;
+
 };
 
 } // namespace ccl::api

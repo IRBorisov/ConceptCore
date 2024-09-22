@@ -89,7 +89,7 @@ public:
 
 private:
   Pict* Access(PictID pid);
-  void InsertInternal(const Pict& pict, GridPosition pos,
+  void InsertInternal(Pict&& pict, GridPosition pos,
                       const src::Handle& srcHandle,
                       std::unique_ptr<OperationHandle> opHandle);
 

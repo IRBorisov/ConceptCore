@@ -1,6 +1,7 @@
 //! Unity build for Concept Core Library
 
 #include "../src/JSON.cpp"
+#include "../src/semantic/schema/SchemaAuditor.cpp"
 #include "../src/semantic/schema/Schema.cpp"
 #include "../src/semantic/schema/RSConcept.cpp"
 #include "../src/semantic/thesaurus/Thesaurus.cpp"

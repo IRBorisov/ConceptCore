@@ -20,9 +20,11 @@ private:
   ValueAuditor valueAuditor;
 
 public:
-  explicit Auditor(const TypeContext& types,
-                   ValueClassContext globalClass,
-                   SyntaxTreeContext globalAST);
+  explicit Auditor(
+    const TypeContext& types,
+    ValueClassContext globalClass,
+    SyntaxTreeContext globalAST
+  );
 
 public:
   bool CheckType(const std::string& expr, Syntax syntaxHint = Syntax::UNDEF);

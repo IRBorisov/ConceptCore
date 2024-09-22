@@ -139,7 +139,7 @@ const Pict& OSSchema::LoadPict(
     pict.uid = idGen.NewUID();
   }
   const auto pid = pict.uid;
-  InsertInternal(pict, pos, handle, std::move(params));
+  InsertInternal(std::move(pict), pos, handle, std::move(params));
   return storage.at(pid);
 }
 
@@ -175,15 +175,14 @@ PictPtr OSSchema::InsertBase() {
 }
 
 void OSSchema::InsertInternal(
-  const Pict& pict,
+  Pict&& pict,
   GridPosition pos,
   const src::Handle& srcHandle,
   std::unique_ptr<OperationHandle> opHandle
 ) {
   const auto pid = pict.uid;
-
   idGen.AddUID(pid);
-  storage.emplace(pid, pict);
+  storage.emplace(pid, std::move(pict));
   Grid().SetPosFor(pid, pos);
   Src().sources.emplace(pid, srcHandle);
   if (opHandle != nullptr) {

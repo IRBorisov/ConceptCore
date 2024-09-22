@@ -19,6 +19,13 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.7] - 2024-09-22
+
+### Fixed
+
+- Improve error messages for invalid types
+- Add API for checking constituenta expressions
+
 ## [0.1.6] - 2024-06-14
 
 ### Fixed

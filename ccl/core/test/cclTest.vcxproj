@@ -214,6 +214,7 @@
     <ClCompile Include="src\testRelativation.cpp" />
     <ClCompile Include="src\testRSCalculationFacet.cpp" />
     <ClCompile Include="src\testSchema.cpp" />
+    <ClCompile Include="src\testSchemaAuditor.cpp" />
     <ClCompile Include="src\testSourceManager.cpp" />
     <ClCompile Include="src\testSynthes.cpp" />
     <ClCompile Include="src\testCstNameGenerator.cpp" />

@@ -127,6 +127,8 @@ TEST_F(UTTypeAuditor, DefinitionsCorrect) {
 TEST_F(UTTypeAuditor, DefinitionsErrors) {
   ExpectError(R"(S1 \deftype R1)", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype 1)", SemanticEID::globalStructure);
+  ExpectError(R"(S1 \deftype 1 \eq 1)", SemanticEID::globalStructure);
+  ExpectError(R"(S1 \deftype [a \in X1] a \eq a)", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype X1 \union X1)", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype B(X1 \union X1))", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype X1*(X1 \union X1))", SemanticEID::globalStructure);
@@ -516,6 +518,14 @@ TEST_F(UTTypeAuditor, WarningLocalNotUsed) {
   ASSERT_TRUE(parser.Parse(input, Syntax::ASCII));
   ASSERT_TRUE(analyse.CheckType(parser.AST()));
   EXPECT_EQ(parser.log.Count(ErrorStatus::WARNING), 2); // Note: 1 warning to 'a' and 1 warning for 't'
+  EXPECT_EQ(begin(parser.log.All())->eid, static_cast<uint32_t>(SemanticEID::localNotUsed));
+}
+
+TEST_F(UTTypeAuditor, WarningParameterNotUsed) {
+  const auto input = R"([a \in X1] 1 \eq 1)";
+  ASSERT_TRUE(parser.Parse(input, Syntax::ASCII));
+  ASSERT_TRUE(analyse.CheckType(parser.AST()));
+  EXPECT_EQ(parser.log.Count(ErrorStatus::WARNING), 1);
   EXPECT_EQ(begin(parser.log.All())->eid, static_cast<uint32_t>(SemanticEID::localNotUsed));
 }
 

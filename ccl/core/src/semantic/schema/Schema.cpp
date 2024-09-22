@@ -1,7 +1,6 @@
 #include "ccl/semantic/Schema.h"
 
 #include "ccl/semantic/RSCore.h"
-#include "ccl/rslang/RSGenerator.h"
 
 namespace ccl::semantic {
 
@@ -243,8 +242,13 @@ void Schema::TranslateAll(const StrTranslator& old2New) {
   UpdateState();
 }
 
-bool Schema::Emplace(const EntityUID newID, std::string newAlias, const CstType type,
-                     std::string definition, std::string convention) {
+bool Schema::Emplace(
+  const EntityUID newID,
+  std::string newAlias,
+  const CstType type,
+  std::string definition,
+  std::string convention
+) {
   if (info.emplace(std::pair{ newID, ParsingInfo{} }).second) {
     storage.emplace(std::pair{ newID, 
                     RSConcept{ newID, std::move(newAlias), type, std::move(definition), std::move(convention) } });
@@ -357,16 +361,15 @@ rslang::ValueClassContext Schema::VCContext() const {
 
 std::optional<rslang::ExpressionType>
 Schema::Evaluate(const std::string& input) const {
-  if (!auditor->CheckType(input, rslang::Syntax::MATH)) {
+  if (!auditor->CheckExpression(input)) {
     return std::nullopt;
   } else {
     return auditor->GetType();
   }
 }
 
-[[nodiscard]] std::unique_ptr<rslang::Auditor>
-Schema::MakeAuditor() const {
-  return std::make_unique<rslang::Auditor>(*this, VCContext(), ASTContext());
+[[nodiscard]] std::unique_ptr<SchemaAuditor> Schema::MakeAuditor() const {
+  return std::make_unique<SchemaAuditor>(*this, VCContext(), ASTContext());
 }
 
 void Schema::TriggerParse(const EntityUID target) {
@@ -381,36 +384,12 @@ void Schema::TriggerParse(const EntityUID target) {
 }
 
 void Schema::ParseCst(const EntityUID target) {
-  using rslang::Generator;
   const auto& cst = At(target);
-  const auto expr = Generator::GlobalDefinition(cst.alias, cst.definition, cst.type == CstType::structured);
-  const auto isValid = 
-    auditor->CheckType(expr, rslang::Syntax::MATH) 
-    && CheckTypeConstistency(auditor->GetType(), cst.type)
-    && (IsBaseSet(cst.type) == std::empty(cst.definition));
-  
+  const auto isValid = auditor->CheckConstituenta(cst.alias, cst.definition, cst.type);  
   info.at(target).Reset();
   info.at(target).status = isValid ? ParsingStatus::VERIFIED : ParsingStatus::INCORRECT;
   if (isValid) {
     SaveInfoTo(info.at(target));
-  }
-}
-
-bool Schema::CheckTypeConstistency(const rslang::ExpressionType& type, const CstType cstType) noexcept {
-  switch (cstType) {
-  default: return false;
-  case CstType::base:
-  case CstType::constant:
-  case CstType::structured:
-  case CstType::function:
-  case CstType::term: {
-    return std::holds_alternative<rslang::Typification>(type);
-  }
-  case CstType::predicate:
-  case CstType::axiom:
-  case CstType::theorem: {
-    return std::holds_alternative<rslang::LogicT>(type);
-  }
   }
 }
 
@@ -422,8 +401,8 @@ void Schema::SaveInfoTo(ParsingInfo& out) {
   if (auditor->CheckValue()) {
     out.valueClass = auditor->GetValueClass();
   }
-  if (auditor->isParsed) {
-    out.ast = auditor->parser.ExtractAST();
+  if (out.status == ParsingStatus::VERIFIED) {
+    out.ast = auditor->ExtractAST();
   }
 }
 

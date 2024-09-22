@@ -86,7 +86,8 @@ TEST_F(UTRSToken, TokenDefault) {
 }
 
 TEST_F(UTRSToken, TokenCompare) {
-  Token t1{}, t2{};
+  Token t1{};
+  Token t2{};
   EXPECT_EQ(t1, t2);
   
   t2.id = TokenID::PUNC_DEFINE;

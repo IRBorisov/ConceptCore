@@ -7,6 +7,7 @@
 #include "../src/testTextData.cpp"
 #include "../src/testRSConcept.cpp"
 #include "../src/testSchema.cpp"
+#include "../src/testSchemaAuditor.cpp"
 #include "../src/testTextConcept.cpp"
 #include "../src/testThesaurus.cpp"
 #include "../src/testConceptRecord.cpp"

@@ -132,3 +132,14 @@ TEST_F(UTRSFormJA, CheckExpression) {
     EXPECT_EQ(reponse.at("args")[0].at("typification"), "X1");
   }
 }
+
+TEST_F(UTRSFormJA, CheckConstituenta) {
+  auto wrapper = RSFormJA::FromData(SetupSchema());
+  auto reponse = JSON::parse(wrapper.CheckConstituenta("A100", "X1=X1", CstType::axiom));
+  EXPECT_EQ(reponse.at("parseResult").get<bool>(), true);
+  EXPECT_EQ(reponse.at("prefixLen"), 7);
+  EXPECT_EQ(reponse.at("syntax"), "math");
+  EXPECT_EQ(reponse.at("typification"), "LOGIC");
+  EXPECT_EQ(reponse.at("errors").size(), 0U);
+  
+}

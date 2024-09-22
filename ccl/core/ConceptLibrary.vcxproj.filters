@@ -129,6 +129,9 @@
     <ClCompile Include="src\api\RSFormJA.cpp">
       <Filter>06 API</Filter>
     </ClCompile>
+    <ClCompile Include="src\semantic\schema\SchemaAuditor.cpp">
+      <Filter>03 semantic\01 Schema</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ccl\env\SourceManager.hpp">
@@ -247,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="include\ccl\api\RSFormJA.h">
       <Filter>06 API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccl\semantic\SchemaAuditor.h">
+      <Filter>03 semantic\01 Schema</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

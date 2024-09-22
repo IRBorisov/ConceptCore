@@ -268,16 +268,18 @@ RawNode Imperative(
 // ------------------------- Language Expression ------------------------------
 expression
     : global_declaration
-    | logic_or_setexpr                      { if(!state->FinalizeExpression($1)) YYABORT; }
-    | function_definition                   { if(!state->FinalizeExpression($1)) YYABORT; }
+    | no_declaration                        { if(!state->FinalizeExpression($1)) YYABORT; }
+    ;
+
+no_declaration
+    : logic_or_setexpr
+    | function_definition
     ;
 
 global_declaration
-    : GLOBAL DEFINE                         { if(!state->FinalizeCstEmpty($1, $2)) YYABORT; }
-    | GLOBAL STRUCT setexpr                 { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
-    | GLOBAL DEFINE logic_or_setexpr        { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
-    | FUNCTION DEFINE function_definition   { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
-	| PREDICATE DEFINE function_definition  { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
+    : global_name DEFINE                    { if(!state->FinalizeCstEmpty($1, $2)) YYABORT; }
+    | global_name DEFINE no_declaration     { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
+    | global_name STRUCT no_declaration     { if(!state->FinalizeCstExpression($1, $2, $3)) YYABORT; }
     ;
 
 logic_or_setexpr
@@ -394,6 +396,12 @@ setexpr_enum_min2
     : setexpr_enum COMMA setexpr            { $$ = Enumeration(TokenID::INTERRUPT, $1, $3); }
     ;
 
+global_name
+    : GLOBAL
+    | FUNCTION
+    | PREDICATE
+    ;
+
 literal
     : INTEGER
     | EMPTYSET
@@ -401,9 +409,7 @@ literal
     ;
 
 identifier
-    : GLOBAL
-    | FUNCTION
-	| PREDICATE
+    : global_name
 	| LOCAL
     | RADICAL
     ;

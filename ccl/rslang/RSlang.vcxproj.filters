@@ -207,6 +207,8 @@
     <None Include="src\MathLexerImpl.l">
       <Filter>11 parse\lexer</Filter>
     </None>
-    <None Include="src\RSParserImpl.y" />
+    <None Include="src\RSParserImpl.y">
+      <Filter>11 parse</Filter>
+    </None>
   </ItemGroup>
 </Project>

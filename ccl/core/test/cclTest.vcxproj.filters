@@ -118,6 +118,9 @@
     <ClCompile Include="src\testOperation.cpp">
       <Filter>s_Concept\06 OPS</Filter>
     </ClCompile>
+    <ClCompile Include="src\testSchemaAuditor.cpp">
+      <Filter>s_Concept\01 Schema</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="s_OSS">

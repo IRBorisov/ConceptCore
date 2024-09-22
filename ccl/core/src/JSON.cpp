@@ -46,7 +46,7 @@ void LoadPicts(const JSON& data, ccl::oss::OSSchema& oss) {
     }
     if (it->contains("attachedOperation")) {
       opHandle = std::make_unique<OperationHandle>();
-      it->at("attachedOperation").get_to(*opHandle.get());
+      it->at("attachedOperation").get_to(*opHandle);
     }
     oss.LoadPict(std::move(pict), position, srcHandle, std::move(opHandle));
   }
@@ -220,7 +220,6 @@ void to_json(JSON& object, const RSCore& core) {
   for (const auto uid : core.List()) {
     const auto& parse = core.GetParse(uid);
     const auto* typification = parse.Typification();
-    const auto typeStr = typification != nullptr ? typification->ToString() : std::string{};
     const auto* exprTree = core.RSLang().ASTContext()(core.GetRS(uid).alias);
     JSON cstJSON(core.AsRecord(uid));
     cstJSON["parse"] = {
@@ -309,7 +308,7 @@ void from_json(const JSON& object, TrackingFlags& mods) {
   object.at("editConvention").get_to(mods.convention);
 }
 
-} // namespace ccl::semantic
+} // namespace semantic
 
 
 namespace rslang {
@@ -379,7 +378,7 @@ void to_json(JSON& object, const Error& error) {
   };
 }
 
-} // namespace ccl::rslang
+} // namespace rslang
 
 
 namespace lang {
@@ -422,7 +421,7 @@ void from_json(const JSON& object, ManagedText& text) {
   };
 }
 
-} // namespace ccl::lang
+} // namespace lang
 
 
 namespace src {
@@ -532,12 +531,12 @@ void from_json(const JSON& object, OperationHandle& operation) {
   object.at("isOutdated").get_to(operation.outdated);
   if (object.contains("options")) {
     auto opts = std::make_unique<ops::EquationOptions>();
-    object.at("options").at("data").get_to(*opts.get());
+    object.at("options").at("data").get_to(*opts);
     operation.options = meta::UniqueCPPtr<ops::Options>{ std::move(opts) };
   }
   if (object.contains("translations")) {
     operation.translations = std::make_unique<ops::TranslationData>();
-    object.at("translations").get_to(*operation.translations.get());
+    object.at("translations").get_to(*operation.translations);
   }
 }
 
@@ -568,7 +567,7 @@ void from_json(const JSON& object, GridPosition& position) {
   object.at("column").get_to(position.column);
 }
 
-} // namespace ccl::oss
+} // namespace oss
 
 
 namespace ops {
@@ -614,7 +613,7 @@ void from_json(const JSON& object, Equation& equation) {
   object.at("newTerm").get_to(equation.arg);
 }
 
-} // namespace ccl::ops
+} // namespace ops
 
 void to_json(JSON& object, const EntityTranslation& translation) {
   object = JSON::array();

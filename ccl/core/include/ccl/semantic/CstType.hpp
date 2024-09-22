@@ -97,4 +97,14 @@ constexpr bool IsStatement(const CstType type)  noexcept {
   }
 }
 
+constexpr bool IsLogical(const CstType type)  noexcept {
+  switch (type) {
+  default: return false;
+  case CstType::axiom:
+  case CstType::theorem:
+  case CstType::predicate:
+    return true;
+  }
+}
+
 } // namespace ccl::semantic

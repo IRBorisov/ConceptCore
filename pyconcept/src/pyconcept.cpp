@@ -7,7 +7,6 @@
 using ccl::api::RSFormJA;
 
 std::string CheckSchema(const std::string& jSchema) {
-	// TODO: consider try-catch if need to process invalid input gracefully
 	ccl::lang::TextEnvironment::Instance().skipResolving = true;
 	auto schema = RSFormJA::FromJSON(jSchema);
 	return schema.ToJSON();
@@ -35,4 +34,14 @@ std::string ParseExpression(const std::string& expression) {
 std::string CheckExpression(const std::string& jSchema, const std::string& expression) {
 	auto schema = RSFormJA::FromJSON(jSchema);
 	return schema.CheckExpression(expression);
+}
+
+std::string CheckConstituenta(
+  const std::string& jSchema,
+  const std::string& alias,
+  const std::string& expression,
+  int cstType
+) {
+	auto schema = RSFormJA::FromJSON(jSchema);
+	return schema.CheckConstituenta(alias, expression, static_cast<ccl::semantic::CstType>(cstType));
 }

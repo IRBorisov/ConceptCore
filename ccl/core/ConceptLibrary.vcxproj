@@ -198,6 +198,7 @@
     <ClCompile Include="src\semantic\rsmodel\rsValuesFacet.cpp" />
     <ClCompile Include="src\semantic\schema\RSConcept.cpp" />
     <ClCompile Include="src\semantic\schema\Schema.cpp" />
+    <ClCompile Include="src\semantic\schema\SchemaAuditor.cpp" />
     <ClCompile Include="src\semantic\thesaurus\TextConcept.cpp" />
     <ClCompile Include="src\semantic\thesaurus\Thesaurus.cpp" />
     <ClCompile Include="src\tools\CstNameGenerator.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="include\ccl\semantic\rsOperationFacet.h" />
     <ClInclude Include="include\ccl\semantic\rsValuesFacet.h" />
     <ClInclude Include="include\ccl\semantic\Schema.h" />
+    <ClInclude Include="include\ccl\semantic\SchemaAuditor.h" />
     <ClInclude Include="include\ccl\semantic\TextConcept.h" />
     <ClInclude Include="include\ccl\semantic\TextData.hpp" />
     <ClInclude Include="include\ccl\semantic\Thesaurus.h" />

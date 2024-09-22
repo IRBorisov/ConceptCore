@@ -85,3 +85,14 @@ TEST_F(UTCstType, IsStatement) {
   EXPECT_TRUE(ccl::semantic::IsStatement(CstType::theorem));
   EXPECT_FALSE(ccl::semantic::IsStatement(CstType::predicate));
 }
+
+TEST_F(UTCstType, IsLogical) {
+  EXPECT_FALSE(ccl::semantic::IsLogical(CstType::base));
+  EXPECT_FALSE(ccl::semantic::IsLogical(CstType::constant));
+  EXPECT_FALSE(ccl::semantic::IsLogical(CstType::structured));
+  EXPECT_TRUE(ccl::semantic::IsLogical(CstType::axiom));
+  EXPECT_FALSE(ccl::semantic::IsLogical(CstType::term));
+  EXPECT_FALSE(ccl::semantic::IsLogical(CstType::function));
+  EXPECT_TRUE(ccl::semantic::IsLogical(CstType::theorem));
+  EXPECT_TRUE(ccl::semantic::IsLogical(CstType::predicate));
+}

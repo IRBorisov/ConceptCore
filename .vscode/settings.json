@@ -18,6 +18,7 @@
   "cSpell.words": [
     "BIGPR",
     "conanfile",
+    "constituenta",
     "coredll",
     "DCMAKE",
     "debool",
@@ -36,6 +37,7 @@
     "NOTEQUAL",
     "NOTIN",
     "notsubset",
+    "pbdoc",
     "PUNC",
     "pybind",
     "pyconcept",
