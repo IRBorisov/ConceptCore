@@ -40,8 +40,8 @@ std::string CheckConstituenta(
   const std::string& jSchema,
   const std::string& alias,
   const std::string& expression,
-  int cstType
+  const std::string& cstType
 ) {
 	auto schema = RSFormJA::FromJSON(jSchema);
-	return schema.CheckConstituenta(alias, expression, static_cast<ccl::semantic::CstType>(cstType));
+	return schema.CheckConstituenta(alias, expression, cstType);
 }

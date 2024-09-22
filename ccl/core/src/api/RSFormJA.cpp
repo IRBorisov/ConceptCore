@@ -71,12 +71,11 @@ std::string RSFormJA::ToMinimalJSON() const {
 }
 
 std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syntax syntaxHint) const {
-  JSON result{};
-
   auto analyser = schema->Core().RSLang().MakeAuditor();
   const auto typeOK = analyser->CheckExpression(text, syntaxHint);
   const auto valueOK = typeOK && analyser->CheckValue();
 
+  JSON result{};
   result["parseResult"] = typeOK;
   result["syntax"] = analyser->GetSyntax();
   result["prefixLen"] = 0;
@@ -111,14 +110,16 @@ std::string RSFormJA::CheckExpression(const std::string& text, const rslang::Syn
 std::string RSFormJA::CheckConstituenta(
   const std::string& alias,
   const std::string& definition,
-  semantic::CstType targetType
+  const std::string& targetType
 ) const {
-  JSON result{};
+  JSON jType = targetType;
+  const auto type = jType.template get<semantic::CstType>();
 
   auto analyser = schema->Core().RSLang().MakeAuditor();
-  const auto typeOK = analyser->CheckConstituenta(alias, definition, targetType);
+  const auto typeOK = analyser->CheckConstituenta(alias, definition, type);
   const auto valueOK = typeOK && analyser->CheckValue();
 
+  JSON result{};
   result["parseResult"] = typeOK;
   result["syntax"] = analyser->GetSyntax();
   result["prefixLen"] = analyser->prefixLen;

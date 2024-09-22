@@ -19,9 +19,15 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
-## [0.1.7] - 2024-09-22
+## [0.1.8] - 2024-09-22
 
 ### Fixed
+
+- Change check-constituenta to use string representation of CstType
+
+## [0.1.7] - 2024-09-22
+
+### Added
 
 - Improve error messages for invalid types
 - Add API for checking constituenta expressions

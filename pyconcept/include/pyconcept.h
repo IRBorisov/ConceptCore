@@ -19,7 +19,7 @@ std::string CheckConstituenta(
   const std::string& jSchema,
   const std::string& alias,
   const std::string& expression,
-  int cstType
+  const std::string& cstType
 );
 
 PYBIND11_MODULE(pyconcept, m) {

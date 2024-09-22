@@ -59,11 +59,14 @@ class TestBinding(unittest.TestCase):
     def test_check_constituenta(self):
         ''' Test checking expression against given schema '''
         schema = self._get_default_schema()
-        out1 = json.loads(pc.check_constituenta(schema, 'A100', 'X1=X1', 5))
+        out1 = json.loads(pc.check_constituenta(schema, 'A100', 'X1=X1', 'axiom'))
         self.assertEqual(out1['parseResult'], True)
 
-        out2 = json.loads(pc.check_constituenta(schema, 'A100', 'X1=X2', 5))
+        out2 = json.loads(pc.check_constituenta(schema, 'A100', 'X1=X2', 'axiom'))
         self.assertEqual(out2['parseResult'], False)
+
+        out3 = json.loads(pc.check_constituenta(schema, 'D100', 'X1=X1', 'term'))
+        self.assertEqual(out3['parseResult'], False)
 
     def test_reset_aliases(self):
         ''' Test reset aliases in schema '''
