@@ -477,7 +477,6 @@ bool TypeAuditor::ViEmptySet(Cursor iter) {
     TokenID::INTERSECTION,
     TokenID::SET_MINUS,
     TokenID::SYMMINUS,
-    TokenID::DECART,
     TokenID::REDUCE,
     TokenID::BIGPR,
     TokenID::SMALLPR

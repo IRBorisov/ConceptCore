@@ -341,6 +341,7 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   ExpectTypification(R"(X1)", "B(X1)"_t);
   ExpectTypification(R"(B(X1))", "BB(X1)"_t);
   ExpectTypification(R"(X1*X1)", "B(X1*X1)"_t);
+  ExpectTypification(R"(X1*{})", "B(X1*R0)"_t);
   ExpectTypification(R"(Pr1(S1))", "B(X1)"_t);
   ExpectTypification(R"(Fi1[X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1,2[X1, X1](S1))", "B(X1*X1)"_t);

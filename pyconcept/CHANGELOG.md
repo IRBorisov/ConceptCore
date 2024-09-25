@@ -19,6 +19,12 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.10] - 2024-09-25
+
+### Fixed
+
+- Allow emptyset in cartesian product
+
 ## [0.1.9] - 2024-09-25
 
 ### Added
