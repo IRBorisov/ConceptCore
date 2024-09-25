@@ -181,6 +181,7 @@ TEST_F(UTTypeAuditor, NumericErrors) {
   ExpectError(R"(card(debool(X1)))", SemanticEID::invalidCard, 5);
   ExpectError(R"(card(S4))", SemanticEID::invalidCard, 5);
   ExpectError(R"(card(1))", SemanticEID::invalidCard, 5);
+  ExpectError(R"(card({}))", SemanticEID::invalidEmptySetUsage, 5);
   ExpectError(R"(card((1,2)))", SemanticEID::invalidCard, 5);
 
   ExpectError(R"(debool(X1) \plus 1)", SemanticEID::arithmeticNotSupported, 0);
@@ -328,9 +329,6 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   SetupConstants();
 
   ExpectTypification(R"(X1 \union X1)", "B(X1)"_t);
-  ExpectTypification(R"({} \union {})", "B(R0)"_t);
-  ExpectTypification(R"(X1 \union {})", "B(X1)"_t);
-  ExpectTypification(R"({} \union X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \setminus X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \intersect X1)", "B(X1)"_t);
   ExpectTypification(R"(X1 \symmdiff X1)", "B(X1)"_t);
@@ -344,14 +342,12 @@ TEST_F(UTTypeAuditor, TypedOperationsCorrect) {
   ExpectTypification(R"(B(X1))", "BB(X1)"_t);
   ExpectTypification(R"(X1*X1)", "B(X1*X1)"_t);
   ExpectTypification(R"(Pr1(S1))", "B(X1)"_t);
-  ExpectTypification(R"(Pr1({}))", "B(R0)"_t);
   ExpectTypification(R"(Fi1[X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1,2[X1, X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1,2[X1 * X1](S1))", "B(X1*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](Z*X1))", "B(Z*X1)"_t);
   ExpectTypification(R"(Fi1[{1,2,3}](C1*X1))", "B(C1*X1)"_t);
   ExpectTypification(R"(Pr1,2(S1))", "B(X1*X1)"_t);
-  ExpectTypification(R"(Pr1,2({}))", "B(R0)"_t);
   ExpectTypification(R"(bool(X1))", "BB(X1)"_t);
   ExpectTypification(R"(debool({X1}))", "B(X1)"_t);
   ExpectTypification(R"(red(S2))", "B(X1)"_t);
@@ -361,11 +357,14 @@ TEST_F(UTTypeAuditor, TypedOperationsErrors) {
   SetupConstants();
 
   ExpectError(R"(X1 \union S2)", SemanticEID::typesNotEqual, 10);
+  ExpectError(R"(X1 \union {})", SemanticEID::invalidEmptySetUsage, 10);
   ExpectError(R"(S2 \union X1)", SemanticEID::typesNotEqual, 10);
 
   ExpectError(R"(Pr1(X1))", SemanticEID::invalidProjectionSet, 4);
+  ExpectError(R"(Pr1({}))", SemanticEID::invalidEmptySetUsage, 4);
   ExpectError(R"(Pr3(S1))", SemanticEID::invalidProjectionSet, 4);
   ExpectError(R"(pr1(debool(X1)))", SemanticEID::invalidProjectionTuple, 4);
+  ExpectError(R"(pr1({}))", SemanticEID::invalidEmptySetUsage, 4);
   ExpectError(R"(Fi1[X1](B(X1)))", SemanticEID::invalidFilterArgumentType, 8);
   ExpectError(R"(Fi1[1](B(X1)))", SemanticEID::invalidFilterArgumentType, 7);
   ExpectError(R"(Fi1[S4](B(X1)))", SemanticEID::invalidFilterArgumentType, 8);
@@ -377,6 +376,7 @@ TEST_F(UTTypeAuditor, TypedOperationsErrors) {
   ExpectError(R"(\A a \in X1 Fi1[a](B(X1)*X1) \eq X1)", SemanticEID::typesNotEqual, 16);
   ExpectError(R"(\A a \in X1*X1 Fi1[a](B(X1)*X1) \eq X1)", SemanticEID::typesNotEqual, 19);
   ExpectError(R"(red(X1))", SemanticEID::invalidReduce, 5);
+  ExpectError(R"(red({}))", SemanticEID::invalidEmptySetUsage, 4);
 
   ExpectError(R"(\A a \in X1 B(a) \eq X1)", SemanticEID::invalidBoolean, 14);
   ExpectError(R"(\A a \in S1 B(a) \eq X1)", SemanticEID::invalidBoolean, 14);

@@ -19,6 +19,12 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.9] - 2024-09-25
+
+### Added
+
+- Add new rule to prevent unreasonable use of emptyset
+
 ## [0.1.8] - 2024-09-22
 
 ### Fixed

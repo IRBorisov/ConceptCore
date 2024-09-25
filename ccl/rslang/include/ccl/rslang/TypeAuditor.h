@@ -38,6 +38,8 @@ class TypeAuditor final : public ASTVisitor<TypeAuditor> {
   friend class SyntaxTree::Cursor;
   friend class ASTVisitor<TypeAuditor>;
 
+  using DeboolCallback = std::function<void(const std::string&)>;
+
   static constexpr auto typeDeductionDepth = 5;
 
   struct LocalData  {
@@ -85,7 +87,7 @@ protected:
   bool ViLocal(Cursor iter);
   bool ViInteger(Cursor /*iter*/) { return SetCurrent(Typification::Integer()); }
   bool ViIntegerSet(Cursor /*iter*/) { return SetCurrent(Typification::Integer().Bool()); }
-  bool ViEmptySet(Cursor /*iter*/);
+  bool ViEmptySet(Cursor iter);
 
   bool ViTupleDeclaration(Cursor iter);
   bool ViEnumDeclaration(Cursor iter) { return VisitAllAndSetCurrent(iter, LogicT{}); }
@@ -131,7 +133,8 @@ private:
   [[nodiscard]] bool VisitAllAndSetCurrent(Cursor iter, const ExpressionType& type);
 
   [[nodiscard]] std::optional<ExpressionType> ChildType(Cursor iter, Index index);
-  [[nodiscard]] std::optional<Typification> ChildTypeDebool(Cursor iter, Index index,  SemanticEID eid);
+  [[nodiscard]] std::optional<Typification> ChildTypeDebool(Cursor iter, Index index, SemanticEID eid);
+  [[nodiscard]] std::optional<Typification> ChildTypeDebool(Cursor iter, Index index, DeboolCallback onError);
 
   void OnError(SemanticEID eid, StrPos position);
   void OnError(SemanticEID eid, StrPos position, std::string param);

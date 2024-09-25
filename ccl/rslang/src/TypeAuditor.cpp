@@ -469,7 +469,23 @@ bool TypeAuditor::ViLocal(Cursor iter) {
   }
 }
 
-bool TypeAuditor::ViEmptySet(Cursor /*iter*/) {
+bool TypeAuditor::ViEmptySet(Cursor iter) {
+  static const std::vector<TokenID> invalidParents{
+    TokenID::CARD,
+    TokenID::DEBOOL,
+    TokenID::UNION,
+    TokenID::INTERSECTION,
+    TokenID::SET_MINUS,
+    TokenID::SYMMINUS,
+    TokenID::DECART,
+    TokenID::REDUCE,
+    TokenID::BIGPR,
+    TokenID::SMALLPR
+  };
+  if (std::find(invalidParents.begin(), invalidParents.end(), iter.Parent().id) != invalidParents.end()) {
+    OnError(SemanticEID::invalidEmptySetUsage, iter->pos.start);
+    return false;
+  }
   return SetCurrent(Typification::EmptySet());
 }
 
@@ -862,7 +878,11 @@ bool TypeAuditor::ViSetexprBinary(Cursor iter) {
 
 bool TypeAuditor::ViProjectSet(Cursor iter) {
   // T(Pri(a)) = B(Pi(D(T(a))))
-  const auto maybeArgument = ChildTypeDebool(iter, 0, SemanticEID::invalidProjectionSet);
+  const auto maybeArgument = ChildTypeDebool(iter, 0,
+    [iter, this](const std::string& typeString) {
+      this->OnError(SemanticEID::invalidProjectionSet, iter(0).pos.start, { iter->ToString(), typeString });
+    }
+  );
   if (!maybeArgument.has_value()) {
     return false;
   }
@@ -1064,6 +1084,14 @@ std::optional<ExpressionType> TypeAuditor::ChildType(Cursor iter, const Index in
 }
 
 std::optional<Typification> TypeAuditor::ChildTypeDebool(Cursor iter, const Index index, const SemanticEID eid) {
+  return ChildTypeDebool(iter, index, 
+    [iter, eid, index, this](const std::string& typeString) {
+      this->OnError(eid, iter(index).pos.start, typeString);
+    }
+  );
+}
+
+std::optional<Typification> TypeAuditor::ChildTypeDebool(Cursor iter, const Index index, DeboolCallback onError) {
   const auto maybeResult = ChildType(iter, index);
   if (!maybeResult.has_value() || !std::holds_alternative<Typification>(maybeResult.value())) {
     return std::nullopt;
@@ -1073,11 +1101,7 @@ std::optional<Typification> TypeAuditor::ChildTypeDebool(Cursor iter, const Inde
     return result;
   }
   if (!result.IsCollection()) {
-    OnError(
-      eid,
-      iter(index).pos.start,
-      ToString(maybeResult.value())
-    );
+    onError(ToString(maybeResult.value()));
     return std::nullopt;
   }
   return result.B().Base();
