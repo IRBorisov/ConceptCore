@@ -11,7 +11,7 @@ function BuildParser {
   }
   Set-Location -Path ${workDir}
   Write-Host "Building ${grammar}"
-  & $bison $grammar
+  & $bison $grammar -Wcounterexamples
   if ($LASTEXITCODE -ne 0) {
     Write-Error 'Grammar generation failed'
     Exit 1
