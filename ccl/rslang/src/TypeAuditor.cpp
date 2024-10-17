@@ -7,8 +7,8 @@ namespace {
 // Helper functions
 [[nodiscard]] std::string ToString(const ExpressionType& type) noexcept(false);
 [[nodiscard]] constexpr bool IsSubset(TokenID token) noexcept;
-[[nodiscard]] bool IsEchelon(SyntaxTree::Cursor iter);
-[[nodiscard]] bool IsEchelon(SyntaxTree::Cursor iter, Index index);
+[[nodiscard]] bool IsStructureDomain(SyntaxTree::Cursor iter);
+[[nodiscard]] bool IsStructureDomain(SyntaxTree::Cursor iter, Index index);
 void MangleRadicals(const std::string& funcName, Typification& type);
 
 std::string ToString(const ExpressionType& type) noexcept(false) {
@@ -26,7 +26,7 @@ constexpr bool IsSubset(const TokenID token) noexcept {
     || token == TokenID::NOTSUBSET;
 }
 
-bool IsEchelon(SyntaxTree::Cursor iter) {
+bool IsStructureDomain(SyntaxTree::Cursor iter) {
   switch (iter->id) {
   default: return false;
 
@@ -34,19 +34,20 @@ bool IsEchelon(SyntaxTree::Cursor iter) {
   case TokenID::ID_GLOBAL:
   case TokenID::BOOLEAN:
   case TokenID::DECART:
+  case TokenID::NT_ENUMERATION:
     break;
   }
   for (Index i = 0; i < iter.ChildrenCount(); ++i) {
-    if (!IsEchelon(iter, i)) {
+    if (!IsStructureDomain(iter, i)) {
       return false;
     }
   }
   return true;
 }
 
-bool IsEchelon(SyntaxTree::Cursor iter, const Index index) {
+bool IsStructureDomain(SyntaxTree::Cursor iter, const Index index) {
   iter.MoveToChild(index);
-  return IsEchelon(iter);
+  return IsStructureDomain(iter);
 }
 
 bool IsRadical(const std::string& alias) {
@@ -304,7 +305,7 @@ void TypeAuditor::Clear() noexcept {
 bool TypeAuditor::ViGlobalDeclaration(Cursor iter) {
   const auto childrenCount = iter.ChildrenCount();
   if (iter->id == TokenID::PUNC_STRUCT) {
-    if (childrenCount != 2 || !IsEchelon(iter, 1)) {
+    if (childrenCount != 2 || !IsStructureDomain(iter, 1)) {
       OnError(SemanticEID::globalStructure, iter(0).pos.finish);
       return false;
     }

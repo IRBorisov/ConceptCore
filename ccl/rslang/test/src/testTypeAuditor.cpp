@@ -103,6 +103,7 @@ TEST_F(UTTypeAuditor, DefinitionsCorrect) {
 
   ExpectTypification(R"(S1 \deftype X1)", "X1"_t);
   ExpectTypification(R"(S1 \deftype Z)", "Z"_t);
+  ExpectTypification(R"(S1 \deftype {X1, X1})", "B(X1)"_t);
   ExpectTypification(R"(S1 \deftype X1*X1)", "X1*X1"_t);
 
   ExpectTypification(R"(F42 \defexpr [a \in X1] {a})", "B(X1)"_t);
@@ -126,6 +127,7 @@ TEST_F(UTTypeAuditor, DefinitionsCorrect) {
 
 TEST_F(UTTypeAuditor, DefinitionsErrors) {
   ExpectError(R"(S1 \deftype R1)", SemanticEID::globalStructure);
+  ExpectError(R"(S1 \deftype {})", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype 1)", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype 1 \eq 1)", SemanticEID::globalStructure);
   ExpectError(R"(S1 \deftype [a \in X1] a \eq a)", SemanticEID::globalStructure);

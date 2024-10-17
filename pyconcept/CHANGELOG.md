@@ -19,6 +19,12 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.11] - 2024-10-17
+
+- Allow enumeration in structure definition
+
+### Changed
+
 ## [0.1.10] - 2024-09-25
 
 ### Fixed
