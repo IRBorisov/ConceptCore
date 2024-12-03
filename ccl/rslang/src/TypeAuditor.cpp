@@ -965,7 +965,7 @@ bool TypeAuditor::ViFilter(Cursor iter) {
   const auto maybeArgument = ChildType(iter, static_cast<Index>(iter.ChildrenCount() - 1));
   if (!maybeArgument.has_value()) {
     return false;
-  } 
+  }
   const auto& argument = std::get<Typification>(maybeArgument.value());
   if (argument.IsAnyType() || (argument.IsCollection() && argument.B().Base().IsAnyType())) {
     return SetCurrent(Typification::EmptySet());
@@ -1008,7 +1008,6 @@ bool TypeAuditor::ViFilter(Cursor iter) {
         );
         return false;
       }
-      ++child; // NOLINT(clang-diagnostic-for-loop-analysis)
     }
   } else {
     const auto param = ChildType(iter, 0);

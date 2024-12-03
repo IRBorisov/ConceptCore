@@ -18,9 +18,11 @@ public:
     : context{ context } {}
 
 public:
-  [[nodiscard]] bool CompareTemplated(Typification::Substitutes& substitutes,
-                                      const Typification& arg,
-                                      const Typification& value);
+  [[nodiscard]] bool CompareTemplated(
+    Typification::Substitutes& substitutes,
+    const Typification& arg,
+    const Typification& value
+  );
   [[nodiscard]] bool IsArithmetic(const Typification& type) const;
   [[nodiscard]] bool IsOrdered(const Typification& type) const;
   [[nodiscard]] std::optional<Typification> Merge(const Typification& type1, const Typification& type2) const;

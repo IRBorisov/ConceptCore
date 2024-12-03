@@ -19,11 +19,17 @@ Here we write upgrading notes. Make them as straightforward as possible.
 
 ### Fixed
 
+## [0.1.12] - 2024-12-03
+
+### Fixed
+
+- Fix multi filter typification check
+
 ## [0.1.11] - 2024-10-17
 
-- Allow enumeration in structure definition
+### Fixed
 
-### Changed
+- Allow enumeration in structure definition
 
 ## [0.1.10] - 2024-09-25
 
